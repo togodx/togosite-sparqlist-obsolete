@@ -12,7 +12,7 @@ Sparqlet markdown files are located under the repository directory.
 5. Place a file named togosite.env under togosite-sparqlist
 6. Set ADMIN_PASSWORD=&lt;&lt;PASSWORD&gt;&gt; to togosite.env
 7. Set VERSION and SPARQLIST_PORT in .env
-8. Run docker-compose up -d. Bulding a sparqlist image takes around 20 minutes.
+8. Run docker-compose up -d. Building a sparqlist image takes around 20 minutes.
 9. Run docker-compose ps to confirm if the status is up
 ```
 [mitsuhashi@smp05 sparqlist20210322]$ docker-compose ps
