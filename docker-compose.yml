@@ -1,0 +1,16 @@
+version: '3.5'
+
+services:
+  sparqlist:
+    build: ./sparqlist
+    image: sparqlist:${VERSION:-20210322}
+    env_file: togosite.env
+    volumes:
+      - ./repository:/app/repository
+    ports:
+      - ${SPARQLIST_PORT:-80}:3000
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "1m"
+        max-file: "1"
