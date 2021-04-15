@@ -63,7 +63,7 @@ VALUES ?chembl_id_ent { chembl_compound:{{idDict.chembl}} }
 
 ```javascript
 ({togoid}) => {
-  return togoid.results.bindings.reduce( );
+  return togoid.results;
 }
 ```
 

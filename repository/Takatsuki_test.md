@@ -247,9 +247,15 @@ SELECT DISTINCT ?mondo_id ?mondo_label ?mondo_definition
       HPO_ID : d.hpo.value,
       HPO_label: d.hpo_label.value,
       HPO_definition: d.hpo_definition.value,
-      HPO_AltID: d.hpo_alt_id?.value
-      
-     }));
+      HPO_AltID: d.hpo_alt_id?.value,
+      HPO_relatedDB: d.hpo_dbxref?.value,
+      HPO_comment: d.hpo_comment?.value,
+      HPO_upperClass: d.hpo_subclass?.value,
+      HPO_exact_synonym: d.hpo_exac_synonym?.value,
+      HPO_related_synonym: d.hpo_related_synonym?.value,
+      HPO_seeAlso: d.hpo_seealso?.value,
+      HPO_obo_ns: d.hpo_obo_ns?.value
+           }));
  };
 
 ```
