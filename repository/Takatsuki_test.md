@@ -1,4 +1,4 @@
-# [WIP] Data source of subject Disease (mitsuhashi)
+# [WIP] Data source of subject Disease (takatsuki)
 
 - https://integbio.jp/togosite/sparqlist/disease-mondo
 - https://integbio.jp/togosite/sparqlist/Disease-nando
@@ -205,7 +205,7 @@ SELECT DISTINCT ?mondo_id ?mondo_label ?mondo_definition
 {{#if togoidDict.nando}}
 {
   SELECT ?nando ?nando_id ?nando_label  ?nando_label_jp ?nando_description ?nando_mondo ?nando_source
-                ?nando_altLabel ?nando_upper ?nando_upper_label ?nando_upper_id
+                ?nando_altLabel ?nando_upper_label ?nando_upper_id
   WHERE { 
    VALUES ?nando { {{#each togoidDict.nando}} <{{this}}> {{/each}} }
    GRAPH <http://rdf.integbio.jp/dataset/togosite/nando> {
@@ -239,22 +239,35 @@ SELECT DISTINCT ?mondo_id ?mondo_label ?mondo_definition
     return main.results.bindings.map((d) => ({
       Mondo_ID: d.mondo_id.value,
       Mondo_label: d.mondo_label.value,
-      Mondo_definition: d.mondo_definition.value,
-      Mondo_relatedDB: d.mondo_related.value,
-      Mondo_synonym: d.mondo_synonym.value,
-      Mondo_upperClass: d.mondo_upper_class.value,
-      Mondo_upperLabel: d.mondo_upper_label.value,
-      HPO_ID : d.hpo.value,
-      HPO_label: d.hpo_label.value,
-      HPO_definition: d.hpo_definition.value,
-      HPO_AltID: d.hpo_alt_id?.value,
+      Mondo_definition: d.mondo_definition?.value,
+      Mondo_relatedDB: d.mondo_related?.value,
+      Mondo_synonym: d.mondo_synonym?.value,
+      Mondo_upperClass: d.mondo_upper_class?.value,
+      Mondo_upperLabel: d.mondo_upper_label?.value,
+      HPO_ID : d.hpo?.value,
+      HPO_label: d.hpo_label?.value,
+      HPO_definition: d.hpo_definition?.value,
+      HPO_altID: d.hpo_alt_id?.value,
       HPO_relatedDB: d.hpo_dbxref?.value,
       HPO_comment: d.hpo_comment?.value,
       HPO_upperClass: d.hpo_subclass?.value,
       HPO_exact_synonym: d.hpo_exac_synonym?.value,
       HPO_related_synonym: d.hpo_related_synonym?.value,
       HPO_seeAlso: d.hpo_seealso?.value,
-      HPO_obo_ns: d.hpo_obo_ns?.value
+      HPO_obo_ns: d.hpo_obo_ns?.value,
+      MeSH_ID: d.mesh?.value,
+      MeSH_label: d.mesh_label?.value,
+      MeSH_tree_URI: d.mesh_tree_uri?.value,
+      MeSH_concept: d.mesh_concept?.value,
+      MeSH_scope_note: d.mesh_scope_note?.value,
+      NANDO_ID: d.nando_id?.value,
+      NANDO_label: d.nando_label?.value,
+      NANDO_label_ja: d.nando_label_jp?.value,
+      NANDO_description: d.nando_description?.value,
+      NANDO_source: d.nando_source?.value,
+      NANDO_altLabel: d.nando_altLabel?.value,
+      NANDO_upperClass: d.nando_upper_id?.value,
+      NANDO_upperLabel: d.nando_upper_label?.value
            }));
  };
 

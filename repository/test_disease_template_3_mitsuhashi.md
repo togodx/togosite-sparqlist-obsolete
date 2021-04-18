@@ -184,19 +184,17 @@ WHERE {
 
 {{#if togoidDict.mondo}}
 {
-  SELECT DISTINCT STR(?id) AS ?mondo_id
-                                 STR(?label) AS ?mondo_label
-                                (GROUP_CONCAT(distinct STR(?related), ", ") AS ?mondo_related)
-                                (GROUP_CONCAT(distinct STR(?synonym), ", ") AS ?mondo_synonym) 
-                                STR(?definition) AS ?mondo_diffinition
-                                (GROUP_CONCAT(distinct STR(?upper_class_s),",")  AS ?mondo_upper_class)
-                                (GROUP_CONCAT(distinct STR(?upper_label) , ",") AS ?mondo_upper_label)
+SELECT DISTINCT ?mondo_id ?mondo_label ?mondo_definition
+                  (GROUP_CONCAT(DISTINCT ?related, ", ") AS ?mondo_related)
+                  (GROUP_CONCAT(DISTINCT ?synonym, ", ") AS ?mondo_synonym) 
+                  (GROUP_CONCAT(DISTINCT ?upper_class_s,",")  AS ?mondo_upper_class)
+                  (GROUP_CONCAT(DISTINCT ?upper_label , ",") AS ?mondo_upper_label)
   WHERE { 
    VALUES ?mondo { {{#each togoidDict.mondo}} <{{this}}> {{/each}} }
    GRAPH <http://rdf.integbio.jp/dataset/togosite/mondo> {
-    ?mondo oboinowl:id ?id ;
-       rdfs:label ?label ;
-       obo:IAO_0000115 ?definition .
+    ?mondo oboinowl:id ?mondo_id ;
+       rdfs:label ?mondo_label ;
+       obo:IAO_0000115 ?mondo_definition .
     OPTIONAL {
       ?mondo oboinowl:hasDbXref ?related ;
         oboinowl:hasExactSynonym ?synonym ;
@@ -212,7 +210,7 @@ WHERE {
 {{#if togoidDict.nando}}
 {
   SELECT ?nando ?nando_id ?nando_label  ?nando_label_jp ?nando_description ?nando_mondo ?nando_source
-                ?nando_altLabel ?nando_upper ?nando_upper_label ?nando_upper_id
+                ?nando_altLabel ?nando_upper_label ?nando_upper_id
   WHERE { 
    VALUES ?nando { {{#each togoidDict.nando}} <{{this}}> {{/each}} }
    GRAPH <http://rdf.integbio.jp/dataset/togosite/nando> {

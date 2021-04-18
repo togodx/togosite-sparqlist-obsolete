@@ -124,20 +124,32 @@ WHERE {
 
 ```javascript
 ({ main }) => {
-  return main.results.bindings.map((elem) => ({
+  let ensg_info = main.results.bindings.map((elem) => ({
     gene_symbol: elem.gene_symbol.value,
     ensg_id: elem.ensg_id.value,
     ensg_url: "http://identifiers.org/ensembl/" + elem.ensg_id.value,
-    hgnc_id: elem.hgnc_id.value,
-    hgnc_url: "http://identifiers.org/hgnc/" + elem.hgnc_id.value,
-    ncbigene_id: elem.ncbigene_id.value,
-    ncbigene_url: "http://identifiers.org/ncbigene/" + elem.ncbigene_id.value,
     ensts: elem.ensts.value.split(','),
     uniprots: elem.uniprots.value.split(','),
     type_label: elem.type_label.value,
     tissues: elem.tissues.value,
     desc: elem.desc.value,
-    location: elem.location.value,
+    location: elem.location.value
   }));
+
+  let hgnc_info = main.results.bindings.map((elem) => ({
+    hgnc_id: elem.hgnc_id.value,
+    hgnc_url: "http://identifiers.org/hgnc/" + elem.hgnc_id.value
+  }));
+
+  let ncbigene_info = main.results.bindings.map((elem) => ({
+    ncbigene_id: elem.ncbigene_id.value,
+    ncbigene_url: "http://identifiers.org/ncbigene/" + elem.ncbigene_id.value
+  }));
+
+  return {
+    ensg_info: ensg_info,
+    hgnc_info: hgnc_info,
+    ncbigene_info: ncbigene_info
+  };
 };
 ```
