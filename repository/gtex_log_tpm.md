@@ -5,18 +5,31 @@
 https://orth.dbcls.jp/sparql-dev
 
 ## Parameters
-* `queryIds` (type: ensembl_gene)
-  * default: ENSG00000002587
-  * example: ENSG00000000005,ENSG00000002587,ENSG00000003989
+* `id`
+  * default: ENSG00000150773
+  * example: ENSG00000150773, ENST00000443779, 1, 5
+* `type`
+  * default: ensembl_gene
+  * example: ensembl_gene, ensembl_transcript, ncbigene, hgnc
 
-## `input_genes`
+## `idDict` returns an id type object
+
 ```javascript
-({ queryIds }) => {
-  queryIds = queryIds.replace(/,/g, " ");
-  if (queryIds.match(/\S/)) {
-    return queryIds.split(/\s+/);
+({id, type}) => {
+  var obj = {};
+  switch (type) {
+    case 'ensembl_gene':
+      obj.ensg = id;
+      break;
+    case 'ensembl_transcript':
+      obj.enst = id;
+      break;
+    case 'ncbigene':
+      obj.ncbigene = id;
+      break;
   }
-};
+  return obj;
+}
 ```
 
 ## `main`
@@ -29,8 +42,28 @@ PREFIX refexo:  <http://purl.jp/bio/01/refexo#>
 
 SELECT DISTINCT ?desc ?tpm ?sd
 WHERE {
-  {{#if input_genes}}
-  VALUES ?ensg { {{#each input_genes}} ensembl:{{this}} {{/each}} }
+  {{#if idDict.ensg}}
+  VALUES ?ensg { ensembl:{{idDict.ensg}} }
+  {{/if}}
+  {{#if idDict.ncbigene}}
+  VALUES ?ncbigene { ncbigene:{{idDict.ncbigene}} }
+  GRAPH <http://rdf.integbio.jp/dataset/togosite/togoid> {
+    ?ncbigene rdfs:seeAlso ?ensg .
+    FILTER(STRSTARTS(STR(?ensg), "http://identifiers.org/ensembl/"))
+  }
+  {{/if}}
+  {{#if idDict.hgnc}}
+  VALUES ?hgnc { hgnc:{{idDict.hgnc}} }
+  GRAPH <http://rdf.integbio.jp/dataset/togosite/togoid> {
+    ?hgnc rdfs:seeAlso ?ensg .
+    FILTER(STRSTARTS(STR(?ensg), "http://identifiers.org/ensembl/"))
+  }
+  {{/if}}
+  {{#if idDict.enst}}
+  VALUES ?enst_input { ensembl:{{idDict.enst}} }
+  GRAPH <http://rdf.integbio.jp/dataset/togosite/togoid> {
+    ?ensg obo:RO_0002511 ?enst_input .
+  }
   {{/if}}
 
   GRAPH <https://refex.dbcls.jp/rdf/gtex_v8_sum> {

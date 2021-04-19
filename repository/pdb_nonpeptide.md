@@ -112,9 +112,9 @@ SELECT DISTINCT COUNT(?PDBentry) AS ?count_Num
    let sum_limit = non_poly_value.reduce((prev,current)=> prev+current,0);   
                                                      //non_polyのSPARQLでlimit100で取得したCount値の合計を計算     
    let non_poly_array = non_poly.results.bindings;  //non_polyの結果を配列に入れて最後に"Other"要素を加える
-   non_poly_array.push({"nonpoly_name": {"type": "literal","value": "Other"},
-               "nonpoly_str":  {"type": "literal","value": "Other" },
-               "nonpoly_compId": { "type": "literal", "value": "Other" },
+   non_poly_array.push({"nonpoly_name": {"type": "literal","value": "_other"},
+               "nonpoly_str":  {"type": "literal","value": "_other" },
+               "nonpoly_compId": { "type": "literal", "value": "_other" },
       "count": {"type": "typed-literal","datatype": "http://www.w3.org/2001/XMLSchema#integer","value": total-sum_limit }});
 
    //return [total, non_poly_value, sum_limit];

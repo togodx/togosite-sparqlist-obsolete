@@ -27,7 +27,8 @@ async ({togoKey, properties, queryIds})=>{
     }
   }
   
-  let togositeConfig = "https://raw.githubusercontent.com/dbcls/togosite/develop/config/togosite.config.json";
+//  let togositeConfig = "https://raw.githubusercontent.com/dbcls/togosite/develop/config/togosite.config.json";
+  let togositeConfig = "https://raw.githubusercontent.com/dbcls/togosite/develop/config/togosite-human/properties.json";
   let togoidApi = "https://integbio.jp/togosite/sparqlist/api/togoid_route_sparql";
   let togositeConfigJson = await fetchReq(togositeConfig, {method: "get"});
   

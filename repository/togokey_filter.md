@@ -29,7 +29,8 @@ async ({togoKey, properties})=>{
     }
   }
 
-  let togositeConfig = "https://raw.githubusercontent.com/dbcls/togosite/develop/config/togosite.config.json";
+//  let togositeConfig = "https://raw.githubusercontent.com/dbcls/togosite/develop/config/togosite.config.json";
+  let togositeConfig = "https://raw.githubusercontent.com/dbcls/togosite/develop/config/togosite-human/properties.json";
   let sparqlSplitter = "https://integbio.jp/togosite/sparqlist/api/togoid_sparqlist_splitter";
   let togoidApi = "https://integbio.jp/togosite/sparqlist/api/togoid_route_sparql"; // SPARQList での仮実装 2
   let togositeConfigJson = await fetchReq(togositeConfig, {method: "get"});

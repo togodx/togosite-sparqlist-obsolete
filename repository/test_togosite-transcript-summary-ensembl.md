@@ -21,7 +21,7 @@ PREFIX ensg: <http://rdf.ebi.ac.uk/resource/ensembl/>
 PREFIX dc: <http://purl.org/dc/elements/1.1/>
 PREFIX ensembl: <http://identifiers.org/ensembl/>
 
-SELECT ?enst_id ?gene_name ?label ?location ?type_name ?uniprot_id COUNT(?exon) AS ?exon_count
+SELECT ?enst_id ?gene_name ?label ?location ?type_name (GROUP_CONCAT(DISTINCT ?uniprot_id; separator=",") AS ?uniprot_ids) COUNT(?exon) AS ?exon_count
 WHERE
 {
   VALUES ?ensg { ensg:{{ensg}} }
@@ -47,91 +47,15 @@ WHERE
 
 ```javascript
 ({ main }) => {
-  return {
-  "head": {
-    "vars": [
-      "enst_id",
-      "enst_url",
-      "uniprot_id",
-      "uniprot_url",
-      "type",
-      "label",
-      "location",
-      "exon_count"
-    ],
-    "labels": [
-      "ENST ID",
-      null,
-      "Type",
-      null,
-      "Uniprot ID",
-      "Name",
-      "Location",
-      "# exon"
-    ],
-    "order": [
-      0,
-      -1,
-      2,
-      -1,
-      1,
-      3,
-      4,
-      5
-    ],
-    "href": [
-      "enst_url",
-      null,
-      "uniprot_url",
-      null,
-      null,
-      null,
-      null
-    ],
-    "rowspan": [
-      false,
-      false,
-      false,
-      false,
-      false,
-      true,
-      false
-    ]
-  },
-  "body": main.results.bindings.map((elem) => ({
-    enst_id: {
-      "type": "literal",
-      "value": elem.enst_id.value
-    },
-    enst_url: {
-      "type": "url",
-      "value": "http://identifiers.org/ensembl/" + elem.enst_id.value
-    },
-    uniprot_id: {
-      "type": "literal",
-      "value": elem.uniprot_id?.value
-    },
-    uniprot_url: {
-      "type": "url",
-      "value": "http://identifiers.org/uniprot/" + elem.uniprot_id?.value
-    },
-    type: {
-      "type": "literal",
-      "value": elem.type_name.value.replace("_", " ")
-    },
-    label: {
-      "type": "literal",
-      "value": elem.label.value
-    },
-    location: {
-      "type": "literal",
-      "value": elem.location.value
-    },
-    exon_count: {
-      "type": "literal",
-      "value": elem.exon_count.value
-    },
+  return main.results.bindings.map((elem) => ({
+    enst_id: elem.enst_id.value,
+    enst_url: "http://identifiers.org/ensembl/" + elem.enst_id.value,
+    uniprot_id: elem.uniprot_ids.value.split(",").map((elem)=>("<a href=\"http://identifiers.org/uniprot/"+elem+"\">"+elem+"</a>")).join(", "),
+    //uniprot_url: "http://identifiers.org/uniprot/" + elem.uniprot_id?.value,
+    type: elem.type_name.value.replace("_", " "),
+    label:  elem.label.value,
+    location: elem.location.value,
+    exon_count: elem.exon_count.value
   }))
- };
 }
 ```
