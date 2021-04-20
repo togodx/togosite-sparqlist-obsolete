@@ -32,7 +32,7 @@ PREFIX affy_probeset: <http://identifiers.org/affy.probeset/>
 PREFIX bioproject: <http://identifiers.org/bioproject/>
 PREFIX biosample: <http://identifiers.org/biosample/>
 PREFIX ccds: <http://identifiers.org/ccds/>
-PREFIX chebi: <https://identifiers.org/chebi/CHEBI:>
+PREFIX chebi: <http://identifiers.org/chebi/CHEBI:>
 PREFIX chembl_compound: <http://identifiers.org/chembl.compound/>
 PREFIX chembl_target: <http://identifiers.org/chembl.target/>
 PREFIX civic_gene: <http://civic.genome.wustl.edu/links/genes/>
