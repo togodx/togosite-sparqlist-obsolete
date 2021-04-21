@@ -63,7 +63,7 @@ PREFIX tree: <http://id.nlm.nih.gov/mesh/>
 {{#if mode}}
 SELECT DISTINCT ?mesh ?tree AS ?category ?label
 {{else}}
-SELECT ?tree AS ?category ?label (COUNT(DISTINCT ?mesh) AS ?count)
+SELECT DISTINCT ?tree AS ?category ?label (COUNT(DISTINCT ?mesh) AS ?count)
 {{/if}}
 FROM <http://rdf.integbio.jp/dataset/togosite/mesh>
 WHERE {
@@ -86,6 +86,7 @@ WHERE {
 {{/if}}
    ?tree ^meshv:treeNumber/rdfs:label ?label .
    ?mesh meshv:treeNumber/meshv:parentTreeNumber* ?tree .
+   FILTER(lang(?label) = "en")
 }
 {{#unless mode}}  
   ORDER BY DESC(?count)

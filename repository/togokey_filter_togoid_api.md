@@ -1,4 +1,4 @@
-# togokey filter (aggregate SPARQList) (togoID api 代替1版)
+# togokey filter (aggregate SPARQList) 絞り込み条件で検索して、条件にあった togo key リストを返す (TogoID API 版)
 
 ## Parameters
 
@@ -15,8 +15,7 @@ async ({togoKey, properties})=>{
     //==== debug code
     let res = await fetch(url, options);
     console.log(res.status);
-    console.log(url);
-    console.log(body);
+    console.log(url + "?" + body);
     return res.json();
     //====
     // return await fetch(url, options).then(res=>res.json());
@@ -30,10 +29,13 @@ async ({togoKey, properties})=>{
     }
   }
 
-  let togositeConfig = "https://raw.githubusercontent.com/dbcls/togosite/develop/config/togosite.config.json";
-  let sparqlSplitter = "https://integbio.jp/togosite/sparqlist/api/test_sparqlist_spltiter_togoid";
-  let togoidApi = "https://integbio.jp/togosite/sparqlist/api/test_togoid_alt"; // SPARQList での仮実装
+//  let togositeConfig = "https://raw.githubusercontent.com/dbcls/togosite/develop/config/togosite.config.json";
+  let togositeConfig = "https://raw.githubusercontent.com/dbcls/togosite/develop/config/togosite-human/properties.json";
+  let togoidApi = "https://integbio.jp/togosite/sparqlist/api/togoid_route_api"; // TogoID API 版
   let togositeConfigJson = await fetchReq(togositeConfig, {method: "get"});
+  let idLimit = 2000; // split 判定
+  
+  let start = Date.now(); // debug
   
   let togoIdArray = [];
   let queryProperties = JSON.parse(properties);
@@ -42,7 +44,7 @@ async ({togoKey, properties})=>{
   for (let configSubject of togositeConfigJson) {
     for (let configProperty of configSubject.properties) {
       if (queryPropertyIds.includes(configProperty.propertyId)) { // クエリに Hit したら
-        if (configProperty.primaryKey == "pdb" || configProperty.primaryKey == "hp" || configProperty.primaryKey == "nando" || configProperty.primaryKey == "togovar") continue; // TogoID API alt. 未対応
+//        if (configProperty.primaryKey == "pdb" || configProperty.primaryKey == "hp" || configProperty.primaryKey == "nando" || configProperty.primaryKey == "togovar") continue; // TogoID API alt. 未対応
 
         // get 'primatyKey' ID list by category filtering
         let queryCategoryIds = "";
@@ -53,15 +55,21 @@ async ({togoKey, properties})=>{
           }
         }
         let primaryIds = await fetchReq(configProperty.data, options, "mode=idList&categoryIds=" + queryCategoryIds);
-
+        console.log((Date.now() - start) + " ms"); //debug
+        
         // get 'primalyKey' ID - togoKey' ID list via togoID API
         let idPair = [];
-        if (togoKey != configProperty.primaryKey) idPair = await fetchReq(sparqlSplitter, options, "sparqlet=" + encodeURIComponent(togoidApi) + "&source=" + configProperty.primaryKey + "&target=" + togoKey + "&ids=" +  encodeURIComponent(primaryIds.join(" ")));
-        else idPair = primaryIds.map(d => {return {source: d, target: d} });
+        if (togoKey != configProperty.primaryKey) {
+          let body = "source=" + configProperty.primaryKey + "&target=" + togoKey + "&ids=" +  encodeURIComponent(primaryIds.join(","));
+          idPair = await fetchReq(togoidApi, options, body);
+        } else {
+          idPair = primaryIds.map(d => {return {source_id: d, target_id: d} });
+        }
         // console.log(idPair.length + " pairs"); //debug
+        console.log((Date.now() - start) + " ms"); //debug
         
         // set 'togoKey' Ids
-        let tmpTogoIdArray = Array.from(new Set(idPair.map(d=>d.target))); // unique array
+        let tmpTogoIdArray = Array.from(new Set(idPair.map(d=>d.target_id))); // unique array
         if (!togoIdArray.length) togoIdArray = tmpTogoIdArray; // first filtered list
         else {
           for (let togoId of togoIdArray) {

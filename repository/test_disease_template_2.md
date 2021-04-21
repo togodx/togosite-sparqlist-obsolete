@@ -139,7 +139,7 @@ WHERE {
     
 {{#if idDict.nando}}
   {
-    SELECT ?nando ?nando_id ?nando_label  ?nando_label_jp ?nando_description ?nando_mondo ?nando_source
+    SELECT DISTINCT ?nando ?nando_id ?nando_label  ?nando_label_jp ?nando_description ?nando_mondo ?nando_source
                   ?nando_altLabel ?nando_upper_label ?nando_upper_id
     WHERE { 
      VALUES ?nando { <http://nanbyodata.jp/ontology/nando#{{idDict.nando}}> }
@@ -166,16 +166,68 @@ WHERE {
 }
 ```
 
+## `columns` columns and their order to show
+
+```javascript
+() => {
+  const array = [
+    { "Mondo_ID": "mondo_id" },
+    { "Mondo_label": "mondo_label" },
+    { "Mondo_definition": "mondo_definition" },
+    { "Mondo_relatedDB": "mondo_related" },
+    { "Mondo_synonym": "mondo_synonym" },
+    { "Mondo_upperClass": "mondo_upper_class" },
+    { "Mondo_upperLabel": "mondo_upper_label" },
+    { "HPO_ID ": "hpo" },
+    { "HPO_label": "hpo_label" },
+    { "HPO_definition": "hpo_definition" },
+    { "HPO_altID": "hpo_alt_id" },
+    { "HPO_relatedDB": "hpo_dbxref" },
+    { "HPO_comment": "hpo_comment" },
+    { "HPO_upperClass": "hpo_subclass" },
+    { "HPO_exact_synonym": "hpo_exac_synonym" },
+    { "HPO_related_synonym": "hpo_related_synonym" },
+    { "HPO_seeAlso": "hpo_seealso" },
+    { "HPO_obo_ns": "hpo_obo_ns" },
+    { "MeSH_ID": "mesh" },
+    { "MeSH_label": "mesh_label" },
+    { "MeSH_tree_URI": "mesh_tree_uri" },
+    { "MeSH_concept": "mesh_concept" },
+    { "MeSH_scope_note": "mesh_scope_note" },
+    { "NANDO_ID": "nando_id" },
+    { "NANDO_label": "nando_label" },
+    { "NANDO_label_ja": "nando_label_jp" },
+    { "NANDO_description": "nando_description" },
+    { "NANDO_source": "nando_source" },
+    { "NANDO_altLabel": "nando_altLabel" },
+    { "NANDO_upperClass": "nando_upper_id" },
+    { "NANDO_upperLabel": "nando_upper_label" }
+  ];
+  return array;
+}
+```
+
 ## `return`
 
 ```javascript
-({ main }) => {
-  return main.results.bindings.map((row) => {
-    var obj = {};
-    for (const [key, node] of Object.entries(row)) {
-      obj[key] = node.value;
-    }
-    return obj;
-   });
+({ main, columns }) => {
+  return main.results.bindings.map((binding) => {
+    const results = columns.map((row) => {
+      const obj = {};
+      for (const [k, v] of Object.entries(row)) {
+        obj[k] = binding[v];
+      }
+      return obj;
+    });
+
+    return results.reduce((obj, elem) => {
+      for (const [key, node] of Object.entries(elem)) {
+        if (node) {
+          obj[key] = node.value;
+        }
+        return obj;
+      };
+    }, {});
+  });
 };
 ```

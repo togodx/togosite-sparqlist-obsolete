@@ -1,4 +1,4 @@
-# togokey table data (aggregate SPARQList)  (togoID api 代替1版)
+# togokey table data (aggregate SPARQList) テーブルデータ取得（絞り込み CategoryIds あり、絞り込み無し）(TogoID API 版)
 
 ## Parameters
 
@@ -27,8 +27,9 @@ async ({togoKey, properties, queryIds})=>{
     }
   }
   
-  let togositeConfig = "https://raw.githubusercontent.com/dbcls/togosite/develop/config/togosite.config.json";
-  let togoidApi = "https://integbio.jp/togosite/sparqlist/api/test_togoid_alt";
+//  let togositeConfig = "https://raw.githubusercontent.com/dbcls/togosite/develop/config/togosite.config.json";
+  let togositeConfig = "https://raw.githubusercontent.com/dbcls/togosite/develop/config/togosite-human/properties.json";
+  let togoidApi = "https://integbio.jp/togosite/sparqlist/api/togoid_route_api"; // TogoID API 版
   let togositeConfigJson = await fetchReq(togositeConfig, {method: "get"});
   
   let queryProperties = JSON.parse(properties);
@@ -38,21 +39,24 @@ async ({togoKey, properties, queryIds})=>{
   for (let togoId of togoIdArray) {
     tableData[togoId] = [];
   }
-  // togosite.config.json で上から
+  // properties.json で上から
   for (let configSubject of togositeConfigJson) {
     for (let configProperty of configSubject.properties) {
       if (queryPropertyIds.includes(configProperty.propertyId)) { // クエリに Hit したら
-        if (configProperty.primaryKey == "hp" || configProperty.primaryKey == "nando"　|| configProperty.primaryKey == "togovar") continue; // TogoID API alt. 未対応
         console.log(configProperty.propertyId); // debug
         
         // get 'togoKey' ID - 'primalyKey' ID list via TogoID API
         let idPair = [];
-        if (togoKey != configProperty.primaryKey) idPair = await fetchReq(togoidApi, options, "source=" + togoKey + "&target=" + configProperty.primaryKey + "&ids=" + encodeURIComponent(togoIdArray.join(" ")));
-        else idPair = togoIdArray.map(d => {return {source: d, target: d} });
+        if (togoKey != configProperty.primaryKey) {
+          let body = "source=" + togoKey + "&target=" + configProperty.primaryKey + "&ids=" + encodeURIComponent(togoIdArray.join(","));
+          idPair = await fetchReq(togoidApi, options, body);
+        } else {
+          idPair = togoIdArray.map(d => {return {source_id: d, target_id: d} });
+        }
         let togo2primary = {};
         for (let d of idPair) {
-          if (!togo2primary[d.source]) togo2primary[d.source] = [];
-          togo2primary[d.source].push(d.target);
+          if (!togo2primary[d.source_id]) togo2primary[d.source_id] = [];
+          togo2primary[d.source_id].push(d.target_id);
         }
 
         // get attributes of 'primaryKey' Ids

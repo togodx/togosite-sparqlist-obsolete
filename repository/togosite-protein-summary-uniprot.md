@@ -34,7 +34,10 @@ WHERE{
   ?entry a core:Protein .
   ?entry core:recommendedName ?rname .
   ?rname core:fullName ?full_name .
-  optional{?rname core:shortName ?short_name .}
+  optional{?rname core:shortName ?sname .}
+    BIND(CONCAT("", ?sname) AS ?shortname)
+    BIND((IF(STRLEN(?shortname)=0,"-", ?shortname)) AS ?short_name)  
+    
   ?entry core:sequence/core:mass ?mass .
   optional{?entry core:citation ?citation .}
   BIND(REPLACE(STR(?entry), uniprot:, "") AS ?id)
