@@ -57,7 +57,7 @@
 
 ## Endpoint
 
-https://togovar.biosciencedbc.jp/sparql
+https://integbio.jp/togosite/sparql
 
 ## `data`
 ```sparql
@@ -74,9 +74,9 @@ SELECT DISTINCT ?tgv_id ?category ?category AS ?label
 {{else}}
 SELECT ?category ?category AS ?label (COUNT (DISTINCT ?tgv_id) AS ?count) 
 {{/if}}
-FROM <http://togovar.biosciencedbc.jp/variation>
-FROM <http://togovar.biosciencedbc.jp/variation/annotation/clinvar>
-FROM <http://togovar.biosciencedbc.jp/clinvar>
+FROM <http://rdf.integbio.jp/dataset/togosite/variation>
+FROM <http://rdf.integbio.jp/dataset/togosite/variation/annotation/clinvar>
+FROM <http://rdf.integbio.jp/dataset/togosite/clinvar>
 WHERE {  
 {{#if queryArray}}
   VALUES ?tgv_id { {{#each queryArray}} "{{this}}" {{/each}} }

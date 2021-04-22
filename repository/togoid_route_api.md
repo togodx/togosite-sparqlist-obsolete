@@ -19,7 +19,7 @@
       protein: ["uniprot", "chembl_target"],
       structure: ["pdb"],
       compound: ["chembl_compound", "pubchem_compound", "chebi"],
-      disease: ["mondo", "medgen", "omim_phenotype", "orphanet", "hp", "nando"]
+      disease: ["mondo", "medgen", "omim_phenotype", "orphanet", "hp", "nando", "mesh"]
     },
     route: {
       variant: {
@@ -94,26 +94,26 @@
 async ({ids, route})=>{
   let fetchReq = async (url, body) => {
     let options = {	
-      method: 'get', // post 未対応
+      method: 'post',
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/x-www-form-urlencoded'
       }
     }
-   // if (body) options.body = body;　// post 未対応
-    url += "?" + body;  // fot get
+    if (body) options.body = body;
+   // url += "?" + body;  // fot get
     console.log(body);
     return await fetch(url, options).then(res=>res.json());
   }
   
   let togoidApi = "https://api.togoid.dbcls.jp.il3c.com/convert";
-  let body = "format=json&type=all"; // pair が未実装
+  let body = "format=json&include=pair";
   body += "&route=" + route.join(",") + "&ids=" + ids;
   let json = await fetchReq(togoidApi, body);
   let pair = json.results.map(d=>{
     return {
       source_id: d[0],
-      target_id: d[d.length - 1]
+      target_id: d[1]
     }
   });
   return Array.from(new Set(pair)); // unique

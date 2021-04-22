@@ -7,7 +7,7 @@
 
 ## Endpoint
 
- https://togovar.biosciencedbc.jp/sparql
+https://integbio.jp/togosite/sparql
 
 ## `data`
 
@@ -20,8 +20,8 @@ PREFIX m2r: <http://med2rdf.org/ontology/med2rdf#>
 PREFIX tgvo: <http://togovar.biosciencedbc.jp/vocabulary/>
 
 SELECT DISTINCT ?tgv_id ?variation ?type_label ?reference ?ref ?alt ?hgvs ?link_to_togovar
-FROM <http://togovar.biosciencedbc.jp/variation>
-FROM <http://togovar.biosciencedbc.jp/so>
+FROM <http://rdf.integbio.jp/dataset/togosite/variation>
+FROM <http://rdf.integbio.jp/dataset/togosite/so>
 WHERE {
     VALUES ?tgv_id { "{{tgv_id}}" }
 

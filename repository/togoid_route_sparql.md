@@ -20,7 +20,7 @@
       protein: ["uniprot", "chembl_target"],
       structure: ["pdb"],
       compound: ["chembl_compound", "pubchem_compound", "chebi"],
-      disease: ["mondo", "medgen", "omim_phenotype", "orphanet", "hp", "nando"]
+      disease: ["mondo", "medgen", "omim_phenotype", "orphanet", "hp", "nando", "mesh"]
     },
     route: {
       variant: {

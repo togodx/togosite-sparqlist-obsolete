@@ -43,7 +43,7 @@
 
 ## Endpoint
 
-https://togovar-dev.biosciencedbc.jp/sparql
+https://integbio.jp/togosite/sparql
 
 ## `data`
 - categoryId があった場合に絞り込み
@@ -69,7 +69,7 @@ WHERE {
   VALUES ?parent { {{#each categoryArray}} hpo:{{this}} {{/each}} }
   {{/if}}
 {{/if}}
- GRAPH <http://togovar.biosciencedbc.jp/hpo> { 
+ GRAPH <http://rdf.integbio.jp/dataset/togosite/hpo> { 
  {{#unless  mode}}
     ?category rdfs:subClassOf ?parent.
  {{/unless}}

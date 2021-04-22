@@ -70,32 +70,32 @@ SELECT DISTINCT *
 WHERE {    
 {{#if idDict.hp}}
   {
-    SELECT ?hpo  ?hpo_label ?hpo_definition ?hpo_alt_id ?hpo_dbxref ?hpo_comment
-                   ?hpo_subclass  ?hpo_exac_synonym ?hpo_obo_ns ?hpo_related_synonym ?hpo_seealso
+    SELECT ?hpo_id ?hpo_label ?hpo_definition ?hpo_alt_id 
+           (GROUP_CONCAT(DISTINCT ?hpo_dbxref_s,",") AS ?hpo_dbxref)
+           ?hpo_comment ?hpo_subclass  ?hpo_exac_synonym ?hpo_obo_ns ?hpo_related_synonym ?hpo_seealso
     WHERE {
       VALUES ?hpo { <http://purl.obolibrary.org/obo/HP_{{idDict.hp}}> }
       GRAPH <http://rdf.integbio.jp/dataset/togosite/hpo> {
         ?hpo rdfs:label ?hpo_label.
         ?hpo obo:IAO_0000115 ?hpo_definition.
-      OPTIONAL {
-        ?hpo go:hasAlternativeId ?hpo_alt_id.
-        ?hpo go:hasDbXref ?hpo_dbxref.
-        ?hpo rdfs:comment ?hpo_comment.
-        ?hpo rdfs:subClassOf ?hpo_subclass.
-        ?hpo go:hasExactSynonym ?hpo_exac_synonym.
-        ?hpo go:hasOBONamespace ?hpo_obo_ns.
-        ?hpo go:hasRelatedSynonym ?hpo_related_synonym.
-        ?hpo rdfs:seeAlso ?hpo_seealso.
-      }
+      OPTIONAL {?hpo go:hasAlternativeId ?hpo_alt_id.}
+      OPTIONAL {?hpo go:hasDbXref ?hpo_dbxref_s.}
+      OPTIONAL {?hpo rdfs:comment ?hpo_comment.}
+      OPTIONAL {?hpo rdfs:subClassOf ?hpo_subclass.}
+      OPTIONAL {?hpo go:hasExactSynonym ?hpo_exac_synonym.}
+      OPTIONAL {?hpo go:hasOBONamespace ?hpo_obo_ns.}
+      OPTIONAL {?hpo go:hasRelatedSynonym ?hpo_related_synonym.}
+      OPTIONAL {?hpo rdfs:seeAlso ?hpo_seealso.}
+        BIND (replace(str(?hpo), 'http://purl.obolibrary.org/obo/HP_', 'HP:') AS ?hpo_id)
     }
    }
   }
 {{/if}}
 {{#if idDict.mesh}}
   {
-    SELECT ?mesh ?mesh_label ?mesh_tree_uri ?mesh_concept ?mesh_scope_note
+    SELECT ?mesh_id ?mesh_label ?mesh_tree_uri ?mesh_concept ?mesh_scope_note
     WHERE { 
-      VALUES ?mesh { <https://identifiers.org/mesh/{{idDict.mesh}}> }
+       VALUES ?mesh { <http://id.nlm.nih.gov/mesh/{{idDict.mesh}}> }
       GRAPH <http://rdf.integbio.jp/dataset/togosite/mesh> {
         ?mesh a meshv:TopicalDescriptor;
             rdfs:label ?mesh_label;
@@ -108,7 +108,7 @@ WHERE {
         BIND (substr(str(?mesh), 28) AS ?mesh_id)
         BIND (substr(str(?mesh_tree_uri),28) AS ?mesh_tree_temp)
      }
-   }
+    }
   }
 {{/if}}
 
@@ -130,7 +130,7 @@ WHERE {
           oboinowl:hasExactSynonym ?synonym ;
           rdfs:subClassOf ?upper_class .
         ?upper_class rdfs:label ?upper_label .
-        BIND(STRAFTER(STR(?upper_class), "http://purl.obolibrary.org/obo/MONDO_") AS ?upper_class_s)
+        BIND(REPLACE(STR(?upper_class), "http://purl.obolibrary.org/obo/MONDO_","MONDO:") AS ?upper_class_s)
       }
     }
    }
@@ -139,8 +139,9 @@ WHERE {
     
 {{#if idDict.nando}}
   {
-    SELECT DISTINCT ?nando ?nando_id ?nando_label  ?nando_label_jp ?nando_description ?nando_mondo ?nando_source
-                  ?nando_altLabel ?nando_upper_label ?nando_upper_id
+    SELECT DISTINCT ?nando ?nando_id ?nando_label  ?nando_label_jp ?nando_description ?nando_source ?nando_altLabel ?nando_upper_label ?nando_upper_id
+                    (GROUP_CONCAT(?nando_mondo_s, ",") AS ?nando_mondo)
+                    
     WHERE { 
      VALUES ?nando { <http://nanbyodata.jp/ontology/nando#{{idDict.nando}}> }
      GRAPH <http://rdf.integbio.jp/dataset/togosite/nando> {
@@ -149,14 +150,13 @@ WHERE {
       FILTER(lang(?nando_label)= "en")
       ?nando rdfs:label ?nando_label_jp.
       FILTER(lang(?nando_label_jp)= "ja")
-      OPTIONAL{
-        ?nando dcterms:description ?nando_description;
-               skos:closeMatch ?nando_mondo;
-               dcterms:source ?nando_source;
-               skos:altLabel ?nando_altLabel;
-               rdfs:subClassOf ?nando_upper.
-        ?nando_upper rdfs:label ?nando_upper_label;
-               dcterms:identifier ?nando_upper_id.
+      OPTIONAL{?nando dcterms:description ?nando_description.}
+      OPTIONAL{?nando skos:closeMatch ?nando_mondo_s.}
+      OPTIONAL{?nando dcterms:source ?nando_source.}
+      OPTIONAL{?nando skos:altLabel ?nando_altLabel.}
+      OPTIONAL{?nando rdfs:subClassOf ?nando_upper.
+               ?nando_upper rdfs:label ?nando_upper_label;
+                            dcterms:identifier ?nando_upper_id.
         FILTER(lang(?nando_upper_label)= "en")
       }
     }
@@ -178,7 +178,7 @@ WHERE {
     { "Mondo_synonym": "mondo_synonym" },
     { "Mondo_upperClass": "mondo_upper_class" },
     { "Mondo_upperLabel": "mondo_upper_label" },
-    { "HPO_ID ": "hpo" },
+    { "HPO_ID ": "hpo_id" },
     { "HPO_label": "hpo_label" },
     { "HPO_definition": "hpo_definition" },
     { "HPO_altID": "hpo_alt_id" },
@@ -189,7 +189,7 @@ WHERE {
     { "HPO_related_synonym": "hpo_related_synonym" },
     { "HPO_seeAlso": "hpo_seealso" },
     { "HPO_obo_ns": "hpo_obo_ns" },
-    { "MeSH_ID": "mesh" },
+    { "MeSH_ID": "mesh_id" },
     { "MeSH_label": "mesh_label" },
     { "MeSH_tree_URI": "mesh_tree_uri" },
     { "MeSH_concept": "mesh_concept" },
@@ -200,6 +200,7 @@ WHERE {
     { "NANDO_description": "nando_description" },
     { "NANDO_source": "nando_source" },
     { "NANDO_altLabel": "nando_altLabel" },
+    { "NANDO_MONDO_related": "nando_mondo"},
     { "NANDO_upperClass": "nando_upper_id" },
     { "NANDO_upperLabel": "nando_upper_label" }
   ];

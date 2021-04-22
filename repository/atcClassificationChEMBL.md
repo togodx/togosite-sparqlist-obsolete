@@ -8,7 +8,7 @@
 
 ## Endpoint
 
-https://integbio.jp/rdf/mirror/ebi/sparql
+https://integbio.jp/togosite/sparql
 
 ## Parameters
 
@@ -48,19 +48,21 @@ category ID を配列に分割
 ## `data`
 * ATCコードの文字列が階層的になっていることに頼る（by 山本さん）
 * Todo:categoryIdがコードの書式にあっているかのチェック（あっていない場合に何を返すか？）
-   
+* Endpointが https://integbio.jp/rdf/mirror/ebi/sparql のとき
+  FROM <http://rdf.ebi.ac.uk/dataset/chembl>
+* Endpointが https://integbio.jp/togosite/sparql のとき
+  FROM <http://rdf.integbio.jp/dataset/togosite/chembl>    
+
 ```sparql
-## https://integbio.jp/rdf/mirror/ebi/sparql
 PREFIX cco: <http://rdf.ebi.ac.uk/terms/chembl#> 
 PREFIX molecule: <http://rdf.ebi.ac.uk/resource/chembl/molecule/>
-
-
 {{#if mode}}
 SELECT DISTINCT ?atctop ?molecule
 {{else}}
 SELECT ?atctop (count(DISTINCT ?molecule) as ?count)
 {{/if}}
-FROM <http://rdf.ebi.ac.uk/dataset/chembl>
+FROM <http://rdf.integbio.jp/dataset/togosite/chembl>  
+
 WHERE {
   {{#if queryArray}}
       VALUES ?molecule { {{#each queryArray}} molecule:{{this}} {{/each}} }
@@ -99,11 +101,11 @@ ORDER BY desc(?count)
 }
 ```
 
-## Endpoint
-https://integbio.jp/rdf/mirror/bioportal/sparql
 
 ## `labeldata`
 * ATCコードのラベル取得
+* Endpointが https://integbio.jp/rdf/mirror/bioportal/sparql のとき
+  FROM <http://integbio.jp/rdf/mirror/bioportal/atc>
 
 ```sparql
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
@@ -112,7 +114,7 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 PREFIX atc: <http://purl.bioontology.org/ontology/UATC/>
 
 SELECT ?atc ?label 
-FROM <http://integbio.jp/rdf/mirror/bioportal/atc>
+FROM <http://rdf.integbio.jp/dataset/togosite/atc>
 WHERE 
 {
     VALUES ?atc  { {{#each atcArray}} atc:{{this}}  {{/each}} }

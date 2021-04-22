@@ -61,7 +61,7 @@
 
 ## Endpoint
 
-https://togovar-dev.biosciencedbc.jp/sparql
+https://integbio.jp/togosite/sparql
 
 ## `data`
 ```sparql
@@ -81,8 +81,8 @@ SELECT DISTINCT ?tgv_id ?category ?label
 {{else}}
 SELECT ?category ?label (COUNT (DISTINCT ?tgv_id) AS ?count) 
 {{/if}}
-FROM <http://togovar.biosciencedbc.jp/variation>
-FROM <http://togovar.biosciencedbc.jp/so>
+FROM <http://rdf.integbio.jp/dataset/togosite/variation>
+FROM <http://rdf.integbio.jp/dataset/togosite/so>
 WHERE {  
 {{#if queryArray}}
   VALUES ?tgv_id { {{#each queryArray}} "{{this}}" {{/each}} }
@@ -100,9 +100,6 @@ WHERE {
    ?category rdfs:subClassOf ?parent.
  {{/unless}}
    ?category rdfs:label ?label.
-#  OPTIONAL {
-#    ?child_category rdfs:subClassOf ?category .
-#  }
 }
 {{#if mode}}
   LIMIT 10000
@@ -168,7 +165,6 @@ WHERE {
       categoryId: d.category.value.replace(categoryPrefix,""),
       label: d.label.value.replace(/_/g, " "),
       count: d.count.value,
-//      hasChild: Boolean(d.child)
       hasChild: (Number(d.count.value) > 1 ? true : false)
     };
   });	
