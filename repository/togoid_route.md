@@ -17,8 +17,10 @@
       gene: ["hgnc", "ncbigene", "ensembl_gene", "ensembl_transcript"],
       protein: ["uniprot", "chembl_target"],
       structure: ["pdb"],
-      compound: ["chembl_compound", "pubchem_compound", "chebi"],
-      disease: ["mondo", "medgen", "omim_phenotype", "orphanet", "hp", "nando", "mesh"]
+      chembl_compound: ["chembl_compound"],
+      compound: ["pubchem_compound", "chebi"],
+      nando: ["nando"],
+      disease: ["mondo", "medgen", "omim_phenotype", "orphanet", "hp", "mesh"]
     },
     route: {
       variant: {
@@ -26,36 +28,52 @@
         gene: [],
         protein: ["hgnc", "uniprot"],
         structure: ["hgnc", "uniprot", "pdb"],
-        compound: ["hgnc", "uniprot", "chembl_target", "chembl_compound"],
+        chembl_compound: ["hgnc", "uniprot", "chembl_target", "chembl_compound"],
+        compound: ["hgnc", "uniprot", "reactome_reaction", "chebi"],
+        nando: ["medgen", "mondo"],
         disease: ["medgen"]
       },
       gene: {
         gene: [],
         protein: ["uniprot"],
         structure: ["uniprot", "pdb"],
-        compound: ["uniprot", "chembl_target", "chembl_compound"],
+        chembl_compound: ["uniprot", "chembl_target", "chembl_compound"],
+        compound: ["uniprot", "reactome_reaction", "chebi"],
+        nando: ["ncbigene", "medgen", "mondo"],
         disease: ["ncbigene", "medgen"]
       },
       protein: {
         protein: [],
         structure: [],
-        compound: ["chembl_target", "chembl_compound"],
-      //  disease: ["omim_phenotype", "mondo"]
+        chembl_compound: ["chembl_target", "chembl_compound"],
+        compound: ["reactome_reaction", "chebi"],
+        nando: ["ncbigene", "medgen", "mondo"],
         disease: ["ncbigene", "medgen"]
       },
       structure: {
         structure: [],
-        compound: ["uniprot", "chembl_target", "chembl_compound"],
-      //  disease: ["uniprot", "omim_phenotype", "mondo"]
+        chembl_compound: ["uniprot", "chembl_target", "chembl_compound"],
+        compound: ["uniprot", "reactome_reaction", "chebi"],
+        nando: ["uniprot", "ncbigene", "medgen", "mondo"],
         disease: ["uniprot", "ncbigene", "medgen"]
+      },
+      chembl_compound: {
+        chembl_compund: [],
+        compound: [],
+        nando: ["chembl_target", "uniprot", "ncbigene", "medgen", "mondo"],
+        disease: ["chembl_target", "uniprot", "ncbigene", "medgen"]
       },
       compound: {
         comppund: [],
-      //  disease: ["chembl_compound", "chembl_target", "uniprot", "omim_phenotype"]
-        disease: ["chembl_compound", "chembl_target", "uniprot", "ncbigene", "medgen"]
+        nando: ["chebi", "reactome_reaction", "uniprot", "ncbigene", "medgen", "mondo"],
+        disease: ["chebi", "reactome_reaction", "uniprot", "ncbigene", "medgen"]
+      },
+      nando: {
+        nando: [],
+        disease: ["mondo"]
       },
       disease: {
-        disease: ["mondo"],
+        disease: ["mondo"]
       }
     }
   };
@@ -65,11 +83,8 @@
     if (config.database[subject].includes(source)) sourceSubject = subject;
     if (config.database[subject].includes(target)) targetSubject = subject;
   }
-  console.log( sourceSubject);
   
   let makeRoute = (source, target, route) => {
-    if (source == "nando" && route[0] == "medgen") route.unshift("mondo");
-    if (target == "nando" && route[route.length - 1] == "medgen") route.push("mondo");
     route.unshift(source);
     route.push(target);
     return route.filter((x, i, self) => self.indexOf(x) === i);

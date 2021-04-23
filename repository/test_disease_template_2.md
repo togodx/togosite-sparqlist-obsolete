@@ -104,7 +104,6 @@ WHERE {
         ?mesh_concept meshv:scopeNote ?mesh_note_temp.
 
         BIND(IF(bound(?mesh_note_temp), ?mesh_note_temp,"null") AS ?mesh_scope_note) 
-
         BIND (substr(str(?mesh), 28) AS ?mesh_id)
         BIND (substr(str(?mesh_tree_uri),28) AS ?mesh_tree_temp)
      }
@@ -125,13 +124,11 @@ WHERE {
       ?mondo oboinowl:id ?mondo_id ;
          rdfs:label ?mondo_label ;
          obo:IAO_0000115 ?mondo_definition .
-      OPTIONAL {
-        ?mondo oboinowl:hasDbXref ?related ;
-          oboinowl:hasExactSynonym ?synonym ;
-          rdfs:subClassOf ?upper_class .
-        ?upper_class rdfs:label ?upper_label .
+      OPTIONAL {?mondo oboinowl:hasDbXref ?related .}
+      OPTIONAL {?mondo oboinowl:hasExactSynonym ?synonym .}
+      OPTIONAL {?mondo rdfs:subClassOf ?upper_class .
+                ?upper_class rdfs:label ?upper_label.}
         BIND(REPLACE(STR(?upper_class), "http://purl.obolibrary.org/obo/MONDO_","MONDO:") AS ?upper_class_s)
-      }
     }
    }
   }
