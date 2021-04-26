@@ -33,6 +33,8 @@ async ({sparqlet, categoryIds, userIds, userKey, primaryKey})=>{
       }
     }
     if (body) options.body = body;
+    console.log(url);
+    console.log(body);
     return await fetch(url, options).then(res=>res.json());
   }
   
@@ -54,17 +56,17 @@ async ({sparqlet, categoryIds, userIds, userKey, primaryKey})=>{
     }
     queryIds = togoidPair.map(d=>d.target_id).join(",");
   } else {
-    queryIds = queryIds;
+    queryIds = userIds;
   }
   
-  if (queryIds.split(/,/).length == 0) return [];
+  if (!queryIds.match(/\w/)) return [];
   
   // get property data
   let body = "queryIds=" + queryIds;
   if (categoryIds) body += "&categoryIds= " + categoryIds;
   if (queryIds.split(/,/).length <= idLimit) return await fetchReq(sparqlet, body);
   body += "&sparqlet=" + encodeURIComponent(sparqlet) + "&limit=" + idLimit;
-  return await fetchReq(sparqlistSplitteer, body);
+  return await fetchReq(sparqlistSplitter, body);
 }
 ```
   

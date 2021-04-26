@@ -1,4 +1,4 @@
-# uniprot phospho site（守屋）
+# uniprot phospho site (binning ver.)（守屋）
 
 - タンパク質リン酸化サイト数の内訳
 

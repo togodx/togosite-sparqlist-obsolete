@@ -7,17 +7,17 @@ https://orth.dbcls.jp/sparql-dev
 ## Parameters
 * `categoryIds` (type: count)
   * example: 2,3
-* `qureyIds` (type: ncbigene)
+* `queryIds` (type: ncbigene)
   * example: 101,805,3543,11243
 * `mode`
   * example: idList, objectList
 
 ## `input_genes`
 ```javascript
-({ qureyIds }) => {
-  qureyIds = qureyIds.replace(/,/g, " ");
-  if (qureyIds.match(/\S/)) {
-    return qureyIds.split(/\s+/);
+({ queryIds }) => {
+  queryIds = queryIds.replace(/,/g, " ");
+  if (queryIds.match(/\S/)) {
+    return queryIds.split(/\s+/);
   }
 };
 ```

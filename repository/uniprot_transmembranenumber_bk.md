@@ -1,4 +1,4 @@
-# (作業中)uniprotのエントリを膜貫通回数で分類_genelist (井手, 守屋)
+# uniprotのエントリを膜貫通回数で分類 (井手, 守屋)
 
 ## Parameters
 * `categoryId` (type: 膜貫通部位数)
@@ -88,10 +88,10 @@ WHERE {
     var num = d.number.value;
     if (category_array){
       if (category_array.includes(num)){
-      	r.push({categoryId: num, label: num, count: d.count.value});
+      	r.push({categoryId: num, label: num, count: Number(d.count.value)});
       }
   	}else{
-      r.push({categoryId: num, label: num, count: d.count.value});
+      r.push({categoryId: num, label: num, count: Number(d.count.value)});
     }
   });
   return r;
