@@ -1,13 +1,13 @@
-# (test2) pubchem, chemblのIDを入力して化合物の詳細情報を出す（信定・山本）
+# (test3) pubchem, chemblのIDを入力して化合物の詳細情報を出す（信定・山本）
 
 ## Parameters
 
 * `id`
   * default:　2244
-  * example: 2244, 517068, 15987396, CHEMBL6939, CHEMBL1201330
+  * example: 2244, 517068, 15987396, CHEMBL6939, CHEMBL1201330, 15414 (CHEBI), 17232 (CHEBI)
 * `type`
   * default: pubchem_compound
-  * example: pubchem_compound, chembl_compound
+  * example: pubchem_compound, chembl_compound, chebi
 
 ## Endpoint
 
@@ -25,6 +25,9 @@ https://integbio.jp/togosite/sparql
     case 'chembl_compound':
       obj.chembl = id;
       break;
+    case 'chebi':
+      obj.chebi = id;
+      break;
   }
   return obj;
 }
@@ -36,6 +39,7 @@ https://integbio.jp/togosite/sparql
 PREFIX chembl_compound: <http://identifiers.org/chembl.compound/>
 PREFIX pubchem_compound: <https://identifiers.org/pubchem.compound/>
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX CHEBI: <http://identifiers.org/chebi/>
 
 SELECT ?pubchem_uri, ?chembl_uri
 WHERE {
@@ -49,6 +53,11 @@ VALUES ?pubchem_id_ent { pubchem_compound:{{idDict.pubchem}} }
 {{#if idDict.chembl}}
 VALUES ?chembl_id_ent { chembl_compound:{{idDict.chembl}} }
   OPTIONAL {   ?chembl_id_ent skos:closeMatch ?pubchem_id_ent .
+  FILTER(STRSTARTS(STR(?pubchem_id_ent), STR(pubchem_compound:) )) }
+{{/if}}
+{{#if idDict.chebi}}
+VALUES ?chebi_id_ent { CHEBI:{{idDict.chebi}} }
+  OPTIONAL {   ?chebi_id_ent ^skos:closeMatch ?pubchem_id_ent .
   FILTER(STRSTARTS(STR(?pubchem_id_ent), STR(pubchem_compound:) )) }
 {{/if}}
   BIND(IRI(REPLACE(STR(?chembl_id_ent), "http://identifiers.org/chembl.compound/","http://rdf.ebi.ac.uk/resource/chembl/molecule/")) AS ?chembl_uri)  
