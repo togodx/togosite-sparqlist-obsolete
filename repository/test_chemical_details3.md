@@ -41,13 +41,15 @@ PREFIX pubchem_compound: <https://identifiers.org/pubchem.compound/>
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 PREFIX CHEBI: <http://identifiers.org/chebi/>
 
-SELECT ?pubchem_uri, ?chembl_uri
+SELECT ?pubchem_uri, ?chembl_uri,?chebi_uri
 WHERE {
         GRAPH <http://rdf.integbio.jp/dataset/togosite/togoid> {
 {{#if idDict.pubchem}}
 VALUES ?pubchem_id_ent { pubchem_compound:{{idDict.pubchem}} }
   OPTIONAL {  ?pubchem_id_ent skos:closeMatch ?chembl_id_ent .
   FILTER(STRSTARTS(STR(?chembl_id_ent), STR(chembl_compound:)  )) }
+  OPTIONAL {  ?pubchem_id_ent skos:closeMatch ?chebi_id_ent .
+  FILTER(STRSTARTS(STR(?chebi_id_ent), STR(CHEBI:)  )) }
 {{/if}}
         
 {{#if idDict.chembl}}
@@ -62,6 +64,7 @@ VALUES ?chebi_id_ent { CHEBI:{{idDict.chebi}} }
 {{/if}}
   BIND(IRI(REPLACE(STR(?chembl_id_ent), "http://identifiers.org/chembl.compound/","http://rdf.ebi.ac.uk/resource/chembl/molecule/")) AS ?chembl_uri)  
   BIND(IRI(REPLACE(STR(?pubchem_id_ent), "https://identifiers.org/pubchem.compound/","http://rdf.ncbi.nlm.nih.gov/pubchem/compound/CID")) AS ?pubchem_uri)
+  BIND(IRI(REPLACE(STR(?chebi_id_ent), "http://identifiers.org/chebi/","https://www.ebi.ac.uk/chebi/searchId.do?chebiId=CHEBI")) AS ?chebi_uri) 
  }}
  ```
  
