@@ -1,6 +1,6 @@
 # Set p-value - 内訳 SPARQList に p-value 追加 (test)
 
-* queryIds それぞれのカテゴリで enrich してるか Fisher's exact test (2x2)で p-value を計算
+* queryIds それぞれのカテゴリで enrich してるか p-value を計算 ( Σ combination(n,k) * p^k * (1-p)^(n-k) )
   * DAVID の EASE score に合わせて n=>n-1, k=>k-1 で計算
   * 参考: https://david.ncifcrf.gov/content.jsp?file=functional_annotation.html
 
@@ -32,47 +32,17 @@ async ({sparqlet, categoryIds, queryIds, population})=>{
     return await fetch(url, options).then(res=>res.json());
   }
   
-  let calcPvalue = (a, b, c, d) => {
-    let sigDigi = (num, exp) => {
-      while (num > 10) {
-        num /= 10;
-        exp++;
-      }
-      while (num < 1) {
-        num *= 10;
-        exp--;
-      }
-      return [num, exp];
-    }
-    
-    let calcProb = (a, b, c, d) => {
-      // prob = num * 10 ** exp;
-      let num = 1;
-      let exp = 0; 
-      for (let i = 1;         i <= a;             i++) { [num, exp] = sigDigi(num / i, exp); }  // 1/a!
-      for (let i = b + 1;     i <= a + b;         i++) { [num, exp] = sigDigi(num * i, exp); }  // (a+b)!/b!
-      for (let i = c + 1;     i <= a + c;         i++) { [num, exp] = sigDigi(num * i, exp); }  // (a+c)!/c!
-      for (let i = d + 1;     i <= c + d;         i++) { [num, exp] = sigDigi(num * i, exp); }  // (c+d)!/d!
-      for (let i = b + d + 1; i <= a + b + c + d; i++) { [num, exp] = sigDigi(num / i, exp); }  // (b+d)!/(a+b+c+d)!
-      return num * 10 ** exp;
-    }
-    
-    let cutoffProb = calcProb(a, b, c, d);
-  
-    let max = a + b;
-    if (max > a + c) max = a + c;
- 
+  let calcPval = (n, x, p) => {  // n: query total, x: category hit, p: probability; (category total - category hit) / (population - query total)
     let pValue = 0;
-    for (let i = 0; i <= max; i++) {
-      let delta = a - i;
-      let tmpProb = 1;
-      if (b + delta >= 0 && c + delta >= 0 && d - delta >= 0) tmpProb = calcProb(i, b + delta, c + delta, d - delta);
-      if (tmpProb <= cutoffProb) pValue += tmpProb;
+    for (let k = x; k <= n; k++) {
+      let combination = 1;
+      for (let i = 0; i < k; i++) {
+        combination *= (n - i) / (k - i);
+      }
+      pValue += combination * p**k * (1-p)**(n-k);
     }
-    if (pValue > 0.9999) pValue = 1; // 有効数字このくらい？
     return pValue;
   }
-
   let sparqlSpliter = "https://integbio.jp/togosite/sparqlist/api/sparqlist_splitter";
   
   let body = false;
@@ -91,7 +61,7 @@ async ({sparqlet, categoryIds, queryIds, population})=>{
   res = await fetchReq(sparqlSpliter, body);
   for (let i = 0; i < res.length; i++) {
     if (res[i].count == 1) res[i].pValue = 1;
-    else res[i].pValue = calcPvalue(res[i].count - 1, queryArray.length - (res[i].count - 1), categoryTotal[res[i].categoryId] - (res[i].count - 1), population - categoryTotal[res[i].categoryId] - queryArray.length);
+    else res[i].pValue = calcPval(queryArray.length - 1, res[i].count - 1, (categoryTotal[res[i].categoryId] - res[i].count + 1) / (population - queryArray.length + 1));
     res[i].total = categoryTotal[res[i].categoryId];
   }
   return res;

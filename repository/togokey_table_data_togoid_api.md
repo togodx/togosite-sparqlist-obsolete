@@ -31,6 +31,13 @@ async ({togoKey, properties, queryIds})=>{
   let togositeConfig = "https://raw.githubusercontent.com/dbcls/togosite/develop/config/togosite-human/properties.json";
   let togoidApi = "https://integbio.jp/togosite/sparqlist/api/togoid_route_api"; // TogoID API 版
   let togositeConfigJson = await fetchReq(togositeConfig, {method: "get"});
+ 
+  // label 取得
+  let labelApi = "https://integbio.jp/togosite/sparqlist/api/togokey_label";
+  let togoIdToLabel = {};
+  if (togoKey != "togovar") {
+    togoIdToLabel = await fetchReq(labelApi, options, "togoKey=" + togoKey + "&queryIds=" + queryIds);
+  }
   
   let queryProperties = JSON.parse(properties);
   let queryPropertyIds = queryProperties.map(d => d.propertyId);
@@ -94,10 +101,12 @@ async ({togoKey, properties, queryIds})=>{
   }
   // object to list
   return togoIdArray.map(togoId=>{
-    return {
+    let obj = {
       id: togoId,
       properties: tableData[togoId]
     }
+    if (togoIdToLabel[togoId]) obj.label = togoIdToLabel[togoId];
+    return obj;
   });
 }
 ```

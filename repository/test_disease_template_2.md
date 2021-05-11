@@ -5,7 +5,18 @@
 - https://integbio.jp/togosite/sparqlist/disease_hpo_details
 - https://integbio.jp/togosite/sparqlist/mesh_descriptor
 
+## Endpoint description
+
+
+- Data sources
+  - NANDO: https://github.com/aidrd/nando
+  - Mondo: https://mondo.monarchinitiative.org
+  - HP: https://hpo.jax.org
+  - MeSH: https://www.ncbi.nlm.nih.gov/mesh
+
+
 ## Test pattern
+
 * [type=mondo(MONDO_0004997)で対応する全ての値が1つずつ存在する](https://integbio.jp/togosite/sparqlist/api/test_disease_template_3_mitsuhashi?id=0004997&type=mondo)
 * [type=nando(nando:2200051)で対応する全ての値が1つずつ存在する](https://integbio.jp/togosite/sparqlist/api/test_disease_template_3_mitsuhashi?id=2200051&type=nando)
 * [type=mesh( mesh:D002804)で対応する全ての値が1つずつ存在する](https://integbio.jp/togosite/sparqlist/api/test_disease_template_3_mitsuhashi?id=D002804&type=mesh)

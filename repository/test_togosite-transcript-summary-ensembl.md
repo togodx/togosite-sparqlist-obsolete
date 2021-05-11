@@ -22,23 +22,24 @@ PREFIX dc: <http://purl.org/dc/elements/1.1/>
 PREFIX ensembl: <http://identifiers.org/ensembl/>
 
 SELECT ?enst_id ?gene_name ?label ?location ?type_name (GROUP_CONCAT(DISTINCT ?uniprot_id; separator=",") AS ?uniprot_ids) COUNT(?exon) AS ?exon_count
+FROM <http://rdf.ebi.ac.uk/dataset/ensembl/102/homo_sapiens>
 WHERE
 {
   VALUES ?ensg { ensg:{{ensg}} }
-  ?entry a ?type .
-  ?entry rdfs:label ?label .
-  ?entry biohack:location/rdfs:label ?location .
-  ?entry obo:SO_transcribed_from ?ensg .
+  ?enst obo:SO_transcribed_from ?ensg .
   ?ensg dc:description ?gene_name .
-  ?entry obo:SO_has_part ?exon .
+  ?enst a ?type ;
+        rdfs:label ?label ;
+        dc:identifier ?enst_id ;
+        biohack:location/rdfs:label ?location ;
+        obo:SO_has_part ?exon .
   OPTIONAL {
-    ?entry obo:SO_translates_to ?ensp .
+    ?enst obo:SO_translates_to ?ensp .
     ?ensp rdfs:seeAlso ?uniprot .
     FILTER(CONTAINS(STR(?uniprot), "http://identifiers.org/uniprot/"))
     BIND(STRAFTER(STR(?uniprot), "http://identifiers.org/uniprot/") AS ?uniprot_id)
   }
   FILTER REGEX(?type, "^http://rdf")
-  BIND(REPLACE(STR(?entry), enst:, "") AS ?enst_id)
   BIND(REPLACE(STR(?type), "http://rdf.ebi.ac.uk/terms/ensembl/", "") AS ?type_name)
 }ORDER BY ?enst_id
 ```
