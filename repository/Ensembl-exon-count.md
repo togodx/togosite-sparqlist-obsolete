@@ -33,6 +33,7 @@
   const RANGE = 10;
   const CG_COUNT = 21;
   const LIMIT = 10000;
+  let index = 0;
   let cArray = [];
   categoryIds = categoryIds.replace(/,/g," ");
   if (categoryIds.match(/[^\s]/)){
@@ -47,13 +48,31 @@
       index++;
     });
   }else{
-    let pos = 1;
-    for (let i=0;i < CG_COUNT;i++){
-      cArray.push({'min':pos, 'max':pos+RANGE-1});
-      pos += RANGE;
-    }
-    cArray[0]['min'] = 0;
-    cArray[CG_COUNT-1]['max'] = LIMIT;
+    cArray.push(  {"min": 1, "max": 1},
+                  {"min": 2, "max": 2},
+                  {"min": 3, "max": 3},
+                  {"min": 4, "max": 4},
+                  {"min": 5, "max": 5},
+                  {"min": 6, "max": 6},
+                  {"min": 7, "max": 7},
+                  {"min": 8, "max": 8},
+                  {"min": 9, "max": 9},
+                  {"min": 10, "max": 10},
+                  {"min": 11, "max": 15},
+                  {"min": 16, "max": 20},
+                  {"min": 21, "max": 50},
+                  {"min": 51, "max": 100},
+                  {"min": 101, "max": 200},
+                  {"min": 201, "max": 400},
+                  {"min": 401, "max": 1000},
+                  {"min": 1001,"max": 10000});
+    //let pos = 1;
+    //for (let i=0;i < CG_COUNT;i++){
+    //  cArray.push({'min':pos, 'max':pos+RANGE-1});
+    //  pos += RANGE;
+    //}
+    //cArray[0]['min'] = 0;
+    //cArray[CG_COUNT-1]['max'] = LIMIT;
   }
   return cArray;
 }
@@ -106,11 +125,12 @@ ORDER BY ?bin_id
         });
     }else if (mode == "objectList"){
       return query.results.bindings.map(d=>{
+        var range = d.bin_id.value.split("-");  //
         return {
           id: d.ens_id.value, 
           attribute: {
             categoryId: d.bin_id.value, 
-            label : d.bin_id.value
+            label : makeLabel(range[0], range[1])   //d.bin_id.value
           }
         }
       });
@@ -120,7 +140,7 @@ ORDER BY ?bin_id
         return {
           id: d.bin_id.value,
           min: range[0],
-          label: range[0]+"-",
+          label: makeLabel(range[0], range[1]),
           count: Number(d.count.value)
         }
       });
@@ -134,11 +154,19 @@ ORDER BY ?bin_id
       
       return rArray.map(d=>{
         return {
-          id: d.id,
+          categoryId: d.id,
           label: d.label,
           count: Number(d.count)
         }
       });
     }
+       function makeLabel(num1, num2) {
+         if (num1 == num2) {
+           return num1;
+         } else {
+           return num1+"-"+num2 ;
+         }
+       }
+    
 };	
 ```

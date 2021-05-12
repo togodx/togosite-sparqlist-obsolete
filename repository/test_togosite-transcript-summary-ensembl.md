@@ -21,7 +21,7 @@ PREFIX ensg: <http://rdf.ebi.ac.uk/resource/ensembl/>
 PREFIX dc: <http://purl.org/dc/elements/1.1/>
 PREFIX ensembl: <http://identifiers.org/ensembl/>
 
-SELECT ?enst_id ?gene_name ?label ?location ?type_name (GROUP_CONCAT(DISTINCT ?uniprot_id; separator=",") AS ?uniprot_ids) COUNT(?exon) AS ?exon_count
+SELECT ?enst_id ?gene_name ?label ?location ?type_name (GROUP_CONCAT(DISTINCT ?uniprot_id; separator=",") AS ?uniprot_ids) (COUNT(DISTINCT ?exon) AS ?exon_count)
 FROM <http://rdf.ebi.ac.uk/dataset/ensembl/102/homo_sapiens>
 WHERE
 {
@@ -53,7 +53,7 @@ WHERE
     enst_url: "http://identifiers.org/ensembl/" + elem.enst_id.value,
     uniprot_id: elem.uniprot_ids.value.split(",").map((elem)=>("<a href=\"http://identifiers.org/uniprot/"+elem+"\">"+elem+"</a>")).join(", "),
     //uniprot_url: "http://identifiers.org/uniprot/" + elem.uniprot_id?.value,
-    type: elem.type_name.value.replace("_", " "),
+    type: elem.type_name.value.replace(/_/g, " "),
     label:  elem.label.value,
     location: elem.location.value,
     exon_count: elem.exon_count.value

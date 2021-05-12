@@ -2,7 +2,7 @@
 
 ## Endpoint
 
-https://orth.dbcls.jp/sparql-dev
+https://integbio.jp/togosite/sparql
 
 ## Parameters
 * `categoryIds` (type: count)

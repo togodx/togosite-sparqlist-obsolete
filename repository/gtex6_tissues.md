@@ -3,7 +3,7 @@ This query allows **multiple tissue flags** for each gene.
 
 ## Endpoint
 
-https://orth.dbcls.jp/sparql-dev
+https://integbio.jp/togosite/sparql
 
 ## Parameters
 * `categoryIds` (type: UBERON or EFO)
@@ -79,10 +79,20 @@ WHERE {
   }
   {{/if}}
   ?narrower_tissue skos:broader* ?tissue .
-  GRAPH <https://refex.dbcls.jp/rdf/tissue_specific_genes_gtex_v6> {
+  GRAPH <http://rdf.integbio.jp/dataset/togosite/refex_tissue_specific_genes_gtex_v6> {
     ?ensg refexo:isPositivelySpecificTo ?narrower_tissue .
   }
-  ?tissue rdfs:label ?label .
+  {
+    GRAPH <http://rdf.integbio.jp/dataset/togosite/efo> {
+      ?tissue rdfs:label ?label .
+    }
+  }
+  UNION
+  {
+    GRAPH <http://rdf.integbio.jp/dataset/togosite/uberon> {
+      ?tissue rdfs:label ?label .
+    }
+  }
   OPTIONAL {
     ?child_tissue skos:broader ?tissue .
   }

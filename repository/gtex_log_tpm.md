@@ -2,7 +2,7 @@
 
 ## Endpoint
 
-https://orth.dbcls.jp/sparql-dev
+https://integbio.jp/togosite/sparql
 
 ## Parameters
 * `id`
@@ -66,7 +66,7 @@ WHERE {
   }
   {{/if}}
 
-  GRAPH <https://refex.dbcls.jp/rdf/gtex_v8_sum> {
+  GRAPH <http://rdf.integbio.jp/dataset/togosite/refex_gtex_v8_summary> {
     ?s refexo:isMeasurementOf ?ensg ;
        sio:SIO_000216 ?b_median, ?b_sd ;
        refexo:refexSample ?refexs .
@@ -75,7 +75,7 @@ WHERE {
     ?b_sd a refexo:logTPMSD ;
           sio:SIO_000300 ?sd .
   }
-  GRAPH <https://refex.dbcls.jp/rdf/refexsample_gtex_v8_sum> {
+  GRAPH <http://rdf.integbio.jp/dataset/togosite/refexsample_gtex_v8_summary> {
     ?refexs dct:description ?desc .
   }
 }ORDER BY ?desc
