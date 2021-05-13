@@ -100,9 +100,9 @@ WHERE {
 
   function makeLabel(id) {
     if (id === "1") 
-      return "with hypothetical upstream TF" ;
+      return "Genes with hypothetical upstream TF" ;
     else if (id === "2")
-      return "without hypothetical upstream TF";
+      return "Genes without hypothetical upstream TF";
     else
       return "";
   }

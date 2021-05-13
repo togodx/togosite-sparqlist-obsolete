@@ -90,8 +90,8 @@ WHERE {
   const idPrefix = "http://purl.uniprot.org/uniprot/";
   const withId = "1";
   const withoutId = "0";
-  const withLabel = "with structure data";
-  const withoutLabel = "without structure data";
+  const withLabel = "Proteins with structure data";
+  const withoutLabel = "Proteins without structure data";
   if (mode) {
     if (mode == "objectList") {
       if (categoryIds == withId) return withTarget.results.bindings.map(d=>{

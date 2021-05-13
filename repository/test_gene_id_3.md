@@ -47,13 +47,14 @@ PREFIX dct: <http://purl.org/dc/terms/>
 PREFIX taxon: <http://identifiers.org/taxonomy/>
 PREFIX identifiers: <http://identifiers.org/>
 PREFIX faldo: <http://biohackathon.org/resource/faldo#>
+PREFIX refexo: <http://purl.jp/bio/01/refexo#>
 
 SELECT DISTINCT *
 #?ensg_id ?ncbigene_id ?hgnc_id ?type_label ?desc ?location ?gene_symbol (GROUP_CONCAT(DISTINCT ?uniprot_id; separator=",") AS ?uniprots) (GROUP_CONCAT(DISTINCT ?enst_id; separator=",") AS ?ensts)
 WHERE {
   {{#if idDict.ensg}}
     {
-      SELECT ?ensg ?ensg_id ?gene_symbol ?desc ?location
+      SELECT ?ensg ?ensg_id ?gene_symbol ?desc ?location (GROUP_CONCAT(DISTINCT ?tissue_label; separator=",") AS ?tissue_labels)
       WHERE {
         VALUES ?ensg { ensembl:{{idDict.ensg}} }
         BIND(STRAFTER(STR(?ensg), "http://identifiers.org/ensembl/") AS ?ensg_id)
@@ -68,9 +69,22 @@ WHERE {
           BIND(STRAFTER(STR(?type), "http://rdf.ebi.ac.uk/terms/ensembl/") as ?type_label)
           ?loc rdfs:label ?location .
         }
+        GRAPH <http://rdf.integbio.jp/dataset/togosite/refex_tissue_specific_genes_gtex_v6> {
+          ?ensg refexo:isPositivelySpecificTo ?tissue .
+        }
+        {
+          GRAPH <http://rdf.integbio.jp/dataset/togosite/efo> {
+            ?tissue rdfs:label ?tissue_label .
+          }
+        }
+        UNION
+        {
+          GRAPH <http://rdf.integbio.jp/dataset/togosite/uberon> {
+            ?tissue rdfs:label ?tissue_label .
+          }
+        }
       }
     }
-
   {{/if}}
   {{#if idDict.ncbigene}}
     {
@@ -118,7 +132,8 @@ WHERE {
     { "NCBI Gene URL": "ncbigene" },
     { "Gene symbol": "gene_symbol" },
     { "Description": "desc" },
-    { "Location": "location" }
+    { "Location": "location" },
+    { "Tissue": "tissue_labels"}
   ];
   return array;
 }

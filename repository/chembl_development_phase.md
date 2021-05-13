@@ -60,7 +60,7 @@ WHERE
 }
 {{#unless mode}}
 group by ?developmentphase ?count
-ORDER BY Desc(?count)
+ORDER BY Desc(?developmentphase)
 {{/unless}}
 ```
 

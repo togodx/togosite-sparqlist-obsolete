@@ -90,15 +90,22 @@ ORDER BY ?branch_id
       attribute: {
         categoryId: elem.branch_id.value,
         uri: elem.branch.value,
-        label: elem.branch_label.value
+        label: capitalizeCsv(elem.branch_label.value)
       }
     }));
   } else {
     return main.results.bindings.map((elem) => ({
       categoryId: elem.branch_id.value,
-      label: elem.branch_label.value,
+      label: capitalizeCsv(elem.branch_label.value),
       count: Number(elem.gene_count.value)
     }));
+  }
+
+  function capitalizeCsv(str) {
+    return str.split(', ').map((s) => capitalize(s)).join(', ')
+  }
+  function capitalize(str) {
+    return str.charAt(0).toUpperCase() + str.substring(1);
   }
 };
 ```

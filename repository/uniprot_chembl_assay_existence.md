@@ -82,8 +82,8 @@ WHERE {
   const idPrefix = "http://purl.uniprot.org/uniprot/";
   const withId = "1";
   const withoutId = "0";
-  const withLabel = "with ChEMBL assay";
-  const withoutLabel = "without ChEMBL assay";
+  const withLabel = "Proteins with ChEMBL assay";
+  const withoutLabel = "Proteins without ChEMBL assay";
   if (mode) {
     let hasAssayArray = hasAssay.results.bindings.map(d=>d[idVarName].value.replace(idPrefix, ""));
     let notAssayArray = [];

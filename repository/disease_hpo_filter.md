@@ -18,6 +18,8 @@
   * example: 0003418, 0002027,0001945
 * `mode` 必須パラメータ。内訳の代わりに該当する ID のリストを返す（デフォルトはオフ）idList: リストだけ、objectList: Attributeの入ったリスト（Attribute は下階層ではなく、categoryid で指定したカテゴリ）
   * example: idList, objectList
+* `is_rewrite_optional` テンプレートのOPTIONALを使わない方が速いと判断して同意（のはず？）に書き換えた。
+  * default: true
 
 ## `queryArray`
 - ユーザが指定した ID リストを配列に分割
@@ -55,9 +57,13 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 {{#if mode}}
 SELECT DISTINCT ?hp ?category ?label
 {{else}}
-#SELECT ?category ?label (COUNT (DISTINCT ?hp) AS ?count) (SAMPLE(?child_category) AS ?child)
-SELECT ?category ?label (COUNT (DISTINCT ?hp) AS ?count)
+{{#if is_rewrite_optional }}
+SELECT ?category ?label (COUNT (DISTINCT ?hp) AS ?count) 
+{{else}}
+SELECT ?category ?label (COUNT (DISTINCT ?hp) AS ?count) (SAMPLE(?child_category) AS ?child) 
 {{/if}}
+{{/if}}
+FROM <http://rdf.integbio.jp/dataset/togosite/hpo>
 WHERE {
 {{#if queryArray}}
   VALUES ?hp { {{#each queryArray}} hpo:{{this}} {{/each}} }
@@ -69,19 +75,19 @@ WHERE {
   VALUES ?parent { {{#each categoryArray}} hpo:{{this}} {{/each}} }
   {{/if}}
 {{/if}}
- GRAPH <http://rdf.integbio.jp/dataset/togosite/hpo> { 
- {{#unless  mode}}
-    ?category rdfs:subClassOf ?parent.
- {{/unless}}
-    ?category rdfs:label ?label.
-    ?hp rdfs:subClassOf* ?category.
-  }
-#  OPTIONAL {
-#    ?child_category rdfs:subClassOf ?category .
-# }
+{{#unless  mode}}
+  ?category rdfs:subClassOf ?parent.
+{{/unless}}
+  ?category rdfs:label ?label.
+  ?hp rdfs:subClassOf* ?category.
+{{#if is_rewrite_optional }}
+  ?hp rdfs:label ?_hp_label.  # ?hp rdfs:subClassOf* ?category が?hpの値に関係なく、trueになってしまうため追加。次のOPTIONALも同じ意図だがこちらの方が軽いはず。
+{{else}}
+  OPTIONAL { ?child_category rdfs:subClassOf ?category . }  
+{{/if}}
 } 
 {{#unless mode}}  
-  ORDER BY DESC(?count)
+ORDER BY DESC(?count)
 {{/unless}}
 ```
 
@@ -109,7 +115,7 @@ WHERE {
       categoryId: d.category.value.replace(categoryPrefix, ""), 
       label: d.label.value.replace(/^Abnormality of /,"").replace(/the /,""),
       count: Number(d.count.value),
-      // hasChild: (Boolean(d.child))
+ //     hasChild: (Boolean(d.child))
       hasChild: (Number(d.count.value) > 1 ? true : false)
     };
   });	

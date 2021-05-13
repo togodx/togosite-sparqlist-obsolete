@@ -1,5 +1,5 @@
 # ChEMBL で薬を薬効（WHO ATC Code）で分類 (mode, hasChild対応, Number対応）（建石）
-
+# ラベル表示をPubChemに合わせるテスト用。うまくいったらatcClassificationChEMBLを上書きする予定。
 * 入力：
   * ATCコードのカテゴリ。（デフォルトは全部：この場合、パラメータは空白)
 * 出力：
@@ -104,21 +104,26 @@ ORDER BY desc(?count)
 
 ## `labeldata`
 * ATCコードのラベル取得
-* Endpointが https://integbio.jp/rdf/mirror/bioportal/sparql のとき
-  FROM <http://integbio.jp/rdf/mirror/bioportal/atc>
-
+* PubChemのグラフより
+* ?attr a sio:CHEMINF_000562 ;
+            sio:is-attribute-of ?cid ; 
+            sio:has-value  ?WHO_INN ;
+            dcterms:subject ?WHO_ATC .
+* http://rdf.ncbi.nlm.nih.gov/pubchem/concept/ATC_xxxx
 ```sparql
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
-PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-PREFIX atc: <http://purl.bioontology.org/ontology/UATC/>
+PREFIX sio: <http://semanticscience.org/resource/>
+PREFIX dcterms: <http://purl.org/dc/terms/>PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX atc: <http://rdf.ncbi.nlm.nih.gov/pubchem/concept/ATC_>
 
 SELECT ?atc ?label 
-FROM <http://rdf.integbio.jp/dataset/togosite/atc>
+FROM <http://rdf.integbio.jp/dataset/togosite/pubchem>
 WHERE 
 {
     VALUES ?atc  { {{#each atcArray}} atc:{{this}}  {{/each}} }
-    ?atc  skos:prefLabel ?label.    
+     ?atc a skos:concept;
+         skos:prefLabel ?label. 
 }
 ```
 
@@ -126,13 +131,13 @@ WHERE
 ## `return` 
 ```javascript
 ({data,labeldata,mode})=>{
-  const uatcprefix="http://purl.bioontology.org/ontology/UATC/"
+  const pubchematcprefix="http://rdf.ncbi.nlm.nih.gov/pubchem/concept/ATC_"
   const moleculeprefix="http://rdf.ebi.ac.uk/resource/chembl/molecule/"
   var labels={}
   var r=[]
   
   labeldata.results.bindings.forEach(d=>{
-    labels[d.atc.value.replace(uatcprefix,"")]=d.label.value
+    labels[d.atc.value.replace(pubchematcprefix,"")]=d.label.value
   });	
   if (mode === "idList") {
     return Array.from(new Set(
@@ -147,7 +152,7 @@ WHERE
         attribute: {
           categoryId:d.atctop.value,
           label:labels[d.atctop.value],
-          uri:uatcprefix+d.atctop.value
+          uri:pubchematcprefix+d.atctop.value
         }
       })
     });

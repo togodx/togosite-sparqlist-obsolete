@@ -123,7 +123,11 @@ WHERE {
       // range
       let range = {begin: 0, end: Infinity};
       if (categoryIds.match(/^[\d\.]+-/)) range.begin = Number(categoryIds.match(/^([\d\.]+)-/)[1]);
-      if (categoryIds.match(/-[\d\.]+$/)) range.end = Number(categoryIds.match(/-([\d\.]+)$/)[1]);
+      else if (categoryIds.match(/-[\d\.]+$/)) range.end = Number(categoryIds.match(/-([\d\.]+)$/)[1]);
+      else if (categoryIds.match(/^[\d\.]+$/)) {
+        range.begin = Number(categoryIds.match(/^([\d\.]+)$/)[1]);
+        range.end = range.begin;
+      }
       for (let d of withTarget.results.bindings) {
         if (range.begin <= Number(d.target_num.value) && Number(d.target_num.value) <= range.end) filteredData.push(d);
       }

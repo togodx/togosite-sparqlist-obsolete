@@ -12,7 +12,7 @@
 
 ## Endpoint
 
-https://integbio.jp/rdf/pubchem/sparql
+https://integbio.jp/togosite/sparql
 
 ## Parameters
 

@@ -99,10 +99,10 @@ WHERE{
   if (obj[0]["length"]) obj[0]["length"] = obj[0]["length"].replace(/(\d)(?=(\d{3})+$)/g , '$1,');
   if (obj[0]["mass"]) obj[0]["mass"] = obj[0]["mass"].replace(/(\d)(?=(\d{3})+$)/g , '$1,');
   if (obj[0]["citation_number"]) obj[0]["citation_number"] = obj[0]["citation_number"].replace(/(\d)(?=(\d{3})+$)/g , '$1,');
-  if (obj[0]["biological_process"]) obj[0]["biological_process"] = obj[0]["biological_process"].split(/,/);
-  if (obj[0]["molecular_function"]) obj[0]["molecular_function"] = obj[0]["molecular_function"].split(/,/);
-  if (obj[0]["cellular_component"]) obj[0]["cellular_component"] = obj[0]["cellular_component"].split(/,/);
-  if (obj[0]["isolated_tissue"]) obj[0]["isolated_tissue"] = obj[0]["isolated_tissue"].split(/,/);
+  if (obj[0]["biological_process"]) obj[0]["biological_process"] = "<ul><li>" + obj[0]["biological_process"].split(/,/).join("</li><li>") + "</li></ul>";
+  if (obj[0]["molecular_function"]) obj[0]["molecular_function"] = "<ul><li>" + obj[0]["molecular_function"].split(/,/).join("</li><li>") + "</li></ul>";
+  if (obj[0]["cellular_component"]) obj[0]["cellular_component"] = "<ul><li>" + obj[0]["cellular_component"].split(/,/).join("</li><li>") + "</li></ul>";
+  if (obj[0]["isolated_tissue"]) obj[0]["isolated_tissue"] = "<ul><li>" + obj[0]["isolated_tissue"].split(/,/).join("</li><li>") + "</li></ul>";
   return obj;
 };
 ```

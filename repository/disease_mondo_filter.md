@@ -3,9 +3,9 @@
 - hasChild 入り
  
  ## testURL
-  - [default](http://ep6.dbcls.jp/togoid/sparqlist/api/disease_mondo_filter?categoryIds=0000001&queryIds=&mode=)
-  - [catgoryId+queryId+idList](http://ep6.dbcls.jp/togoid/sparqlist/api/disease_mondo_filter?categoryIds=0000001&queryIds=0008903%2C0002691%2C0005260&mode=idList)
-  - [catgoryId+queryId+objectList](http://ep6.dbcls.jp/togoid/sparqlist/api/disease_mondo_filter?categoryIds=0000001&queryIds=0008903%2C0002691%2C0005260&mode=objectList)
+  - [default](https://integbio.jp/togosite/sparqlist/api/disease_mondo_filter?categoryIds=0000001&queryIds=&mode=)
+  - [catgoryId+queryId+idList](https://integbio.jp/togosite/sparqlist/api/disease_mondo_filter?categoryIds=0000001&queryIds=0008903%2C0002691%2C0005260&mode=idList)
+  - [catgoryId+queryId+objectList](https://integbio.jp/togosite/sparqlist/api/disease_mondo_filter?categoryIds=0000001&queryIds=0008903%2C0002691%2C0005260&mode=objectList)
 
 ## Parameters
 
@@ -41,7 +41,7 @@
 
 ## Endpoint
 
-https://integbio.jp/rdf/sparql
+https://integbio.jp/togosite/sparql
 
 ## `data`
 - categoryId があった場合に絞り込み
@@ -67,12 +67,12 @@ WHERE {
   VALUES ?parent { {{#each categoryArray}} mondo:{{this}} {{/each}} }
   {{/if}}
 {{/if}}
- GRAPH <http://integbio.jp/rdf/ontology/mondo> { 
+ GRAPH <http://rdf.integbio.jp/dataset/togosite/mondo> { 
  {{#unless  mode}}
     ?category rdfs:subClassOf ?parent.
  {{/unless}}
     ?category rdfs:label ?label.
-    ?mondo rdfs:subClassOf* ?category.
+    ?mondo rdfs:subClassOf+ ?category.
   }
 } 
 {{#unless mode}}  

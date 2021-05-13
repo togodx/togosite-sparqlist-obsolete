@@ -117,7 +117,7 @@ WHERE {
           .replace("http://purl.obolibrary.org/obo/", "")
           .replace("http://www.ebi.ac.uk/efo/", ""),
         uri: elem.tissue.value,
-        label: modifyLabel(elem.label.value)
+        label: capitalize(modifyLabel(elem.label.value))
       }
     }));
   } else {
@@ -125,7 +125,7 @@ WHERE {
       categoryId: elem.tissue.value
         .replace("http://purl.obolibrary.org/obo/", "")
         .replace("http://www.ebi.ac.uk/efo/", ""),
-      label: modifyLabel(elem.label.value),
+      label: capitalize(modifyLabel(elem.label.value)),
       count: Number(elem.count.value),
       hasChild: Boolean(elem.child_example)
     })).sort((a, b) => a.label.toLowerCase() < b.label.toLowerCase() ? -1 : 1);
@@ -149,6 +149,10 @@ WHERE {
     } else {
       return label;
     }
+  }
+
+  function capitalize(str) {
+    return str.charAt(0).toUpperCase() + str.substring(1);
   }
 };
 ```
