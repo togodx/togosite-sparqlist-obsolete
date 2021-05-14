@@ -85,7 +85,7 @@ WHERE {
 - 集計
 
 ```javascript
-({categoryIds, mode, withTarget, withoutTarget})=>{
+({queryIds, categoryIds, mode, withTarget, withoutTarget})=>{
   const targetVarName = "uniprot";
   const idPrefix = "http://purl.uniprot.org/uniprot/";
   const withId = "1";
@@ -124,17 +124,21 @@ WHERE {
       return withTarget.results.bindings.map(d=>d[targetVarName].value.replace(idPrefix, "")).concat(withoutTarget.results.bindings.map(d=>d[targetVarName].value.replace(idPrefix, "")));  
     }
   }
-  return [
-    {
-      categoryId: withId,
-      label: withLabel,
+  let obj = [];
+  if (!queryIds || Number(withTarget.results.bindings[0].count.value) != 0) {
+    obj.push({
+      categoryId: withId, 
+      label: withLabel, 
       count: Number(withTarget.results.bindings[0].count.value)
-    },
-    {
-      categoryId: withoutId,
-      label: withoutLabel,
-      count: Number(withoutTarget.results.bindings[0].count.value)
-    }
-  ];
+    });
+  }
+  if (!queryIds || Number(withoutTarget.results.bindings[0].count.value) != 0) {
+    obj.push({
+      categoryId: withoutId, 
+      label: withoutLabel, count: 
+      Number(withoutTarget.results.bindings[0].count.value)
+    });
+  }
+  return obj;
 }
 ```

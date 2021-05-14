@@ -1,4 +1,4 @@
-# Diseaseカテゴリフィルタ(MONDO階層利用)
+# Diseaseカテゴリフィルタ(Mondo階層利用)
 
 - hasChild 入り
  
@@ -9,13 +9,15 @@
 
 ## Parameters
 
-* `categoryIds` 指定したMONDOノードのリストの下位階層のノード数を返す。
+* `categoryIds` 指定したMondoノードのリストの下位階層のノード数を返す。
   * default:0000001
   * example: 0000001 (disease and disorder), 0004992, 0005071  (cancer, nervous system disorder),  Search MONDO at https://monarchinitiative.org/
 * `queryIds` 数える対象(MONDO_ ID)リスト。ここで指定されたID群が各内訳に何個ずつ該当するかを返す。
   * example: 0008903,0002691,0005260    (liver cancer, lung cancer,autism (disease))
 * `mode` 必須パラメータ。内訳の代わりに該当する ID のリストを返す（デフォルトはオフ）idList: リストだけ、objectList: Attributeの入ったリスト（Attribute は下階層ではなく、categoryid で指定したカテゴリ）
   * example: idList, objectList
+* `is_rewrite_optional` テンプレートのOPTIONALを使わない方が速いと判断して同意（のはず？）に書き換えた。
+  * default: true
 
 ## `queryArray`
 - ユーザが指定した ID リストを配列に分割
@@ -50,12 +52,17 @@ https://integbio.jp/togosite/sparql
 PREFIX dct: <http://purl.org/dc/terms/>
 PREFIX mondo: <http://purl.obolibrary.org/obo/>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
 {{#if mode}}
 SELECT DISTINCT ?mondo ?category ?label
 {{else}}
-#SELECT ?category ?label (COUNT (DISTINCT ?mondo) AS ?count) (SAMPLE(?child_category) AS ?child)
-SELECT ?category ?label (COUNT (DISTINCT ?mondo) AS ?count)
+{{#if is_rewrite_optional }}
+SELECT ?category ?label (COUNT (DISTINCT ?mondo) AS ?count) 
+{{else}}
+SELECT ?category ?label (COUNT (DISTINCT ?mondo) AS ?count) (SAMPLE(?child_category) AS ?child) 
 {{/if}}
+{{/if}}
+FROM <http://rdf.integbio.jp/dataset/togosite/mondo>
 WHERE {
 {{#if queryArray}}
   VALUES ?mondo { {{#each queryArray}} mondo:{{this}} {{/each}} }
@@ -67,16 +74,19 @@ WHERE {
   VALUES ?parent { {{#each categoryArray}} mondo:{{this}} {{/each}} }
   {{/if}}
 {{/if}}
- GRAPH <http://rdf.integbio.jp/dataset/togosite/mondo> { 
- {{#unless  mode}}
-    ?category rdfs:subClassOf ?parent.
- {{/unless}}
-    ?category rdfs:label ?label.
-    ?mondo rdfs:subClassOf+ ?category.
-  }
+{{#unless  mode}}
+  ?category rdfs:subClassOf ?parent.
+{{/unless}}
+  ?category rdfs:label ?label.
+  ?mondo rdfs:subClassOf* ?category.
+{{#if is_rewrite_optional }}
+  ?mondo rdf:type owl:Class.  # ?hp rdfs:subClassOf* ?category が?mondoの値に関係なく、trueになってしまうため追加。次のOPTIONALも同じ意図だがこちらの方が軽いはず。
+{{else}}
+  OPTIONAL { ?child_category rdfs:subClassOf ?category . }  
+{{/if}}
 } 
 {{#unless mode}}  
-  ORDER BY DESC(?count)
+ORDER BY DESC(?count)
 {{/unless}}
 ```
 

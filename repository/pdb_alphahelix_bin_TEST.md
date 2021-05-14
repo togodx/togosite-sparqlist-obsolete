@@ -1,4 +1,4 @@
-# PDBエントリをalpha_helixで分類(ヒトのみ) (フロント開発用)（井手, 守屋）
+# PDBエントリをalpha_helixで分類(ヒトのみ) (フロント開発用)（井手, 守屋）bug修正用テスト
 
 ## Endpoint
 
@@ -134,7 +134,7 @@ WHERE{
     if (mode == "idList") return filteredData.map(d=>d[idVarName].value.replace(idPrefix, ""));
   }
   // 仮想階層制御
-  if (withoutTarget.results.bindings[0].count.value != 0) {                      //不正PDB-idでOを返さない修正
+  if (withoutTarget.results.bindings[0].count.value != 0) {
   withTarget.results.bindings.unshift( {count: {value: withoutTarget.results.bindings[0].count.value}, target_num: {value: "0"}}  ); // カウント 0 を追加
   };
   const limit_1 = 50;

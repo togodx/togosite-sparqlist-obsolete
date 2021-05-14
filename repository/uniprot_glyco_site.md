@@ -108,7 +108,7 @@ WHERE {
 ## `return`
 - 上位を合算
 ```javascript
-({mode, categoryIds, withTarget, withoutTarget})=>{
+({mode, queryIds, categoryIds, withTarget, withoutTarget})=>{
   if (mode) {
     const idVarName = "uniprot";
     const idPrefix = "http://purl.uniprot.org/uniprot/";
@@ -133,7 +133,9 @@ WHERE {
     if (mode == "idList") return filteredData.map(d=>d[idVarName].value.replace(idPrefix, ""));
   }
   // 仮想階層制御
-  withTarget.results.bindings.unshift( {count: {value: withoutTarget.results.bindings[0].count.value}, target_num: {value: "0"}}  ); // カウント 0 を追加
+  if (!queryIds || withoutTarget.results.bindings[0].count.value != 0) {
+    withTarget.results.bindings.unshift( {count: {value: withoutTarget.results.bindings[0].count.value}, target_num: {value: "0"}}  ); // カウント 0 を追加
+  }
   let value = 0;
   let res = [];
   for (let d of withTarget.results.bindings) {

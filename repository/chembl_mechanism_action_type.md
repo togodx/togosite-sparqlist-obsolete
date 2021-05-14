@@ -36,7 +36,7 @@
 
 ## Endpoint
 
-https://integbio.jp/rdf/mirror/ebi/sparql
+https://integbio.jp/rdf/ebi/sparql
 
 ## `query_mechanism_action_type`
 

@@ -30,7 +30,7 @@
 ```
 
 ## `categoryArray`
-- Clinical siginificanceのIDをlabelに変換して配列に
+- Clinical siginificanceのIDをlabel(ClinVarの表記と同じ)に変換して配列に代入する。
 ```javascript
 ({categoryIds}) => {
   
@@ -46,7 +46,7 @@
   id2label["drug_response"] = "drug response"
   id2label["risk_factor"] = "risk factor"
   id2label["association"] = "association"
-  id2label["affects"] = "Affects"
+  id2label["affects"] = "affects"
   id2label["protective"] = "protective"
   
   categoryIds = categoryIds.replace(/,/g," ")
@@ -105,7 +105,7 @@ WHERE {
       attribute: {
         categoryId: d.category.value.toLowerCase().replace("/", "_or_").replace(/,?\s+/g, "_"),
         uri: d.category.value.toLowerCase().replace("/", "_or_").replace(/,?\s+/g, "_"),
-        label : d.label.value
+        label : d.label.value.charAt(0).toUpperCase() + d.label.value.slice(1)   // 先頭の１文字だけを大文字にする。
       }
     }
   });
@@ -114,9 +114,9 @@ WHERE {
   return data.results.bindings.map(d=>{ 
     return {
       categoryId: d.category.value.toLowerCase().replace("/", "_or_").replace(/,?\s+/g, "_"),
-      label: d.label.value,
+      label: d.label.value.charAt(0).toUpperCase() + d.label.value.slice(1),   // 先頭の１文字だけを大文字にする。
       count: Number(d.count.value),
-      hasChild: Boolean(d.child)
+      hasChild: false      // ClinVarは無階層のため常にfalse
     };
   });	
 }

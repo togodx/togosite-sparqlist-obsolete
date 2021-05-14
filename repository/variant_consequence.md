@@ -20,7 +20,7 @@
 ## Parameters
 
 * `categoryIds` (type: variant consequence)
-  * default: SO_0001060
+  * default: 
   * example: SO_0001060　(sequence_variant)  http://www.sequenceontology.org/browser/current_svn/term/SO:0001060
 * `queryIds` (type:TogoVar)
   * example: tgv48208871,tgv48208872,tgv48208877,tgv48208884,tgv48208888,tgv48208896,tgv48208897,tgv48208898,tgv48208900,tgv48208904,tgv48208906,tgv48208908,tgv48208938,tgv48208939,tgv48208943,tgv48208945,tgv48208947,tgv48208962,tgv48208965,tgv48208967,tgv48208968,tgv48208970,tgv48208971,tgv48208973,tgv48208977
@@ -95,16 +95,16 @@ WHERE {
   {{/if}} 
 {{/if}}
    ?togovar dct:identifier ?tgv_id.
-   ?togovar  tgvo:hasConsequence/rdf:type/rdfs:subClassOf* ?category.
+   ?togovar tgvo:hasConsequence/rdf:type/rdfs:subClassOf* ?category.
  {{#unless  mode}}
    ?category rdfs:subClassOf ?parent.
  {{/unless}}
    ?category rdfs:label ?label.
 }
 {{#if mode}}
-  LIMIT 10000
+LIMIT 10000
 {{else}}  
-  ORDER BY DESC(?count)
+ORDER BY DESC(?count)
 {{/if}}
 {{/if}}
 ```
@@ -119,31 +119,31 @@ WHERE {
   
   if (isCountAll == true) {
   return  [
-    {"categoryId":"SO_0001627","count":212366571,"label":"intron variant","hasChild":false},
-    {"categoryId":"SO_0001619","count":52390424,"label":"non coding transcript variant","hasChild":false},
-    {"categoryId":"SO_0001628","count":38329053,"label": "intergenic variant","hasChild":false},
+    {"categoryId":"SO_0001627","count":212366571,"label":"Intron variant","hasChild":false},
+    {"categoryId":"SO_0001619","count":52390424,"label":"Non coding transcript variant","hasChild":false},
+    {"categoryId":"SO_0001628","count":38329053,"label": "Intergenic variant","hasChild":false},
     {"categoryId":"SO_0001621","count":20962310,"label": "NMD transcript variant","hasChild":false},
-    {"categoryId":"SO_0001583","count":12385885,"label": "missense variant","hasChild":false},
-    {"categoryId":"SO_0001792","count":7450628,"label": "non coding transcript exon variant","hasChild":false},
-    {"categoryId":"SO_0001819","count":6340518,"label": "synonymous variant","hasChild":false},
+    {"categoryId":"SO_0001583","count":12385885,"label": "Missense variant","hasChild":false},
+    {"categoryId":"SO_0001792","count":7450628,"label": "Non coding transcript exon variant","hasChild":false},
+    {"categoryId":"SO_0001819","count":6340518,"label": "Synonymous variant","hasChild":false},
     {"categoryId":"SO_0001624","count":4109311,"label": "3 prime UTR variant","hasChild":false},
-    {"categoryId":"SO_0001630","count":2785532,"label": "splice region variant","hasChild":false},
+    {"categoryId":"SO_0001630","count":2785532,"label": "Splice region variant","hasChild":false},
     {"categoryId":"SO_0001623","count":1546374,"label": "5 prime UTR variant","hasChild":false},
-    {"categoryId":"SO_0001589","count":506417,"label": "frameshift variant","hasChild":false},
-    {"categoryId":"SO_0001587","count":402831,"label": "stop gained","hasChild":false},
-    {"categoryId":"SO_0001575","count":210311,"label": "splice donor variant","hasChild":false},
-    {"categoryId":"SO_0001574","count":172987,"label": "splice acceptor variant","hasChild":false},
-    {"categoryId":"SO_0001822","count":143302,"label": "inframe deletion","hasChild":false},
-    {"categoryId":"SO_0001821","count":50924,"label": "inframe insertion","hasChild":false},
-    {"categoryId":"SO_0002012","count":38719,"label": "start lost","hasChild":false},
-    {"categoryId":"SO_0001580","count":18057,"label": "coding sequence variant","hasChild":false},
-    {"categoryId":"SO_0001578","count":16247,"label": "stop lost","hasChild":false},
-    {"categoryId":"SO_0001567","count":7754,"label": "stop retained variant","hasChild":false},
-    {"categoryId":"SO_0001620","count":6871,"label": "mature miRNA variant","hasChild":false},
-    {"categoryId":"SO_0001818","count":3482,"label": "protein altering variant","hasChild":false},
-    {"categoryId":"SO_0001626","count":3443,"label": "incomplete terminal codon variant","hasChild":false},
-    {"categoryId":"SO_0002019","count":585,"label": "start retained variant","hasChild":false},
-    {"categoryId":"SO_0001893","count":18,"label": "transcript ablation","hasChild":false}
+    {"categoryId":"SO_0001589","count":506417,"label": "Frameshift variant","hasChild":false},
+    {"categoryId":"SO_0001587","count":402831,"label": "Stop gained","hasChild":false},
+    {"categoryId":"SO_0001575","count":210311,"label": "Splice donor variant","hasChild":false},
+    {"categoryId":"SO_0001574","count":172987,"label": "Splice acceptor variant","hasChild":false},
+    {"categoryId":"SO_0001822","count":143302,"label": "Inframe deletion","hasChild":false},
+    {"categoryId":"SO_0001821","count":50924,"label": "Inframe insertion","hasChild":false},
+    {"categoryId":"SO_0002012","count":38719,"label": "Start lost","hasChild":false},
+    {"categoryId":"SO_0001580","count":18057,"label": "Coding sequence variant","hasChild":false},
+    {"categoryId":"SO_0001578","count":16247,"label": "Stop lost","hasChild":false},
+    {"categoryId":"SO_0001567","count":7754,"label": "Stop retained variant","hasChild":false},
+    {"categoryId":"SO_0001620","count":6871,"label": "Mature miRNA variant","hasChild":false},
+    {"categoryId":"SO_0001818","count":3482,"label": "Protein altering variant","hasChild":false},
+    {"categoryId":"SO_0001626","count":3443,"label": "Incomplete terminal codon variant","hasChild":false},
+    {"categoryId":"SO_0002019","count":585,"label": "Start retained variant","hasChild":false},
+    {"categoryId":"SO_0001893","count":18,"label": "Transcript ablation","hasChild":false}
   ];
 }
 
@@ -153,7 +153,7 @@ WHERE {
       attribute: {
         categoryId: d.category.value.replace(categoryPrefix,""),
         uri: d.category.value,
-        label : d.label.value.replace(/_/g, " "),
+        label : d.label.value.replace(/_/g, " ").charAt(0).toUpperCase() + d.label.value.replace(/_/g, " ").slice(1)   // 先頭の１文字だけを大文字にする。
       }
     }
   });
@@ -163,7 +163,7 @@ WHERE {
   return data.results.bindings.map(d=>{ 
     return {
       categoryId: d.category.value.replace(categoryPrefix,""),
-      label: d.label.value.replace(/_/g, " "),
+      label : d.label.value.replace(/_/g, " ").charAt(0).toUpperCase() + d.label.value.replace(/_/g, " ").slice(1),   // 先頭の１文字だけを大文字にする。
       count: d.count.value,
       hasChild: (Number(d.count.value) > 1 ? true : false)
     };

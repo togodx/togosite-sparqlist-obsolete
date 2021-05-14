@@ -134,7 +134,9 @@ WHERE{
     if (mode == "idList") return filteredData.map(d=>d[idVarName].value.replace(idPrefix, ""));
   }
   // 仮想階層制御
+  if (withoutTarget.results.bindings[0].count.value != 0) {                        //不正pdb-idで0を返さない修正
   withTarget.results.bindings.unshift( {count: {value: withoutTarget.results.bindings[0].count.value}, target_num: {value: "0"}}  ); // カウント 0 を追加
+  };
   const limit_1 = 20;
   const limit_2 = 100;
   const bin_2 = 10;

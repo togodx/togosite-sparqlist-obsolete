@@ -48,13 +48,13 @@ PREFIX taxon: <http://identifiers.org/taxonomy/>
 PREFIX identifiers: <http://identifiers.org/>
 PREFIX faldo: <http://biohackathon.org/resource/faldo#>
 PREFIX refexo: <http://purl.jp/bio/01/refexo#>
+PREFIX schema: <http://schema.org/>
 
 SELECT DISTINCT *
-#?ensg_id ?ncbigene_id ?hgnc_id ?type_label ?desc ?location ?gene_symbol (GROUP_CONCAT(DISTINCT ?uniprot_id; separator=",") AS ?uniprots) (GROUP_CONCAT(DISTINCT ?enst_id; separator=",") AS ?ensts)
 WHERE {
   {{#if idDict.ensg}}
     {
-      SELECT ?ensg ?ensg_id ?gene_symbol ?desc ?location (GROUP_CONCAT(DISTINCT ?tissue_label; separator=",") AS ?tissue_labels)
+      SELECT ?ensg ?ensg_id ?gene_symbol ?desc ?location (GROUP_CONCAT(DISTINCT ?tissue_label; separator=", ") AS ?tissue_labels)
       WHERE {
         VALUES ?ensg { ensembl:{{idDict.ensg}} }
         BIND(STRAFTER(STR(?ensg), "http://identifiers.org/ensembl/") AS ?ensg_id)
@@ -69,20 +69,29 @@ WHERE {
           BIND(STRAFTER(STR(?type), "http://rdf.ebi.ac.uk/terms/ensembl/") as ?type_label)
           ?loc rdfs:label ?location .
         }
-        GRAPH <http://rdf.integbio.jp/dataset/togosite/refex_tissue_specific_genes_gtex_v6> {
-          ?ensg refexo:isPositivelySpecificTo ?tissue .
-        }
-        {
-          GRAPH <http://rdf.integbio.jp/dataset/togosite/efo> {
-            ?tissue rdfs:label ?tissue_label .
+        OPTIONAL {
+          GRAPH <http://rdf.integbio.jp/dataset/togosite/refex_tissue_specific_genes_gtex_v6> {
+            ?ensg refexo:isPositivelySpecificTo ?tissue .
+          }
+          GRAPH <http://rdf.integbio.jp/dataset/togosite/refexsample_gtex_v8_summary> {
+            ?refexs schema:additionalProperty ?b1 .
+            VALUES ?name {"cell type" "tissue"}
+            ?b1 schema:name ?name ;
+                schema:value ?tissue_label ;
+                schema:valueReference ?tissue .
           }
         }
-        UNION
-        {
-          GRAPH <http://rdf.integbio.jp/dataset/togosite/uberon> {
-            ?tissue rdfs:label ?tissue_label .
-          }
-        }
+#        {
+#          GRAPH <http://rdf.integbio.jp/dataset/togosite/efo> {
+#            ?tissue rdfs:label ?tissue_label .
+#          }
+#        }
+#        UNION
+#        {
+#          GRAPH <http://rdf.integbio.jp/dataset/togosite/uberon> {
+#            ?tissue rdfs:label ?tissue_label .
+#          }
+#        }
       }
     }
   {{/if}}
@@ -133,7 +142,7 @@ WHERE {
     { "Gene symbol": "gene_symbol" },
     { "Description": "desc" },
     { "Location": "location" },
-    { "Tissue": "tissue_labels"}
+    { "Tissue specificity": "tissue_labels"}
   ];
   return array;
 }
@@ -156,6 +165,9 @@ WHERE {
       for (const [key, node] of Object.entries(elem)) {
         if (node) {
           obj[key] = node.value;
+          if (key == "Tissue specificity" && obj[key] == "") {
+            obj[key] = "(Low tissue specificity)";
+          }
         }
         return obj;
       };

@@ -110,13 +110,14 @@ SELECT DISTINCT COUNT(?PDBentry) AS ?count_Num
                                                         //total_countのSPARQLから出てきた数値を"total"に代入
    let non_poly_value = non_poly.results.bindings.map(e=>Number(e.count.value));
    let sum_limit = non_poly_value.reduce((prev,current)=> prev+current,0);   
-                                                     //non_polyのSPARQLでlimit100で取得したCount値の合計を計算     
+                                                     //non_polyのSPARQLでlimit100で取得したCount値の合計を計算
+   if (total != 0) {
    let non_poly_array = non_poly.results.bindings;  //non_polyの結果を配列に入れて最後に"Other"要素を加える
    non_poly_array.push({"nonpoly_name": {"type": "literal","value": "_other"},
                "nonpoly_str":  {"type": "literal","value": "_other" },
                "nonpoly_compId": { "type": "literal", "value": "_other" },
       "count": {"type": "typed-literal","datatype": "http://www.w3.org/2001/XMLSchema#integer","value": total-sum_limit }});
-
+   };
    //return [total, non_poly_value, sum_limit];
   
    if (mode == "objectList") return non_poly.results.bindings.map(d=>{ 
@@ -124,7 +125,7 @@ SELECT DISTINCT COUNT(?PDBentry) AS ?count_Num
        id: d.PDBentry.value.replace("https://rdf.wwpdb.org/pdb/", ""), 
        attribute: {
        categoryId: d.nonpoly_str.value, 
-       label: makeLabel(d.nonpoly_name.value, d.nonpoly_compId.value) 
+       label: capitalize(makeLabel(d.nonpoly_name.value, d.nonpoly_compId.value))
                   }
        };
     });
@@ -132,7 +133,7 @@ SELECT DISTINCT COUNT(?PDBentry) AS ?count_Num
    return non_poly.results.bindings.map(d=>{
      return {
        categoryId: d.nonpoly_str.value, 
-       label: makeLabel(d.nonpoly_name.value, d.nonpoly_compId.value), 
+       label: capitalize(makeLabel(d.nonpoly_name.value, d.nonpoly_compId.value)),
        count: Number(d.count.value)
        };
    });
@@ -143,6 +144,9 @@ SELECT DISTINCT COUNT(?PDBentry) AS ?count_Num
     }  else {
       return name;
     }
+  }
+  function capitalize(s) {
+    return s.charAt(0).toUpperCase() + s.substring(1).toLowerCase();
   }
 }
 ```

@@ -5,9 +5,10 @@
   - 三橋、高月、仲里、藤原
  
  ## testURL
-  - [default](http://ep6.dbcls.jp/togoid/sparqlist/api/disease_hpo_filter?categoryIds=0000118&queryIds=&mode=)
-  - [catgoryId+queryId+idList](http://ep6.dbcls.jp/togoid/sparqlist/api/disease_hpo_filter?categoryIds=0000118%2C0000707&queryIds=0003418%2C0002027%2C0001945&mode=idList)
-  - [catgoryId+queryId+objectList](http://ep6.dbcls.jp/togoid/sparqlist/api/disease_hpo_filter?categoryIds=0000118%2C0000707&queryIds=0003418%2C0002027%2C0001945&mode=objectList)
+  - [default](https://integbio.jp/togosite/sparqlist/api/disease_hpo_filter?categoryIds=0000118&queryIds=&mode=)
+  - [catgoryId+queryId+idList](https://integbio.jp/togosite/sparqlist/api/disease_hpo_filter?categoryIds=0000118%2C0000707&queryIds=0003418%2C0002027%2C0001945&mode=idList)
+  - [catgoryId+queryId+objectList](https://integbio.jp/togosite/sparqlist/api/disease_hpo_filter?categoryIds=0000118%2C0000707&queryIds=0003418%2C0002027%2C0001945&mode=objectList)
+  - [catgoryId+queryId(存在しないaaaa)+idList](https://integbio.jp/togosite/sparqlist/api/disease_hpo_filter?categoryIds=0000118%2C0000707&queryIds=aaaa&mode=idList)→検索結果がないことを確認
 
 ## Parameters
 
@@ -54,6 +55,7 @@ https://integbio.jp/togosite/sparql
 PREFIX dct: <http://purl.org/dc/terms/>
 PREFIX hpo: <http://purl.obolibrary.org/obo/>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
 {{#if mode}}
 SELECT DISTINCT ?hp ?category ?label
 {{else}}
@@ -81,7 +83,7 @@ WHERE {
   ?category rdfs:label ?label.
   ?hp rdfs:subClassOf* ?category.
 {{#if is_rewrite_optional }}
-  ?hp rdfs:label ?_hp_label.  # ?hp rdfs:subClassOf* ?category が?hpの値に関係なく、trueになってしまうため追加。次のOPTIONALも同じ意図だがこちらの方が軽いはず。
+  ?hp rdf:type owl:Class.  # ?hp rdfs:subClassOf* ?category が?hpの値に関係なく、trueになってしまうため追加。次のOPTIONALも同じ意図だがこちらの方が軽いはず。
 {{else}}
   OPTIONAL { ?child_category rdfs:subClassOf ?category . }  
 {{/if}}

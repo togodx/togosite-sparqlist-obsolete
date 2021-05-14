@@ -77,7 +77,7 @@ WHERE {
 ## `return`
 
 ```javascript
-({uniprotAll, hasAssay, categoryIds, mode})=>{
+({uniprotAll, hasAssay, queryIds, categoryIds, mode})=>{
   const idVarName = "uniprot";
   const idPrefix = "http://purl.uniprot.org/uniprot/";
   const withId = "1";
@@ -127,9 +127,21 @@ WHERE {
       
   var countHasAssay = hasAssay.results.bindings[0].count.value;
   var countRemain = uniprotAll.results.bindings[0].count.value; - countHasAssay;
-  return [
-    {categoryId: withId, label: withLabel, count: Number(countHasAssay)},
-  	{categoryId: withoutId, label: withoutLabel, count: Number(countRemain)}
-  ];
+  let obj = [];
+  if (!queryIds || Number(countHasAssay) != 0) {
+    obj.push({
+      categoryId: withId, 
+      label: withLabel, 
+      count: Number(countHasAssay)
+    });
+  }
+  if (!queryIds || Number(countRemain) != 0) {
+    obj.push({
+      categoryId: withoutId, 
+      label: withoutLabel, 
+      count: Number(countRemain)
+    });
+  }
+  return obj;
 };	
 ```

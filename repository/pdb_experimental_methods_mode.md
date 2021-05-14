@@ -78,7 +78,7 @@ order by DESC(?count)
                 id: d.PDBentry.value.replace("https://rdf.wwpdb.org/pdb/", ""), 
                 attribute: {
                             categoryId: d.methods_id.value, 
-                            label: d.methods.value
+                            label: capitalize(d.methods.value)
                             }
                 };
               });
@@ -86,9 +86,19 @@ order by DESC(?count)
    return count_methods.results.bindings.map(d=>{
      return {
        categoryId: d.methods_id.value, 
-       label: d.methods.value, 
+       label: capitalize(d.methods.value),
        count: Number(d.count.value)
        };
    });	  
+  function capitalize(label) {
+    const s = label.split(' ').map((word) => {
+      if (word === 'NMR' || word === 'EPR') {
+        return word;
+      } else {
+        return word.toLowerCase();
+      }
+    }).join(' ');
+    return s.charAt(0).toUpperCase() + s.substring(1);
+  }
 }
 ```

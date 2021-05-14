@@ -42,7 +42,7 @@ category ID を配列に分割
 
 ## Endpoint
 
-https://integbio.jp/rdf/mirror/bioportal/sparql
+https://integbio.jp/rdf/bioportal/sparql
 
 ## `data`
 - categoryIds があった場合に絞り込み

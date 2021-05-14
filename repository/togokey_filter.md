@@ -7,7 +7,7 @@
 * `properties`
   * default: [{"propertyId": "refex_specific_high_expression", "categoryIds": ["v32_40", "v25_40"]}, {"propertyId": "uniprot_keywords_cellular_component","categoryIds": ["472"]}, {"propertyId": "uniprot_pdb_existence", "categoryIds": ["1"]}, {"propertyId": "uniprot_chembl_assay_existence", "categoryIds": ["1"]}]
 * `inputIds` Uploaded user IDs
-  * default: ["1193","13940","13557","15586","16605","4942","5344","6148", "6265","6344","6677","6735","10593","10718","10876"]
+  * example: ["1193","13940","13557","15586","16605","4942","5344","6148", "6265","6344","6677","6735","10593","10718","10876"]
   
 ## `primaryIds`
 ```javascript
@@ -44,6 +44,7 @@ async ({togoKey, properties, inputIds})=>{
   if (inputIds) {
       togoIdArray = JSON.parse(inputIds);
   }
+  
   let queryProperties = JSON.parse(properties);
   let queryPropertyIds = queryProperties.map(d => d.propertyId);
   // togosite.config.json で上から
@@ -85,6 +86,7 @@ async ({togoKey, properties, inputIds})=>{
       }
     }
   }
+
   return togoIdArray;
 }
 ```
