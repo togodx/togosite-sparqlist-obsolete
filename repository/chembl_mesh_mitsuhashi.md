@@ -43,7 +43,7 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX meshv: <http://id.nlm.nih.gov/mesh/vocab#>
 PREFIX tree: <http://id.nlm.nih.gov/mesh/>
 #SELECT DISTINCT ?mesh ?tree ?label (SAMPLE(?child_tree) AS ?child)
-SELECT ?category ?label (IF(COUNT (DISTINCT ?mondo) > 1, TRUE, FALSE) AS ?child) 
+SELECT ?mesh ?label (IF(COUNT (DISTINCT ?mondo) > 1, TRUE, FALSE) AS ?child) 
 FROM <http://rdf.integbio.jp/dataset/togosite/mesh>
 WHERE {
 {{#if top}}
