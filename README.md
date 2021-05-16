@@ -50,3 +50,17 @@ sparqlist20210322_sparqlist_1   docker-entrypoint.sh /bin/ ...   Up      0.0.0.0
   </body>
 </html>
 ```
+
+## scheduled backup and service availability monitoring
+
+See the cron jobs below.
+```
+[mitsuhashi@smp05 sparqlist20210322]$ cat /etc/cron.d/sparqlist-for-togosite
+# scheduled rsync backup to NAS
+0 3 * * * root /ssd/togosite/scripts/sparqlist-togosite-integbio.jp-backup > /dev/null
+# scheduled git push
+0 2 * * * root /ssd/togosite/scripts/sparqlist-togosite-integbio.jp-github-push > /dev/null
+# service availability monitoring
+*/5 * * * * root /ssd/togosite/scripts/sparqlist-togosite-integbio.jp-monitor > /dev/null
+[mitsuhashi@smp05 sparqlist20210322]$
+```
