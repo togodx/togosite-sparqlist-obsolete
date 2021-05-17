@@ -49,6 +49,8 @@ PREFIX identifiers: <http://identifiers.org/>
 PREFIX faldo: <http://biohackathon.org/resource/faldo#>
 PREFIX refexo: <http://purl.jp/bio/01/refexo#>
 PREFIX schema: <http://schema.org/>
+PREFIX nuc: <http://ddbj.nig.ac.jp/ontologies/nucleotide/>
+PREFIX hop: <http://purl.org/net/orthordf/hOP/ontology#>
 
 SELECT DISTINCT *
 WHERE {
@@ -97,12 +99,42 @@ WHERE {
   {{/if}}
   {{#if idDict.ncbigene}}
     {
-      SELECT *
+      SELECT ?ncbigene ?ncbigene_id ?desc ?location ?gene_symbol ?type_of_gene
+                       (GROUP_CONCAT(DISTINCT ?others; separator=", ") AS ?other_names)
+                       (GROUP_CONCAT(DISTINCT ?tissue_label; separator=", ") AS ?tissue_labels)
+                       (GROUP_CONCAT(DISTINCT ?synonym; separator=", ") AS ?synonyms)
       WHERE {
         VALUES ?ncbigene { ncbigene:{{idDict.ncbigene}} }
-        BIND(STRAFTER(STR(?ncbigene), "http://identifiers.org/ncbigene/") AS ?ncbigene_id)
-        GRAPH <> {
-          ?ncbigene ?p ?o .
+        GRAPH <http://rdf.integbio.jp/dataset/togosite/homo_sapiens_gene_info> {
+          ?ncbigene dct:description ?desc ;
+                    dct:identifier ?ncbigene_id ;
+                    hop:typeOfGene ?type_of_gene ;
+                    nuc:chromosome ?chromosome ;
+                    nuc:map ?location .
+          OPTIONAL {
+            ?ncbigene nuc:standard_name ?gene_symbol .
+          }
+          OPTIONAL {
+            ?ncbigene nuc:gene_synonym ?synonym .
+            }
+          OPTIONAL {
+            ?ncbigene dct:alternative ?others .
+          }
+        }
+        OPTIONAL {
+          GRAPH <http://rdf.integbio.jp/dataset/togosite/refex_id_relation_human> {
+            VALUES ?p { refexo:affyProbeset refexo:refseq }
+            ?ncbigene ?p ?gene .
+          }
+          VALUES ?graph { <http://rdf.integbio.jp/dataset/togosite/refex_tissue_specific_rnaseq_human_PRJEB2445>
+                          <http://rdf.integbio.jp/dataset/togosite/refex_tissue_specific_genechip_human_GSE7307> }
+          GRAPH ?graph {
+            ?gene refexo:isPositivelySpecificTo ?tissue .
+          }
+          GRAPH <http://rdf.integbio.jp/dataset/togosite/refexo> {
+            ?tissue rdfs:label ?tissue_label .
+            FILTER(lang(?tissue_label) = 'en')
+          }
         }
       }
     }
@@ -142,7 +174,10 @@ WHERE {
     { "Gene symbol": "gene_symbol" },
     { "Description": "desc" },
     { "Location": "location" },
-    { "Tissue specificity": "tissue_labels"}
+    { "Tissue specificity": "tissue_labels"},
+    { "Synonym": "synonyms" },
+    { "Type": "type_of_gene" },
+    { "Others": "other_names" }
   ];
   return array;
 }

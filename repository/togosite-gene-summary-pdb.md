@@ -69,11 +69,13 @@ WHERE {
      ?polypeptide rdfs:seeAlso ?uniprot_link . #DNAのentryを排除
      }}
      
-     ?PDBentry    pdbo:has_entityCategory/pdbo:has_entity ?entity_each .
-     ?entity_each pdbo:referenced_by_struct_ref/pdbo:link_to_uniprot ?id_uniprot .
-      {{#if gene_list_uniprot}} filter CONTAINS (STR(?id_uniprot), ?uniprot) {{/if}}
-     ?entity_each pdbo:entity.pdbx_description ?description .
-     BIND(CONCAT((?description),"> ", STR(?id_uniprot)) AS ?protein_andLink)
+     OPTIONAL {
+       ?PDBentry    pdbo:has_entityCategory/pdbo:has_entity ?entity_each .
+       ?entity_each pdbo:referenced_by_struct_ref/pdbo:link_to_uniprot ?id_uniprot .
+        {{#if gene_list_uniprot}} filter CONTAINS (STR(?id_uniprot), ?uniprot) {{/if}}
+       ?entity_each pdbo:entity.pdbx_description ?description .
+       BIND(CONCAT((?description),"> ", STR(?id_uniprot)) AS ?protein_andLink)
+     }
      BIND(REPLACE(STR(?PDBentry), pdbr:, "") AS ?id)
     }
 ```

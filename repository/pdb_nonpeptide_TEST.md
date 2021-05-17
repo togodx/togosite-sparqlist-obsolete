@@ -1,4 +1,4 @@
-# PDBエントリに含まれる非タンパク質で分類(ヒトのみ)（井手）
+# PDBエントリに含まれる非タンパク質で分類(ヒトのみ)（井手） Capital編集用TEST 210517
 
 ## Parameters
 
@@ -125,7 +125,7 @@ SELECT DISTINCT COUNT(?PDBentry) AS ?count_Num
        id: d.PDBentry.value.replace("https://rdf.wwpdb.org/pdb/", ""), 
        attribute: {
        categoryId: d.nonpoly_str.value, 
-       label: makeLabel(capitalize(d.nonpoly_name.value), d.nonpoly_compId.value)
+       label: makeLabel(calitalize(d.nonpoly_name.value), d.nonpoly_compId.value)
                   }
        };
     });
