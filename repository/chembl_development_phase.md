@@ -32,7 +32,7 @@
 
 ## Endpoint
 
-https://integbio.jp/rdf/ebi/sparql
+https://integbio.jp/togosite/sparql
 
 ## `count_development_phase`
 - SPARQL

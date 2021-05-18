@@ -142,15 +142,14 @@ WHERE {
   {{/if}}
   {{#if idDict.hgnc}}
     {
-      SELECT ?hgnc ?hgnc_id ?gene_symbol ?desc ?loc ?pubmed
+      SELECT ?hgnc ?hgnc_id ?gene_symbol ?desc ?location
       WHERE {
         VALUES ?hgnc { hgnc:{{idDict.hgnc}} }
         GRAPH <http://rdf.integbio.jp/dataset/togosite/hgnc> {
           ?hgnc dct:identifier ?hgnc_id ;
                 rdfs:label ?gene_symbol ;
                 dct:description ?desc ;
-                dct:references ?pubmed ;
-                obo:so_part_of ?loc .
+                obo:so_part_of ?location .
         }
       }
     }

@@ -35,7 +35,7 @@
 
 ## Endpoint
 
-https://integbio.jp/rdf/ebi/sparql
+https://integbio.jp/togosite/sparql
 
 ## `count_substance_type`
 - SPARQL

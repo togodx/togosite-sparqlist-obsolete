@@ -126,7 +126,7 @@ WHERE {
   }
       
   var countHasAssay = hasAssay.results.bindings[0].count.value;
-  var countRemain = uniprotAll.results.bindings[0].count.value; - countHasAssay;
+  var countRemain = uniprotAll.results.bindings[0].count.value - countHasAssay;
   let obj = [];
   if (!queryIds || Number(countHasAssay) != 0) {
     obj.push({

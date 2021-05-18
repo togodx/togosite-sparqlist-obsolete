@@ -36,7 +36,7 @@
 
 ## Endpoint
 
-https://integbio.jp/rdf/ebi/sparql
+https://integbio.jp/togosite/sparql
 
 ## `query_mechanism_action_type`
 
@@ -79,7 +79,7 @@ order by desc (?count)
         id: d.chembl_id.value,
         attribute: {
           categoryId: parseInt(idStrs[0]),
-          label: idStrs[1]
+          label: capitalize(idStrs[1])
         }
       };
     });
@@ -88,10 +88,20 @@ order by desc (?count)
       var idStrs = d.mec_id.value.split(":");
       return {
         categoryId: parseInt(idStrs[0]),
-        label: idStrs[1],
+        label: capitalize(idStrs[1]),
         count: Number(d.count.value)
       };
     });
+  }
+  function capitalize(label) {
+    const s = label.split(' ').map((word) => {
+      if (word === 'RNAI') {
+        return 'RNAi';
+      } else {
+        return word.toLowerCase();
+      }
+    }).join(' ');
+    return s.charAt(0).toUpperCase() + s.substring(1);
   }
 }
 ```

@@ -63,6 +63,11 @@ WHERE {
   {{#if gene_list}}
     VALUES ?ensg { {{#each gene_list}} ensg:{{this}} {{/each}} }
   {{else}}
+    SELECT DISTINCT ?ensg ?description ?type ?description_label
+    {{#if mode}}
+      ?id ?gene_name ?gene_symbol
+    {{/if}}
+    WHERE {
     ?enst obo:SO_transcribed_from ?ensg .
   {{/if}}
   ?ensg a ?type ;
@@ -79,6 +84,9 @@ WHERE {
     VALUES ?description_query { {{#each category_list}} "{{this}}" {{/each}} } 
     FILTER (?description IN (?description_query))
   {{/if}}
+  {{#unless gene_list}}
+    }
+  {{/unless}}
 }
 ORDER BY DESC(?count)
                    
@@ -88,23 +96,29 @@ ORDER BY DESC(?count)
 
 ```javascript
 ({mode, main }) => {
-  if (mode == "objectList") return main.results.bindings.map(d=>{ 
-    return {
-      id: d.id.value, 
+  if (mode == "objectList") {
+    return main.results.bindings.map(d=>{ 
+      return {
+        id: d.id.value, 
         attribute: {
-             categoryId: d.description.value,
-             uri: d.des.value, 
-             label: d.description_label.value
-                   }
-                };
-              });
-  if (mode == "idList") return Array.from(new Set(main.results.bindings.map(d=>d.id.value.replace("https://rdf.wwpdb.org/pdb/", "")))); // unique 
-  return main.results.bindings.map(d=>{ 
-     return {
-       categoryId: d.description.value, 
-       label: d.description_label.value, 
-       count: Number(d.count.value)
-       };
-   });	
+          categoryId: d.description.value,
+          uri: d.type.value, 
+          label: d.description_label.value
+        }
+      };
+    });
+  }
+  if (mode == "idList") {
+    return Array.from(new Set(main.results.bindings.map(d=>d.id.value))); // unique
+  }
+  else {
+    return main.results.bindings.map(d=>{ 
+      return {
+        categoryId: d.description.value, 
+        label: d.description_label.value, 
+        count: Number(d.count.value)
+      };
+    });
+  }	
 };
 ```
