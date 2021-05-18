@@ -146,16 +146,31 @@ BIND(CONCAT('<img src="',  ?pubchem_formula_fig,   '"/>') AS ?pubchem_formula_im
 ```
 
 ## `return`
-- 整形
 
 ```javascript 
- ({ main }) => {
-  return main.results.bindings.map((row) => {
-    var obj = {};
-    for (const [key, node] of Object.entries(row)) {
-      obj[key] = node.value;
-    }
-    return obj;
-   });
+({ main }) => {
+  let pubchem_info = main.results.bindings.map((elem) => ({
+    cid: elem.pubchem_id.value,
+    molecular_formula: elem.pubchem_molecular_formula.value,
+    label: elem.pubchem_label.value,
+    molecular_weight: elem.pubchem_molecular_weight.value,
+    smiles: elem.pubchem_smiles.value,
+    inchi: elem.pubchem_inchi.value,
+    formula_img: elem.pubchem_formula_img.value,
+      }));
+  let chembl_info = main.results.bindings.map((elem) => ({
+    chembl_id: elem.chembl_id.value,
+    molecular_formula: elem.chembl_molecular_formula.value,
+    type: elem.chembl_type.value,
+    label: elem.chembl_label.value,
+    molecular_weight: elem.chembl_molecular_weight.value,
+    smiles: elem.chembl_smiles.value,
+    inchi: elem.chembl_inchi.value,
+    formula_img: elem.chembl_formula_img.value,
+      }));
+  return {
+    pubchem_info: pubchem_info,
+    chembl_info: chembl_info,
+  };
 };
 ```

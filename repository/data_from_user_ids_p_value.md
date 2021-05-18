@@ -1,4 +1,4 @@
-# Data from user IDs - 内訳 SPARQList を user IDs でフィルタ (test)
+# Data from user IDs with p-value - 内訳 SPARQList を user IDs でフィルタ (test)
 
 * sparqlet: Property の API (properties.json の 'data')
 * primaryKey: Property で対象とするデータベース (properties.json の 'primaryKey')
