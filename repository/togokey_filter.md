@@ -40,7 +40,7 @@ async ({togoKey, properties, inputIds})=>{
   
   let start = Date.now(); // debug
   
-  let togoIdArray = [];
+  let togoIdArray = undefined;
   if (inputIds) {
       togoIdArray = JSON.parse(inputIds);
   }
@@ -77,12 +77,13 @@ async ({togoKey, properties, inputIds})=>{
         
         // set 'togoKey' Ids
         let tmpTogoIdArray = Array.from(new Set(idPair.map(d=>d.target_id))); // unique array
-        if (!togoIdArray.length) togoIdArray = tmpTogoIdArray; // first filtered list
+        if (togoIdArray === undefined) togoIdArray = tmpTogoIdArray; // first filtered list
         else {
           for (let togoId of togoIdArray) {
             if (!tmpTogoIdArray.includes(togoId)) togoIdArray = togoIdArray.filter(id => id !== togoId); // remove 'togoKey' ID from list
           }
         }
+        if (togoIdArray.length == 0) return [];
       }
     }
   }

@@ -43,7 +43,7 @@ category ID を配列に分割
 
 ## Endpoint
 
-https://integbio.jp/rdf/sparql
+https://integbio.jp/togosite/sparql
 
 ## `data`
 - categoryId があった場合に絞り込み
@@ -69,7 +69,7 @@ WHERE {
   VALUES ?parent { {{#each categoryArray}} nando:{{this}} {{/each}} }
   {{/if}}
 {{/if}}
- GRAPH <http://nanbyodata.jp/ontology/nando> { 
+ GRAPH <http://rdf.integbio.jp/dataset/togosite/nando> { 
  {{#unless  mode}}
     ?category rdfs:subClassOf ?parent.
  {{/unless}}

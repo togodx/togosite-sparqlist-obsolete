@@ -42,7 +42,7 @@ category ID を配列に分割
 
 ## Endpoint
 
-https://integbio.jp/rdf/bioportal/sparql
+https://integbio.jp/togosite/sparql
 
 ## `data`
 - categoryIds があった場合に絞り込み
@@ -59,7 +59,7 @@ PREFIX oboinowl: <http://www.geneontology.org/formats/oboInOwl#>
 {{else}}
 SELECT DISTINCT ?name (count (?name) AS ?count)
 {{/if}}       
-FROM <http://integbio.jp/rdf/mirror/bioportal/mondo>
+FROM <http://rdf.integbio.jp/dataset/togosite/mondo>
 WHERE {
 {{#if queryArray}}
   VALUES ?mondo { {{#each queryArray}} mondo:{{this}} {{/each}} }
@@ -68,12 +68,12 @@ WHERE {
   VALUES ?category { {{#each categoryArray}} "{{this}}" {{/each}} } 
   ?mondo oboinowl:hasDbXref ?id .
   FILTER(REGEX(?id,?category))
-  BIND (strbefore(?id, ":") AS ?name).
+  BIND (strbefore(str(?id), ":") AS ?name).
 {{else}}
    ?mondo oboinowl:hasDbXref ?id .
-   BIND (strbefore(?id, ":") AS ?name)  
+   BIND (strbefore(str(?id), ":") AS ?name)  
 {{/if}}
-   FILTER(!STRSTARTS(?id, "http"))
+   FILTER(!STRSTARTS(str(?id), "http"))
  }
 {{#if mode}}
 ORDER BY DESC(?mondo)

@@ -11,7 +11,7 @@
 
 ## Endpoint
 
-https://integbio.jp/rdf/sparql
+https://integbio.jp/togosite/sparql
 
 ## `input_ragne`
 ```javascript

@@ -2,11 +2,11 @@
 
 ## Endpoint
 
-https://integbio.jp/rdf/sparql
+https://integbio.jp/togosite/sparql
 
 ## Parameters
 
-* `categoryId` -(type:実験手法)
+* `categoryIds` -(type:実験手法)
   * example: X-RAY_DIFFRACTION, SOLUTION_NMR, ELECTRON_MICROSCOPY, NEUTRON_DIFFRACTION, ELECTRON_CRYSTALLOGRAPHY, SOLID-STATE_NMR, SOLUTION_SCATTERING, FIBER_DIFFRACTION, POWDER_DIFFRACTION, EPR, THEORETICAL_MODEL, INFRARED_SPECTROSCOPY, FLUORESCENCE_TRANSFER
 * `queryIds` -(type: PDB)
   * example: 6TIW,6E7C
@@ -24,11 +24,11 @@ https://integbio.jp/rdf/sparql
 ```
 
 ## `methods_list`
-- categoryId を配列に
+- categoryIds を配列に
 ```javascript
-({categoryId}) => {
-  categoryId = categoryId.replace(/,/g," ")
-  if (categoryId.match(/[^\s]/)) return categoryId.split(/\s+/);
+({categoryIds}) => {
+  categoryIds = categoryIds.replace(/,/g," ")
+  if (categoryIds.match(/[^\s]/)) return categoryIds.split(/\s+/);
   return false;
 }
 ```
@@ -77,7 +77,7 @@ order by DESC(?count)
                 return {
                 id: d.PDBentry.value.replace("https://rdf.wwpdb.org/pdb/", ""), 
                 attribute: {
-                            categoryId: d.methods_id.value, 
+                            categoryIds: d.methods_id.value, 
                             label: capitalize(d.methods.value)
                             }
                 };
@@ -85,7 +85,7 @@ order by DESC(?count)
   if (mode == "idList") return Array.from(new Set(count_methods.results.bindings.map(d=>d.PDBentry.value.replace("https://rdf.wwpdb.org/pdb/", "")))); // unique 
    return count_methods.results.bindings.map(d=>{
      return {
-       categoryId: d.methods_id.value, 
+       categoryIds: d.methods_id.value, 
        label: capitalize(d.methods.value),
        count: Number(d.count.value)
        };

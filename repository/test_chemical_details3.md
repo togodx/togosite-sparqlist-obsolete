@@ -1,10 +1,10 @@
-# (test3) pubchem, chemblのIDを入力して化合物の詳細情報を出す（信定・山本）
+# (test3) pubchem, chemblのIDを入力して化合物の詳細情報を出す（信定・山本・建石）
 
 ## Parameters
 
 * `id`
   * default:　2244
-  * example: 2244, 517068, 15987396, CHEMBL6939, CHEMBL1201330, 15414 (CHEBI), 17232 (CHEBI)
+  * example: 2244, 15987396, CHEMBL6939, CHEMBL1201330, 15414 (CHEBI), 17232 (CHEBI)
 * `type`
   * default: pubchem_compound
   * example: pubchem_compound, chembl_compound, chebi
@@ -112,7 +112,7 @@ prefix chebi: <http://purl.obolibrary.org/obo/chebi/>
 prefix chebi_id: <http://purl.obolibrary.org/obo/CHEBI_>
 
 SELECT
-{{#if togoidDict.pubchem_uri}} ?pubchem_molecular_formula, ?pubchem_id, ?pubchem_label, ?pubchem_molecular_weight, ?pubchem_smiles, ?pubchem_inchi, ?pubchem_formula_img {{/if}} {{#if togoidDict.chembl_uri}}, ?chembl_molecular_formula, ?chembl_id, ?chembl_type,  (GROUP_concat(?label_temp; separator = ", ") as ?chembl_label), ?chembl_molecular_weight, ?chembl_smiles,?chembl_inchi,  ?chembl_formula_img {{/if}} {{#if togoidDict.chebi_uri}}, ?chebi_molecular_formula,?chebi_id, (GROUP_concat(distinct ?chebi_altid; separator = ", ") as ?chebi_altid_list),?chebi_label,(GROUP_concat(distinct ?chebi_synonym; separator = ", ") as ?chebi_synonym_list),?chebi_mono_mass,?chebi_smiles,?chebi_inchi {{/if}}  
+{{#if togoidDict.pubchem_uri}} ?pubchem_molecular_formula ?pubchem_id ?pubchem_label ?pubchem_molecular_weight ?pubchem_smiles ?pubchem_inchi ?pubchem_formula_img {{/if}} {{#if togoidDict.chembl_uri}} ?chembl_molecular_formula ?chembl_id ?chembl_type  (GROUP_concat(distinct ucase(?label_temp); separator = ", ") as ?chembl_label) ?chembl_molecular_weight ?chembl_smiles ?chembl_inchi  ?chembl_formula_img {{/if}} {{#if togoidDict.chebi_uri}} ?chebi_molecular_formula ?chebi_id (GROUP_concat(distinct ?chebi_altid; separator = ", ") as ?chebi_altid_list) ?chebi_label (GROUP_concat(distinct ?chebi_synonym; separator = ", ") as ?chebi_synonym_list) ?chebi_mass ?chebi_smiles ?chebi_inchi  {{/if}}  
 FROM <http://rdf.integbio.jp/dataset/togosite/pubchem>
 FROM <http://rdf.integbio.jp/dataset/togosite/chembl>
 FROM <http://rdf.integbio.jp/dataset/togosite/chebi>
@@ -162,7 +162,7 @@ FROM <http://rdf.integbio.jp/dataset/togosite/chebi>
   optional{?chebi_uri oboinowl:hasExactSynonym ?synonym_temp . } 
   optional{ ?chebi_uri chebi:formula ?chebi_formula_temp . }
   optional{ ?chebi_uri chebi:inchi ?chebi_inchi_temp . } 
-  optional{ ?chebi_uri chebi:monoisotopicmass ?chebi_mono_mass_temp . }
+  optional{ ?chebi_uri chebi:mass ?chebi_mass_temp . }
   optional{ ?chebi_uri chebi:smiles ?chebi_smiles_temp . }
   optional{ ?chebi_uri iao:0000115 ?chebi_definition_temp . }
   optional{ ?chebi_uri oboinowl:hasAlternativeId ?chebi_altid_temp . } 
@@ -171,7 +171,7 @@ FROM <http://rdf.integbio.jp/dataset/togosite/chebi>
   BIND(IF(bound(?synonym_temp),?synonym_temp,"null") as ?chebi_synonym)
   BIND(IF(bound(?chebi_formula_temp), ?chebi_formula_temp,"null") AS ?chebi_molecular_formula) 
   BIND(IF(bound(?chebi_inchi_temp),?chebi_inchi_temp,"null") as ?chebi_inchi)  
-  BIND(IF(bound(?chebi_mono_mass_temp),?chebi_mono_mass_temp,"null") as ?chebi_mono_mass)   
+  BIND(IF(bound(?chebi_mass_temp),?chebi_mass_temp,"null") as ?chebi_mass)   
   BIND(IF(bound(?chebi_smiles_temp),?chebi_smiles_temp,"null") as ?chebi_smiles) 
   BIND(IF(bound(?chebi_definition_temp),?chebi_definition_temp,"null") as ?chebi_definition)
   BIND(IF(bound(?chebi_altid_temp),?chebi_altid_temp,"null") as ?chebi_altid) 
@@ -183,36 +183,45 @@ FROM <http://rdf.integbio.jp/dataset/togosite/chebi>
 ## `return`
 
 ```javascript 
-({ main }) => {
-  let pubchem_info = main.results.bindings.map((elem) => ({
-    cid: elem.pubchem_id.value,
-    molecular_formula: elem.pubchem_molecular_formula.value,
-    label: elem.pubchem_label.value,
-    molecular_weight: elem.pubchem_molecular_weight.value,
-    smiles: elem.pubchem_smiles.value,
-    inchi: elem.pubchem_inchi.value,
-    formula_img: elem.pubchem_formula_img.value,
+({ main, togoidDict }) => {
+  let pubchem_info = {}
+  if (togoidDict.pubchem_uri) {
+    pubchem_info = main.results.bindings.map((elem) => ({
+      cid: elem.pubchem_id.value,
+      molecular_formula: elem.pubchem_molecular_formula.value,
+      label: elem.pubchem_label.value,
+      molecular_weight: elem.pubchem_molecular_weight.value,
+      smiles: elem.pubchem_smiles.value,
+      inchi: elem.pubchem_inchi.value,
+      formula_img: elem.pubchem_formula_img.value,
       }));
-  let chembl_info = main.results.bindings.map((elem) => ({
-    chembl_id: elem.chembl_id.value,
-    molecular_formula: elem.chembl_molecular_formula.value,
-    type: elem.chembl_type.value,
-    label: elem.chembl_label.value,
-    molecular_weight: elem.chembl_molecular_weight.value,
-    smiles: elem.chembl_smiles.value,
-    inchi: elem.chembl_inchi.value,
-    formula_img: elem.chembl_formula_img.value,
+  }
+  let chembl_info = {}
+  if (togoidDict.chembl_uri) {
+    chembl_info = main.results.bindings.map((elem) => ({
+      chembl_id: elem.chembl_id.value,
+      molecular_formula: elem.chembl_molecular_formula.value,
+      type: elem.chembl_type.value,
+      label: elem.chembl_label.value,
+      molecular_weight: elem.chembl_molecular_weight.value,
+      smiles: elem.chembl_smiles.value,
+      inchi: elem.chembl_inchi.value,
+      formula_img: elem.chembl_formula_img.value,
       }));
-  let chebi_info = main.results.bindings.map((elem) => ({
+  }
+  let chebi_info = {}
+  if (togoidDict.chebi_uri) {
+    chebi_info = main.results.bindings.map((elem) => ({ 
       chebi_id: elem.chebi_id.value,
-      chebi_secondary_id: elem.chebi_altid_list.value,
+      chebi_alt_id: elem.chebi_altid_list.value,
       molecular_formula: elem.chebi_molecular_formula.value,
       label: elem.chebi_label.value,
       synonym: elem.chebi_synonym_list.value,
-      monoisotopic_mass: elem.chebi_mono_mass.value,
+      mass: elem.chebi_mass.value,
       smiles: elem.chebi_smiles.value,
       inchi: elem.chebi_inchi.value,
       }));
+  }
   return {
     pubchem_info: pubchem_info,
     chembl_info: chembl_info,

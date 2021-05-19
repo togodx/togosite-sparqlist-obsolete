@@ -31,29 +31,29 @@ async ({sparqlet, ids, source, target, limit})=>{
       }
     }
     if (body) options.body = body;
+    console.log(url);
+    console.log(body);
     return await fetch(url, options).then(res=>res.json());
   }
-/*  let gunzip = await fetch("https://raw.githubusercontent.com/imaya/zlib.js/develop/bin/gunzip.min.js", {method: "get"}).then(res=>res.text());
-  eval(gunzip);
-  let gunzipIds = new Zlib.Gunzip(ids);
-  ids = gunzipIds.decompress(); */
   
   ids = ids.replace(/,/g, " ");
   if (ids.match(/[^\s]/)) {
     let query_array = ids.split(/\s+/);
-    let res;
+    let res = undefined;
     let query_array_tmp = [];
-    let flag = true;
+    let idListMode = true; // true: idList or objectList mode, false: mode undefined
     for (let i = 0; i < query_array.length; i++){
       query_array_tmp.push(query_array[i]);
       if (query_array_tmp.length == limit || i == query_array.length - 1) {
         let body = "source=" + source + "&target=" + target + "&ids=" + query_array_tmp.join(",");
         let json = await fetchReq(sparqlet, body);
-	    if (!res) {
-          res = json;
-          if (res[0].id) flag = false;
-	    } else {
-          if (flag) res = res.concat(json);
+	    if (res === undefined) { // first concat
+          if (json[0]) { // empty check
+            res = json;
+            if (res[0].id) idListMode = false; // mode check
+          }
+	    } else { // 2nd or later concat
+          if (idListMode) res = res.concat(json); // List mode
           else {
             let plus = {};
             for (let d of json) {
