@@ -15,7 +15,7 @@
 
 ```javascript
 async ({queryIds, categoryIds, mode})=>{
-  let url = "https://integbio.jp/togosite/sparqlist/api/uniprot_keywords"; // localhost:port を叩けると早い
+  let url = "https://integbio.jp/togosite/sparqlist/api/uniprot_keywords_wo"; // localhost:port を叩けると早い
   let options = {
     method: 'POST',
     body	: "categoryIds=" + categoryIds + "&queryIds=" + encodeURIComponent(queryIds) + "&mode=" + mode,

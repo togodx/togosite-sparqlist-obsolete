@@ -18,15 +18,26 @@ https://integbio.jp/togosite/sparql
 ```javascript
 ({id, type}) => {
   var obj = {};
+  id=id.trim()
   switch (type) {
     case 'pubchem_compound':
-      obj.pubchem = id;
+      var regex = /^\d+$/;
+      if (regex.test(id)) {
+      	obj.pubchem = id;
+      }
       break;
     case 'chembl_compound':
-      obj.chembl = id;
+      var regex = /CHEMBL\d+/;
+      if (regex.test(id)) {
+      	obj.chembl = id;
+      }
+      
       break;
     case 'chebi':
-      obj.chebi = id;
+      var regex = /^\d+$/;
+      if (regex.test(id)) {
+      	obj.chebi = id;
+      }
       break;
   }
   return obj;

@@ -183,11 +183,19 @@ FROM <http://rdf.integbio.jp/dataset/togosite/chebi>
 ## `return`
 
 ```javascript 
-({ main, togoidDict }) => {
-  let pubchem_info = {}
-  if (togoidDict.pubchem_uri) {
-    pubchem_info = main.results.bindings.map((elem) => ({
-      cid: elem.pubchem_id.value,
+ ( { main, togoidDict }) => {
+   let pubchem_info = {}
+  let chembl_ID = main.results.bindings.chembl_id
+  let chebi_ID = main.results.bindings.chembl_id
+    if ({chembl_ID} === undefined){
+      chembl_ID = null}
+  if ({chebi_ID} === undefined){
+      chebi_ID = null}
+   if (togoidDict.pubchem_uri) {
+   pubchem_info = main.results.bindings.map((elem) => ({
+      pubchem_cid: elem.pubchem_id.value,
+      chembl_id: chembl_ID,
+      chebi_id: chebi_ID,
       molecular_formula: elem.pubchem_molecular_formula.value,
       label: elem.pubchem_label.value,
       molecular_weight: elem.pubchem_molecular_weight.value,
@@ -195,7 +203,7 @@ FROM <http://rdf.integbio.jp/dataset/togosite/chebi>
       inchi: elem.pubchem_inchi.value,
       formula_img: elem.pubchem_formula_img.value,
       }));
-  }
+    }
   let chembl_info = {}
   if (togoidDict.chembl_uri) {
     chembl_info = main.results.bindings.map((elem) => ({

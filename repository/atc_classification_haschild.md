@@ -121,7 +121,7 @@ WHERE {
         attribute: {
           categoryId: d.category.value.replace(categoryPrefix, ""), 
           uri: d.category.value,
-          label : d.label.value
+          label : capitalize(d.label.value)
         }
       }
     });
@@ -134,11 +134,14 @@ WHERE {
     return data.results.bindings.map(d=>{
       return {
         categoryId: d.category.value.replace(categoryPrefix, ""), 
-        label: d.label.value,
+        label: capitalize(d.label.value),
         count: Number(d.count.value),
         hasChild: Boolean(d.child)
       };
     });
-  }  
+  }
+  function capitalize(str) {
+    return str.charAt(0).toUpperCase() + str.substring(1);
+  }
 }
 ```
