@@ -173,7 +173,7 @@ WHERE {
 ({mode, category_array, withAnnotation, withoutAnnotation, without_id})=>{
   if (!category_array) withAnnotation.results.bindings = [];
   let data = withAnnotation.results.bindings;
-  if (without_id) data.concat(withoutAnnotation.results.bindings)
+  if (without_id) data = data.concat(withoutAnnotation.results.bindings)
   const idPrfix = "http://purl.uniprot.org/uniprot/";
   const categoryPrefix = "http://purl.uniprot.org/keywords/";
   if (mode == "objectList") return data.map(d=>{

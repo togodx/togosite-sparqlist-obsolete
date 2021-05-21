@@ -106,9 +106,10 @@ SELECT ?category ?label (COUNT (DISTINCT ?uniprot) AS ?count)
 FROM <http://rdf.integbio.jp/dataset/togosite/uniprot>
 FROM <http://rdf.integbio.jp/dataset/togosite/go>
 WHERE {
-{{#if queryArray}}
+{{#if categoryArray}}
+  {{#if queryArray}}
   VALUES ?uniprot { {{#each queryArray}} uniprot:{{this}} {{/each}} }
-{{/if}}
+  {{/if}}
   VALUES ?category { {{#each targetGoArray}} obo:{{this}} {{/each}} }
   ?uniprot a up:Protein ;
            up:organism taxon:9606 ;
@@ -116,12 +117,11 @@ WHERE {
   FILTER(REGEX(STR(?proteome), "UP000005640"))
   ?uniprot up:classifiedWith/rdfs:subClassOf* ?category .
   ?category rdfs:label ?label .
-{{#if mode}}
-}
-{{else}}
-}
-ORDER BY DESC(?count)
 {{/if}}
+}
+{{#unless mode}}
+ORDER BY DESC(?count)
+{{/unless}}
 ```
 
 - あるGOカテゴリを持たないUniProtを１つのSPARQLで取ろうとするとメモリオーバーするので変則的
@@ -157,27 +157,42 @@ PREFIX obo: <http://purl.obolibrary.org/obo/>
 PREFIX uniprot: <http://purl.uniprot.org/uniprot/>
 SELECT DISTINCT ?uniprot
 FROM <http://rdf.integbio.jp/dataset/togosite/uniprot>
-FROM <http://rdf.integbio.jp/dataset/togosite/go>
 WHERE {
 {{#if withoutId}}
+  {
+    SELECT DISTINCT ?go
+    FROM <http://rdf.integbio.jp/dataset/togosite/go>
+    WHERE {
+      ?go rdfs:subClassOf+ obo:{{withoutId}} .
+    }
+  }
   ?uniprot a up:Protein ;
            up:organism taxon:9606 ;
-           up:proteome ?proteome ;
-           up:classifiedWith/rdfs:subClassOf+ obo:{{withoutId}} .
+           up:proteome ?proteome .
   FILTER(REGEX(STR(?proteome), "UP000005640"))
+  ?uniprot up:classifiedWith ?go .
 {{/if}}
 }
 ```
 
 ## `withoutAnnotation`
 ```javascript
-({mode, allUniProt, withGoUniProt, withoutId}) => {
+({mode, queryArray, allUniProt, withGoUniProt, withoutId}) => {
   if (!withoutId) return {results: {bindings: []}};
-  let withGoArray = withGoUniProt.results.bindings.map(d => d.uniprot.value);
+  let withGo = {};
+  for (let d of withGoUniProt.results.bindings) {
+    withGo[d.uniprot.value] = true;
+  }
+  let query = {};
+  if (queryArray) {
+    for (let d of queryArray) {
+      query["http://purl.uniprot.org/uniprot/" + d] = true;
+    }
+  }
   let bindings = [];
   if (mode == "objectList") {
     for (let d of allUniProt.results.bindings) {
-      if (!withGoArray.includes(d.uniprot.value)) {
+      if (!withGo[d.uniprot.value] && (!queryArray || (queryArray && query[d.uniprot.value]))) {
         bindings.push({
           uniprot: {value: d.uniprot.value},
           category: {value: "wo_" + withoutId},
@@ -188,34 +203,31 @@ WHERE {
     return {results: {bindings: bindings}};
   }
   for (let d of allUniProt.results.bindings) {
-    if (!withGoArray.includes(d.uniprot.value)) {
+    if (!withGo[d.uniprot.value] && (!queryArray || (queryArray && query[d.uniprot.value]))) {
       bindings.push({uniprot: {value: d.uniprot.value}})
     }
   }
   if (mode == "idList") return {results: {bindings: bindings}};
   let count = bindings.length;
-  return {
-    results: {
-      bindings: [
-        {
+  bindings = [{
           count: {value: count},
           category: {value: "wo_" + withoutId},
           label: {value: "without annotation"}
-        }
-      ]
-    }
-  };
+        }];
+  return {results: {bindings: bindings}};
 }
 ```
 
 ## `return`
 - 存在レベル、タンパク質リストでのフィルタリング
 ```javascript
-({mode, withAnnotation, withoutAnnotation, targetGo}) => {
+({mode, categoryArray, withoutId, withAnnotation, withoutAnnotation, targetGo}) => {
   const idVar = "uniprot";
   const idPrfix = "http://purl.uniprot.org/uniprot/";
   const categoryPrefix = "http://purl.obolibrary.org/obo/";
-  const data = withAnnotation.results.bindings.concat(withoutAnnotation.results.bindings);
+  let data = [];
+  if (categoryArray) data = withAnnotation.results.bindings;
+  if (withoutId) data = data.concat(withoutAnnotation.results.bindings);
   if (mode == "objectList") return data.map(d => {
     return {
       id: d[idVar].value.replace(idPrfix, ""), 

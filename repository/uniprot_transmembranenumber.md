@@ -1,7 +1,7 @@
 # uniprotのエントリを膜貫通回数で分類 (井手, 守屋)
 
 ## Parameters
-* `categoryId` (type: 膜貫通部位数)
+* `categoryIds` (type: 膜貫通部位数)
   * example: 4,8
 * `queryIds` (type: uniprot)
   * example: Q5VV42,Q9BSA9,Q12884,P04233,O15162,O00322,P16070,O75844,Q9BXK5,Q12983,P08195,Q496J9,P63027,P51681,P58335,Q9Y5U4,P12830,P08581,Q96NB2,O75746,Q9Y548
@@ -21,9 +21,9 @@
 ## `categoryArray`
 
 ```javascript
-({categoryId}) => {
-  categoryId = categoryId.replace(/,/g," ");
-  if (categoryId.match(/[^\s]/)) return categoryId.split(/\s+/);
+({categoryIds}) => {
+  categoryIds = categoryIds.replace(/,/g," ");
+  if (categoryIds.match(/[^\s]/)) return categoryIds.split(/\s+/);
   return false;
 }
 ```
@@ -112,7 +112,7 @@ WHERE {
     if (mode == "objectList") return filteredData.map(d=>{
       return {
         id: d[idVarName].value.replace(idPrefix, ""),
-        attribute: {categoryId: d.target_num.value, label: d.target_num.value}
+        attribute: {categoryIds: d.target_num.value, label: d.target_num.value}
       }
     });
     if (mode == "idList") return filteredData.map(d=>d[idVarName].value.replace(idPrefix, ""));
@@ -127,11 +127,11 @@ WHERE {
     const num = Number(d.target_num.value);
     if (value < num) {
       for (let emptyValue = value; emptyValue < num; emptyValue++) {
-        res.push( { categoryId: emptyValue.toString(), label: emptyValue.toString(), count: 0} );
+        res.push( { categoryIds: emptyValue.toString(), label: emptyValue.toString(), count: 0} );
       }
     }
     value = num + 1;
-    res.push( { categoryId: d.target_num.value, label: d.target_num.value, count: Number(d.count.value)} );
+    res.push( { categoryIds: d.target_num.value, label: d.target_num.value, count: Number(d.count.value)} );
   }
   return res;
 }

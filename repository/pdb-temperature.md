@@ -77,7 +77,7 @@ order by ?temperature
      return {
        id: d.PDBentry.value.replace("https://rdf.wwpdb.org/pdb/", ""), 
          attribute: {
-         categoryId: d.temperature_str.value, 
+         categoryIds: d.temperature_str.value, 
          label: d.temperature_str.value +" K"
          }
        };
@@ -85,7 +85,7 @@ order by ?temperature
    if (mode == "idList") return Array.from(new Set(temperature.results.bindings.map(d=>d.PDBentry.value.replace("https://rdf.wwpdb.org/pdb/", "")))); // unique
    return temperature.results.bindings.map(d=>{
      return {
-       categoryId: d.temperature.value, 
+       categoryIds: d.temperature.value, 
        label: d.temperature.value +" K", 
        count: Number(d.count.value)
        };

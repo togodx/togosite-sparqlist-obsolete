@@ -2,7 +2,7 @@
 
 ## Parameters
 
-* `categoryId` (type: chembl compound development phase)
+* `categoryIds` (type: chembl compound development phase)
   * example: 3(efficacy/safety), 2(efficacy)
 * `queryIds` (type: chembl_compound)
   * example: CHEMBL1071, CHEMBL1200945, CHEMBL1274, CHEMBL204021, CHEMBL2111108, CHEMBL286398, CHEMBL252164, CHEMBL304087, CHEMBL452461, CHEMBL134702, CHEMBL279433, CHEMBL591429, CHEMBL101285, CHEMBL101360, CHEMBL101454, CHEMBL101609, CHEMBL101721, CHEMBL101775, CHEMBL101993, CHEMBL102307
@@ -23,9 +23,9 @@
 - development phase を配列に
 - 0:no description  1:PK tolerability, 2:Efficacy, 3: Safety & Efficacy, 4:Indication Discovery & expansion
 ```javascript
-({categoryId})=>{
-  categoryId = categoryId.replace(/,/g, " ");
-  if (categoryId.match(/[^\s]/)) return categoryId.split(/\s+/);
+({categoryIds})=>{
+  categoryIds = categoryIds.replace(/,/g, " ");
+  if (categoryIds.match(/[^\s]/)) return categoryIds.split(/\s+/);
   return false;
 }
 ```

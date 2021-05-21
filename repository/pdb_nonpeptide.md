@@ -2,7 +2,7 @@
 
 ## Parameters
 
-* `categoryId`
+* `categoryIds`
   * example: water, ZINC_ION, SULFATE_ION, GLYCEROL, 1,2-ETHANEDIOL, MAGNESIUM_ION, CHLORIDE_ION, CALCIUM_ION, SODIUM_ION, 2-acetamido-2-deoxy-beta-D-glucopyranose
 * `queryIds` (type: PDB)
   * example: 1FJS,1FPC,6BNR
@@ -20,12 +20,12 @@
 ```
 
 ## `nonpoly_list`
-- categoryId を配列に
+- categoryIds を配列に
 ```javascript
-({categoryId}) => {
-  categoryId = categoryId.replace(/\s+/,"")
-  categoryId = categoryId.replace("_"," ")
-  if (categoryId) return categoryId.split(/,/);
+({categoryIds}) => {
+  categoryIds = categoryIds.replace(/\s+/,"")
+  categoryIds = categoryIds.replace("_"," ")
+  if (categoryIds) return categoryIds.split(/,/);
   return false;
 }
 ```
@@ -124,7 +124,7 @@ SELECT DISTINCT COUNT(?PDBentry) AS ?count_Num
      return {
        id: d.PDBentry.value.replace("https://rdf.wwpdb.org/pdb/", ""), 
        attribute: {
-       categoryId: d.nonpoly_str.value, 
+       categoryIds: d.nonpoly_str.value, 
        label: makeLabel(capitalize(d.nonpoly_name.value), d.nonpoly_compId.value)
                   }
        };
@@ -132,7 +132,7 @@ SELECT DISTINCT COUNT(?PDBentry) AS ?count_Num
    if (mode == "idList") return Array.from(new Set(non_poly.results.bindings.map(d=>d.PDBentry.value.replace("https://rdf.wwpdb.org/pdb/", "")))); // unique 
    return non_poly.results.bindings.map(d=>{
      return {
-       categoryId: d.nonpoly_str.value, 
+       categoryIds: d.nonpoly_str.value, 
        label: makeLabel(capitalize(d.nonpoly_name.value), d.nonpoly_compId.value),
        count: Number(d.count.value)
        };

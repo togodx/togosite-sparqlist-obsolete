@@ -8,7 +8,7 @@ https://integbio.jp/togosite/sparql
 
 ## Parameters
 
-* `categoryId` -(type:種別/機能)
+* `categoryIds` -(type:種別/機能)
   * example: protein_coding,lncRNA,retained_intron,processed_transcript,nonsense_mediated_decay,processed_pseudogene,unprocessed_pseudogene,misc_RNA,snRNA,miRNA,TEC,transcribed_unprocessed_pseudogene,snoRNA,transcribed_processed_pseudogene,rRNA_pseudogene,IG_V_pseudogene,IG_V_gene,TR_V_gene,transcribed_unitary_pseudogene,polymorphic_pseudogene,unitary_pseudogene,non_stop_decay,TR_J_gene,rRNA,IG_D_gene,pseudogene,scaRNA,TR_V_pseudogene,IG_C_gene,IG_J_gene,Mt_tRNA,IG_C_pseudogene,TR_C_gene,ribozyme,IG_J_pseudogene,sRNA,TR_D_gene,TR_J_pseudogene,translated_processed_pseudogene,Mt_rRNA,IG_pseudogene,vault_RNA,scRNA,translated_unprocessed_pseudogene
 * `queryIds` -(type: Ensembl)
   * example: ENSG00000171097
@@ -28,11 +28,11 @@ https://integbio.jp/togosite/sparql
 ```
 
 ## `category_list`
-- categoryId を配列に
+- categoryIds を配列に
 ```javascript
-({categoryId}) => {
-  categoryId = categoryId.replace(/,/g," ")
-  if (categoryId.match(/[^\s]/)) return categoryId.split(/\s+/);
+({categoryIds}) => {
+  categoryIds = categoryIds.replace(/,/g," ")
+  if (categoryIds.match(/[^\s]/)) return categoryIds.split(/\s+/);
   return false;
 }
 ```

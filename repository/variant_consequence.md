@@ -31,9 +31,10 @@
 - 全部をカウントする(default)場合は静的JSONをレスポンスする。そのフラグを判定する。
 
 ```javascript
-({queryIds,mode}) => {
+({categoryIds,queryIds,mode}) => {
   queryIds = queryIds.replace(/,/g," ");
-  if (queryIds.match(/\S/) || mode.match(/\S/)) return false;
+  if (categoryIds.match(/\S/) || queryIds.match(/\S/) || mode.match(/\S/)) return false;
+//  if (queryIds.match(/\S/) || mode.match(/\S/)) return false;
   return true;
 }
 ```

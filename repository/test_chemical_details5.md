@@ -1,10 +1,10 @@
-# (test3) pubchem, chemblのIDを入力して化合物の詳細情報を出す（信定・山本・建石）
+# (test5) pubchem, chemblのIDを入力して化合物の詳細情報を出す（信定・山本・建石）
 
 ## Parameters
 
 * `id`
   * default:　2244
-  * example: 2244, 15987396, CHEMBL6939, CHEMBL1201330, 15414 (CHEBI), 17232 (CHEBI)
+  * example: 2244,34756, CHEMBL6939, CHEMBL1201330, 15414 (CHEBI), 17232 (CHEBI)
 * `type`
   * default: pubchem_compound
   * example: pubchem_compound, chembl_compound, chebi
@@ -47,9 +47,10 @@ WHERE {
 {{#if idDict.pubchem}}
 VALUES ?pubchem_id_ent { pubchem_compound:{{idDict.pubchem}} }
   OPTIONAL {  ?pubchem_id_ent skos:closeMatch ?chembl_id_ent .
-  FILTER(STRSTARTS(STR(?chembl_id_ent), STR(chembl_compound:)  )) }
+  FILTER(STRSTARTS(STR(?chembl_id_ent), STR(chembl_compound:))) }
   OPTIONAL {  ?pubchem_id_ent skos:closeMatch ?chebi_id_ent .
-  FILTER(STRSTARTS(STR(?chebi_id_ent), STR(CHEBI:)  )) }
+  FILTER(STRSTARTS(STR(?chebi_id_ent), STR(CHEBI:)  ))          
+ }
 {{/if}}
         
 {{#if idDict.chembl}}
@@ -68,9 +69,9 @@ VALUES ?chebi_id_ent { CHEBI:{{idDict.chebi}} }
            FILTER(STRSTARTS(STR(?chembl_id_ent), STR(chembl_compound:) ))
            FILTER(STRSTARTS(STR(?chebi_id_ent), STR(CHEBI:) ))}
 {{/if}}
-  BIND(IRI(REPLACE(STR(?chembl_id_ent), STR(chembl_compound:),"http://rdf.ebi.ac.uk/resource/chembl/molecule/")) AS ?chembl_uri)  
-  BIND(IRI(REPLACE(STR(?pubchem_id_ent), STR(pubchem_compound:),"http://rdf.ncbi.nlm.nih.gov/pubchem/compound/CID")) AS ?pubchem_uri)
-  BIND(IRI(REPLACE(STR(?chebi_id_ent), STR(CHEBI:),"http://purl.obolibrary.org/obo/CHEBI_")) AS ?chebi_uri) 
+  BIND(IRI(REPLACE(STR(?chembl_id_ent), STR(chembl_compound:),"")) AS ?chembl_uri)  
+  BIND(IRI(REPLACE(STR(?pubchem_id_ent), STR(pubchem_compound:),"")) AS ?pubchem_uri)
+  BIND(IRI(REPLACE(STR(?chebi_id_ent), STR(CHEBI:),"")) AS ?chebi_uri) 
  }}
  ```
  
@@ -112,13 +113,13 @@ prefix chebi: <http://purl.obolibrary.org/obo/chebi/>
 prefix chebi_id: <http://purl.obolibrary.org/obo/CHEBI_>
 
 SELECT
-{{#if togoidDict.pubchem_uri}} ?pubchem_molecular_formula ?pubchem_id ?pubchem_label ?pubchem_molecular_weight ?pubchem_smiles ?pubchem_inchi ?pubchem_formula_img {{/if}} {{#if togoidDict.chembl_uri}} ?chembl_molecular_formula ?chembl_id ?chembl_type  (GROUP_concat(distinct ucase(?label_temp); separator = ", ") as ?chembl_label) ?chembl_molecular_weight ?chembl_smiles ?chembl_inchi  ?chembl_formula_img {{/if}} {{#if togoidDict.chebi_uri}} ?chebi_molecular_formula ?chebi_id (GROUP_concat(distinct ?chebi_altid; separator = ", ") as ?chebi_altid_list) ?chebi_label (GROUP_concat(distinct ?chebi_synonym; separator = ", ") as ?chebi_synonym_list) ?chebi_mass ?chebi_smiles ?chebi_inchi  {{/if}}  
+{{#if togoidDict.pubchem_uri}} ?pubchem_molecular_formula ?pubchem_label ?pubchem_molecular_weight ?pubchem_smiles ?pubchem_inchi ?pubchem_formula_img {{/if}} {{#if togoidDict.chembl_uri}} ?chembl_molecular_formula  ?chembl_type  (GROUP_concat(distinct ucase(?label_temp); separator = ", ") as ?chembl_label) ?chembl_molecular_weight ?chembl_smiles ?chembl_inchi  ?chembl_formula_img {{/if}} {{#if togoidDict.chebi_uri}} ?chebi_molecular_formula  (GROUP_concat(distinct ?chebi_altid; separator = ", ") as ?chebi_altids) (GROUP_concat(distinct ?chebi_label; separator = ", ") as ?chebi_labels) (GROUP_concat(distinct ?chebi_synonym; separator = ", ") as ?chebi_synonym_list) ?chebi_mass ?chebi_smiles ?chebi_inchi  {{/if}}  
 FROM <http://rdf.integbio.jp/dataset/togosite/pubchem>
 FROM <http://rdf.integbio.jp/dataset/togosite/chembl>
 FROM <http://rdf.integbio.jp/dataset/togosite/chebi>
  {
    {{#if togoidDict.pubchem_uri }}
-{  VALUES ?pubchem_uri  { {{#each togoidDict.pubchem_uri}} <{{this}}> {{/each}} }
+{  VALUES ?pubchem_uri  { {{#each togoidDict.pubchem_uri}} <http://rdf.ncbi.nlm.nih.gov/pubchem/compound/CID{{this}}> {{/each}} }
  OPTIONAL{ ?pubchem_uri sio:has-attribute
        [ a sio:CHEMINF_000382; sio:has-value ?pubchem_label_temp  ] ,
       [ a sio:CHEMINF_000334; sio:has-value ?pubchem_molecular_weight_temp] ,
@@ -134,10 +135,10 @@ FROM <http://rdf.integbio.jp/dataset/togosite/chebi>
     BIND(CONCAT("https://pubchem.ncbi.nlm.nih.gov/image/imagefly.cgi?cid=",(SUBSTR(STR(?pubchem_id),4)),"&width=500&height=500") AS ?pubchem_formula_fig)
     BIND(CONCAT('<img src="',  ?pubchem_formula_fig,   '"/>') AS ?pubchem_formula_img)
    }  {{/if}}
-
- {{#if togoidDict.chembl_uri}}                  
+   
+ {{#if togoidDict.chembl_uri}}
 {
- VALUES ?chem_id  {  {{#each togoidDict.chembl_uri}} <{{this}}> {{/each}}   }
+ VALUES ?chem_id  {  {{#each togoidDict.chembl_uri}} <http://rdf.ebi.ac.uk/resource/chembl/molecule/{{this}}> {{/each}}   }
  ?chem_id a cco:SmallMolecule ;
            skos:altLabel ?label_temp ;
            cco:substanceType ?chembl_type ;
@@ -154,9 +155,10 @@ FROM <http://rdf.integbio.jp/dataset/togosite/chebi>
   BIND(CONCAT('<img src="',  ?chembl_formula_fig,   '"/>') AS  ?chembl_formula_img) 
   }
  {{/if}}
-  {{#if togoidDict.chebi_uri}} 
+
+  {{#if togoidDict.chebi_uri }} 
     {
- VALUES ?chebi_uri  {  {{#each togoidDict.chebi_uri}} <{{this}}> {{/each}}   }
+ VALUES ?chebi_uri  {  {{#each togoidDict.chebi_uri}} <http://purl.obolibrary.org/obo/CHEBI_{{this}}> {{/each}}   }
   optional{?chebi_uri  rdfs:label ?chebi_label_temp.}
   optional{?chebi_uri  oboinowl:id ?chebi_id_temp.}
   optional{?chebi_uri oboinowl:hasExactSynonym ?synonym_temp . } 
@@ -183,31 +185,28 @@ FROM <http://rdf.integbio.jp/dataset/togosite/chebi>
 ## `return`
 
 ```javascript 
- ( { main, togoidDict }) => {
-   let pubchem_info = {}
-  let chembl_ID = main.results.bindings.chembl_id
-  let chebi_ID = main.results.bindings.chembl_id
-    if ({chembl_ID} === undefined){
-      chembl_ID = null}
-  if ({chebi_ID} === undefined){
-      chebi_ID = null}
-   if (togoidDict.pubchem_uri) {
-   pubchem_info = main.results.bindings.map((elem) => ({
-      pubchem_cid: elem.pubchem_id.value,
-      chembl_id: chembl_ID,
-      chebi_id: chebi_ID,
+ ( { main, togoidDict, togoid}) => {
+     if (togoidDict.pubchem_uri)
+      
+ { return pubchem_ID = togoidDict.pubchem_uri,
+    chembl_ID = togoidDict.chembl_uri,
+    chebi_ID = togoidDict.chebi_uri,
+   main.results.bindings.map((elem) => ({
       molecular_formula: elem.pubchem_molecular_formula.value,
-      label: elem.pubchem_label.value,
+      pubchem_label: elem.pubchem_label.value,
       molecular_weight: elem.pubchem_molecular_weight.value,
       smiles: elem.pubchem_smiles.value,
-      inchi: elem.pubchem_inchi.value,
+      pubchem_inchi: elem.pubchem_inchi.value,
       formula_img: elem.pubchem_formula_img.value,
-      }));
+      chembl_label: elem.chembl_label.value,
+      chembl_inchi:  elem.chembl_inchi.value,
+      chebi_label:  elem.chebi_labels.value,
+      chebi_inchi:  elem.chebi_inchi.value,
+  }));
     }
-  let chembl_info = {}
-  if (togoidDict.chembl_uri) {
-    chembl_info = main.results.bindings.map((elem) => ({
-      chembl_id: elem.chembl_id.value,
+
+  else if (togoidDict.chembl_uri) {
+ main.results.bindings.map((elem) => ({
       molecular_formula: elem.chembl_molecular_formula.value,
       type: elem.chembl_type.value,
       label: elem.chembl_label.value,
@@ -217,23 +216,17 @@ FROM <http://rdf.integbio.jp/dataset/togosite/chebi>
       formula_img: elem.chembl_formula_img.value,
       }));
   }
-  let chebi_info = {}
-  if (togoidDict.chebi_uri) {
-    chebi_info = main.results.bindings.map((elem) => ({ 
-      chebi_id: elem.chebi_id.value,
-      chebi_alt_id: elem.chebi_altid_list.value,
+      
+  else if (togoidDict.chebi_uri) {
+  main.results.bindings.map((elem) => ({
       molecular_formula: elem.chebi_molecular_formula.value,
-      label: elem.chebi_label.value,
+      label: elem.chebi_labels.value,
       synonym: elem.chebi_synonym_list.value,
       mass: elem.chebi_mass.value,
       smiles: elem.chebi_smiles.value,
       inchi: elem.chebi_inchi.value,
+      chebi_altid: elem.chebi_altids.value,
       }));
   }
-  return {
-    pubchem_info: pubchem_info,
-    chembl_info: chembl_info,
-    chebi_info: chebi_info
-  };
 };
 ```
