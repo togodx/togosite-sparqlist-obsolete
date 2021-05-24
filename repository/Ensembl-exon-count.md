@@ -1,5 +1,18 @@
 # exon数ごとにトランスクリプトーム数をカウント（鈴木・八塚）
 
+## Description
+
+- Data sources
+    - Ensembl human release 102: http://nov2020.archive.ensembl.org/Homo_sapiens/Info/Index
+- Query
+    -  Input
+        - Ensembl Transcription ID -> queryIds
+        - "(Number of exons)" or range ("(Min number of exons)-(Max number of exons)") -> categoryIds
+    - Output
+        - Output1("mode": none): List of number of exons for each category
+        - Output2("mode": idList): List of Ensembl Transcription ID
+        - Output3("mode": objectList): List of Ensembl Transcription ID and attribute of category
+        
 ## Endpoint
 
 https://integbio.jp/togosite/sparql

@@ -1,5 +1,17 @@
 # ChEMBLを作用機作で分類する（信定・八塚・鈴木）
 
+## Description
+
+- Data sources
+    - (More data sources description goes here..)
+    - ChEMBL-RDF: http://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBL-RDF/28.0/
+- Query
+    - (More query details go here..)
+    -  Input
+        - ChEMBL ID
+    - Output
+        - Mechanism action type
+
 ## Parameters
 
 * `categoryIds` (type: mechanism_action_type)

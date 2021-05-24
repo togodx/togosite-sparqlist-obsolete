@@ -1,5 +1,15 @@
 # Evolutionary conservation of human genes（千葉・池田）(mode対応版)
 
+## Description
+* Data sources
+  * HomoloGene Release 68: https://www.ncbi.nlm.nih.gov/homologene/statistics/
+
+* Query
+  * Input
+    * NCBI Gene ID
+  * Output
+    * Organisms
+
 ## Endpoint
 
 https://integbio.jp/togosite/sparql

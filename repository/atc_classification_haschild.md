@@ -1,14 +1,32 @@
 # PubChem で薬を薬効で分類（FDA Approved Drugs → WHO ATC Code）(フロント開発用 with hasChild flag.)（建石, 守屋, 山本）
 
-- atc_classification_haschild （objectList はOK）を idList対応に修正 (2021/3/24)
-- Filterの効率化 (2021/4/2)
+*  atc_classification_haschild （objectList はOK）を idList対応に修正 (2021/3/24)
+*  Filterの効率化 (2021/4/2)
 
+## Description 
+* Data sources
+	* PubChem-RDF: ftp://ftp.ncbi.nlm.nih.gov/pubchem/RDF/ （Version 2021-03-01 ） 
+      * https://integbio.jp/rdf/dataset/pubchem より、
+      ChEMBLまたはChEBIとリンクされているノードに関するデータのみを取得
 
-- 入力：
-  - ATCコードのカテゴリ。（デフォルトは全部：このばあい、パラメータは空白)
-- 出力：
-  - 入力したATCコードのカテゴリのサブカテゴリに含まれるPubChem Compound ID数（サブカテゴリ単位で集計）
-  - 一つの薬に複数のATCコードがついていることがありうる 
+* Query
+	* Input
+  		*  categoryIds:  ATC code (https://www.whocc.no/atc_ddd_index/)
+    	   * デフォルトは空白。
+    	   *  第1階層：英大文字１ケタ, 第2階層：数字２ケタ, 第３階層：英大文字１ケタ, 第４階層：英大文字１ケタ, 第５階層：数字２ケタ （個別の薬）  
+  		* queryIds
+    	  *  PubChem Compound ID (数字のみ）、空白の場合はFDA Approved Drugsであるもの全体
+        * mode  
+  * Output
+    * modeが空の場合
+      * 入力したATCコードで示されるカテゴリのサブカテゴリに含まれるPubChem Compound ID数（サブカテゴリ単位で集計）
+      *  categoryIdsが空の場合は、第1階層の内訳
+      * 一つの薬に複数のATCコードがついていることがありうるがその場合は重複して数えられる 
+    * modeがidListの場合
+      * categoryIdsで指定されたカテゴリに属する物質のPubChem Compound ID
+    * modeがobjectListの場合
+      * categoryIdsで指定されたカテゴリに属する物質のPubChem Compound ID、ATCコード、ラベル
+
 
 ## Endpoint
 
@@ -17,10 +35,9 @@ https://integbio.jp/togosite/sparql
 ## Parameters
 
 * `categoryIds`   ATCコード、デフォルトは空。指定された場合、その下の内訳。
-  *  第1階層：英大文字１ケタ, 第2階層：数字２ケタ, 第３階層：英大文字１ケタ, 第４階層：英大文字１ケタ, 第５階層：数字２ケタ （個別の薬）  
   * default:  
   * example: J (ANTIINFECTIVES FOR SYSTEMIC USE), J05 (ANTIVIRALS FOR SYSTEMIC USE), J05A (DIRECT ACTING ANTIVIRALS), J05AE (Protease inhibitors)
-* `queryIds` PubChem Concept ID (数字のみ）、空白の場合はFDA Approved Drugsであるもの全体
+* `queryIds` PubChem Compound ID (数字のみ）、空白の場合はFDA Approved Drugsであるもの全体
   * default: 
   * example: 3561, 6957673, 3226, 452548, 19861, 41781, 4909, 15814656, 13342, 11597698, 3396, 60937, 86767262, 43507, 3342, 4642, 5311497, 3356, 37464, 5353853 
 * `mode`
@@ -103,7 +120,7 @@ WHERE {
     ?child_atc skos:broader ?category .
   }
 {{/unless}}
-} ORDER BY desc(?count)
+} ORDER BY ?category
 
 ```
 
@@ -116,12 +133,13 @@ WHERE {
   const categoryPrefix = "http://rdf.ncbi.nlm.nih.gov/pubchem/concept/ATC_";
   if (mode == "objectList") {
     return data.results.bindings.map(d=>{
+      var categorycode = d.category.value.replace(categoryPrefix, "")
       return {
         id: d[idVarName].value.replace(idPrfix, ""), 
         attribute: {
           categoryId: d.category.value.replace(categoryPrefix, ""), 
           uri: d.category.value,
-          label : capitalize(d.label.value)
+          label : capitalize(d.label.value)+" ("+categorycode+")"
         }
       }
     });
@@ -132,9 +150,10 @@ WHERE {
     return Array.from(new Set(r))
   } else {  
     return data.results.bindings.map(d=>{
+      var categorycode = d.category.value.replace(categoryPrefix, "")
       return {
-        categoryId: d.category.value.replace(categoryPrefix, ""), 
-        label: capitalize(d.label.value),
+        categoryId: categorycode, 
+        label: capitalize(d.label.value)+" ("+categorycode+")",
         count: Number(d.count.value),
         hasChild: Boolean(d.child)
       };

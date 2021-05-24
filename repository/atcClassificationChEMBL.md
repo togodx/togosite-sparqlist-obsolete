@@ -1,10 +1,24 @@
-# ChEMBL で薬を薬効（WHO ATC Code）で分類 (mode, hasChild対応, Number対応）（建石）
+# ChEMBL で薬を薬効（WHO ATC Code）で分類 (mode, hasChild対応, Number対応）（建石、山本）
 
 * 入力：
   * ATCコードのカテゴリ。（デフォルトは全部：この場合、パラメータは空白)
 * 出力：
   * 入力したATCコードのカテゴリのサブカテゴリに含まれるChEMBL Molecule ID数（サブカテゴリ単位で集計）
   * 一つの薬に複数のATCコードがついていることがありうる 
+
+## Description
+
+- Data sources
+    - (More data sources description goes here..)
+    - ATC: https://bioportal.bioontology.org/ontologies/ATC
+    - ChEMBL-RDF: http://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBL-RDF/28.0/
+- Query
+    - (More query details go here..)
+    -  Input
+        - ATC category ID
+    - Output
+        - ChEMBL ID
+        - ATC category label
 
 ## Endpoint
 
@@ -88,7 +102,7 @@ WHERE {
 
 }
 GROUP BY ?atctop
-ORDER BY desc(?count)
+ORDER BY ?atctop
 
 
 ```
@@ -132,7 +146,8 @@ WHERE
   var r=[]
   
   labeldata.results.bindings.forEach(d=>{
-    labels[d.atc.value.replace(uatcprefix,"")]=d.label.value
+    var atccode=d.atc.value.replace(uatcprefix,"")
+    labels[atccode]=d.label.value+" ("+atccode+")"
   });	
   if (mode === "idList") {
     return Array.from(new Set(

@@ -1,5 +1,18 @@
 # Genes with hypothetical upstream TFs in ChIP-Atlas（大田・池田・小野・千葉）(mode対応版)
 
+## Description
+
+- Data sources
+    - ChIP-Atlas: [http://dbarchive.biosciencedbc.jp/kyushu-u/hg38/target/](http://dbarchive.biosciencedbc.jp/kyushu-u/hg38/target/)
+    - The genes in `<Transcription Factor>.10.tsv` were defined to be "Genes with hypothetical upstream TF".
+
+- Query
+    - The output ID 1 and 2 are assigned to "Genes with hypothetical upstream TF" and Genes without hypothetical upstream TF" respectively.
+    - Input
+        - Ensembl gene ID
+    - Output
+        - with or without hypothetical upstream TF
+
 ## Endpoint
 
 https://integbio.jp/togosite/sparql
@@ -7,7 +20,7 @@ https://integbio.jp/togosite/sparql
 ## Parameters
 * `categoryIds` (type: 1 or 2)
   * example: 1
-* `queryIds` (type: ensemble gene)
+* `queryIds` (type: ensembl gene)
   * example: ENSG00000000005,ENSG00000002587,ENSG00000115942
 * `mode` (type: string)
   * example: idList, objectList

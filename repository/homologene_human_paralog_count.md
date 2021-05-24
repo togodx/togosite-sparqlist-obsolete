@@ -1,5 +1,16 @@
 # Number of human genes in each ortholog group（千葉）(mode対応版)
 
+## Description
+* Data sources
+  * HomoloGene Release 68
+    * https://www.ncbi.nlm.nih.gov/homologene/statistics/
+
+* Query
+  * Input
+    * NCBI Gene ID
+  * Output
+    * Number of paralogs
+
 ## Endpoint
 
 https://integbio.jp/togosite/sparql

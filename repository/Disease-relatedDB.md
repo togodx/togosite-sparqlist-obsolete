@@ -5,6 +5,18 @@
   - Output
   - [ {categoryId:, label:, count: } ]
   
+ ## Description
+
+- Data sources
+    - (More data sources description goes here..)
+    - Mondo disease ontlogy: https://mondo.monarchinitiative.org/
+- Query
+    - 各MondoIDに紐づいている、関連のデータベースについて、その種類と関連するIDの数を集計
+    -  Input
+        - MONDO id
+    - Output
+        - Related Databases category
+  
 ## Parameters
 * `categoryIds` 必須パラメータ。デフォルトは空。数える対象の ID リスト。
    ユーザが ID のリストを指定した場合、全体の内訳の代わりに、ユーザの ID が各内訳に何個ずつ該当するかを返す。

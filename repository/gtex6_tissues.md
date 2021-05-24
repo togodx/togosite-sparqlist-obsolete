@@ -1,6 +1,17 @@
 # Genes expressed in tissues (GTEx ver6)（小野・池田・千葉）(mode対応版)
 This query allows **multiple tissue flags** for each gene.
 
+## Description
+
+- Data sources
+    - Supplementary Table 1 of [A systematic survey of human tissue-specific gene expression and splicing reveals new opportunities for therapeutic target identification and evaluation; R. Y. Yang et al.; bioRxiv 311563](https://doi.org/10.1101/311563)
+    - Mapping from the tissue names to the corresponding UBERON or EFO term is based on [GTEx documentation](https://gtexportal.org/home/samplingSitePage).
+- Query
+    - Input
+        - Ensembl gene ID
+    - Output
+        - UBERON ID or EFO ID
+
 ## Endpoint
 
 https://integbio.jp/togosite/sparql

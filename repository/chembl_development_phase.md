@@ -1,5 +1,17 @@
 # ChEMBLを薬の開発フェーズで分類する（信定）(mode対応版)
 
+## Description
+
+- Data sources
+    - (More data sources description goes here..)
+    - ChEMBL-RDF: http://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBL-RDF/28.0/
+- Query
+    - (More query details go here..)
+    -  Input
+        - ChEMBL ID
+    - Output
+        - Highest development phase
+
 ## Parameters
 
 * `categoryIds` (type: chembl compound development phase)

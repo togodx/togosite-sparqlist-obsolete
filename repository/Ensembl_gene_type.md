@@ -2,6 +2,18 @@
 
 Forked from `Ensembl transcript description`
 
+## Description
+
+- Data sources
+    - (More data sources description goes here..)
+    - Ensembl human release 102: http://nov2020.archive.ensembl.org/Homo_sapiens/Info/Index
+- Query
+    - (More query details go here..)
+    -  Input
+        - Ensembl Gene ID
+    - Output
+        - Gene type
+
 ## Endpoint
 
 https://integbio.jp/togosite/sparql

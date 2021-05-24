@@ -33,7 +33,6 @@
 
 ## Endpoint
 https://integbio.jp/togosite/sparql
-* https://integbio.jp/rdf/mirror/mesh/sparql
 
 ## `targetMesh`
 - mesh D番号 と目的 tree 階層の対応表
@@ -43,7 +42,7 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX meshv: <http://id.nlm.nih.gov/mesh/vocab#>
 PREFIX tree: <http://id.nlm.nih.gov/mesh/>
 #SELECT DISTINCT ?mesh ?tree ?label (SAMPLE(?child_tree) AS ?child)
-SELECT ?mesh ?label (IF(COUNT (DISTINCT ?mondo) > 1, TRUE, FALSE) AS ?child) 
+SELECT ?tree ?label COUNT(DISTINCT ?mesh) AS ?count
 FROM <http://rdf.integbio.jp/dataset/togosite/mesh>
 WHERE {
 {{#if top}}
@@ -60,18 +59,11 @@ WHERE {
   ?tree meshv:parentTreeNumber ?parent .
   {{/if}}
 {{/if}}
-   ?tree ^meshv:treeNumber/rdfs:label ?label .
-   ?mesh meshv:treeNumber/meshv:parentTreeNumber* ?tree .
-   ?mesh rdf:type meshv:TopicalDescriptor.
-#   OPTIONAL {
-#     ?child_tree meshv:parentTreeNumber ?tree .
-#   }
+  ?tree ^meshv:treeNumber/rdfs:label ?label .
+  ?mesh meshv:treeNumber/meshv:parentTreeNumber* ?tree .
+  ?mesh rdf:type meshv:TopicalDescriptor.
 }
 ```
-
-## Endpoint
-https://integbio.jp/togosite/sparql
-* https://integbio.jp/rdf/mirror/ebi/sparql
 
 ## `chemblList`
 - ChEMBL molecule - mesh D番号の対応リスト
@@ -105,7 +97,7 @@ WHERE {
     if (!mesh2id[mesh]) mesh2id[mesh] = [id];
     mesh2id[mesh].push(id);
     if (!id2label[id]) id2label[id] = d.label.value;
-    id2child[id] = Boolean(d.child);
+    id2child[id] = (Number(d.count.value) > 1 ? true : false);
   }
   let id2chembl = {};
   let filteredList = [];

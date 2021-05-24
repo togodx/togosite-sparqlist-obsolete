@@ -1,14 +1,15 @@
 # variant clinical significance (三橋）
 
-- variant clinical significance の内訳
-- togovarのendpointはsparql-proxy じゃないのでキャッシュしない（TogoSite本番用のvirtuosoでキャッシュされることを想定(3/18三橋))
-- template対応(3/18三橋)
+## Description
 
-## testURL
-- [default](https://integbio.jp/togosite/sparqlist/api/variant_clinical_significance?categoryIds=&queryIds=&mode=)
-- [queryId+categoryId](https://integbio.jp/togosite/sparqlist/api/variant_clinical_significance?categoryIds=uncertain_significance%2Clikely_benign%2Cpathogenic&queryIds=tgv48208871%2Ctgv48208872%2Ctgv48208877&mode=)
-- [queryId+categoryId+idList](https://integbio.jp/togosite/sparqlist/api/variant_clinical_significance?categoryIds=uncertain_significance%2Clikely_benign%2Cbenign%2Cpathogenic&queryIds=tgv48208871%2Ctgv48208872%2Ctgv48208877&mode=idList)
-- [queyId+categoryId+objectList](https://integbio.jp/togosite/sparqlist/api/variant_clinical_significance?categoryIds=uncertain_significance%2Clikely_benign%2Cbenign%2Cpathogenic&queryIds=tgv48208871%2Ctgv48208872%2Ctgv48208877&mode=objectList)
+- Data sources
+    - ClinVar (limited to variants in TogoVar (i.e. variant with frequency in Japanese poplulations))
+- Query
+    -  The query obtains the numbers of variants summed up by clinical significance of ClinVar.
+    -  Input
+        - TogoVar id
+    - Output
+        - Clinical significance from ClinVar
 
 ## Parameters
 
@@ -18,6 +19,12 @@
   * example: tgv48208871,tgv48208872,tgv48208877,tgv48208884,tgv48208888,tgv48208896,tgv48208897,tgv48208898,tgv48208900,tgv48208904,tgv48208906,tgv48208908,tgv48208938,tgv48208939,tgv48208943,tgv48208945,tgv48208947,tgv48208962,tgv48208965,tgv48208967,tgv48208968,tgv48208970,tgv48208971,tgv48208973,tgv48208977
 * `mode` 必須パラメータ。内訳の代わりに該当する ID のリストを返す（デフォルトはオフ）idList: リストだけ、objectList: Attributeの入ったリスト（Attribute は下階層ではなく、categoryid で指定したカテゴリ）
   * example: idList, objectList
+
+## testURL
+- [default](https://integbio.jp/togosite/sparqlist/api/variant_clinical_significance?categoryIds=&queryIds=&mode=)
+- [queryId+categoryId](https://integbio.jp/togosite/sparqlist/api/variant_clinical_significance?categoryIds=uncertain_significance%2Clikely_benign%2Cpathogenic&queryIds=tgv48208871%2Ctgv48208872%2Ctgv48208877&mode=)
+- [queryId+categoryId+idList](https://integbio.jp/togosite/sparqlist/api/variant_clinical_significance?categoryIds=uncertain_significance%2Clikely_benign%2Cbenign%2Cpathogenic&queryIds=tgv48208871%2Ctgv48208872%2Ctgv48208877&mode=idList)
+- [queyId+categoryId+objectList](https://integbio.jp/togosite/sparqlist/api/variant_clinical_significance?categoryIds=uncertain_significance%2Clikely_benign%2Cbenign%2Cpathogenic&queryIds=tgv48208871%2Ctgv48208872%2Ctgv48208877&mode=objectList)
 
 ## `queryArray`
 - Query TogoVarIDを配列に
