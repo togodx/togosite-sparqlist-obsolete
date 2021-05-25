@@ -1,12 +1,16 @@
 # variant consequence　（三橋）
 
-- クエリの内容
-  - variant consequence 毎のバリアント数を表示している
-- パフォーマンス
-  - queryIdsを指定しない場合は全バリアント(1000万レベル）を対象にするため、SPARQLではタイムアウトする。
-  - タイムアウトを回避するために、TogoVarのAPI(Elasticsearch実装)　https://togovar.biosciencedbc.jp/search のJSON出力をこのSPARQlistに転記して表示している(isCountAll=true)。TogoVarのAPIを動的に呼び出す方がよければそのように変更します。
-  -  mode=idList、objectListの場合は、LIMIT 10000を設定して、それ以上出力しないようにしている。
-  - sparql-proxy じゃないのでキャッシュしないが、全バリアントを集計する場合はキャッシュに入れるクエリーも成功しないと思う。
+## Description
+
+- Data sources
+    -  [TogoVar](https://togovar.biosciencedbc.jp/?) (limited to variants with frequency data in Japanese populations)
+- Query
+    -  Input
+        - SO (sequence ontology) ID that indicates [a variant consequence calculated with Variant Effect Predictor (VEP)](https://asia.ensembl.org/info/genome/variation/prediction/predicted_data.html#consequences)
+        - TogoVar id
+    - Output
+        - The number of variants categorized by the variant consequence.
+
 - author:
   - 三橋(守屋さんのSPARQListを改造)
 

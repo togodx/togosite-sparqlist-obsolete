@@ -1,5 +1,18 @@
 # PDBエントリをポリペプチドの数で分類(mode対応版)（井手）
 
+## Description
+ 
+- Data sources
+    - Number of peptides contained in one PDB entry
+    - This item based on the data of January 20, 2021 of PDBj. 
+        - The latest data can be obtained from the URL below. https://data.pdbj.org/pdbjplus/data/pdb/rdf/
+- Query
+    - Input
+        - Number of peptides, PDB id
+    - Output
+        - The number of PDB entries included in each peptide number
+        - If a PDB id is entered, it returns the number of peptides in each PDB entry.
+
 ## Parameters
 
 * `categoryIds` -(type:エントリーに含まれるポリペプチドの数の範囲)

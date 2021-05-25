@@ -1,5 +1,18 @@
 # PDBエントリを実験手法で分類(mode対応版)
 
+## Description
+ 
+- Data sources
+    - Experimental methods used for 3D structure acquisition in the PDB entry.
+    - This item based on the data of January 20, 2021 of PDBj. 
+        - The latest data can be obtained from the URL below. https://data.pdbj.org/pdbjplus/data/pdb/rdf/
+- Query
+    - Input
+        - Experimental methods, PDB id
+    - Output
+        - The number of PDB entries included in each experimental method
+        - If a PDB id is entered, it returns the experimental method in each entry.
+
 ## Endpoint
 
 https://integbio.jp/togosite/sparql

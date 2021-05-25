@@ -1,5 +1,18 @@
 # PDBエントリをalpha_helixで分類(ヒトのみ) (フロント開発用)（井手, 守屋）
 
+## Description
+
+- Data sources
+    - The number of alpha-helices recorded in the PDB entry.
+    - This item based on the data of January 20, 2021 of PDBj. 
+        - The latest data can be obtained from the URL below. https://data.pdbj.org/pdbjplus/data/pdb/rdf/
+- Query
+    - Input
+        - Number of alpha-helices, PDB id
+    - Output
+        - The number of PDB entries included in each alpha-helix number
+        - If a PDB id is entered, it returns the alpha-helix value contained in each entry.
+
 ## Endpoint
 
 https://integbio.jp/togosite/sparql

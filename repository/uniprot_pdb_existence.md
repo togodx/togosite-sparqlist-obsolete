@@ -2,6 +2,20 @@
 
 - PDB エントリー(立体構造)の有無の内訳を返す
 
+## Description
+ 
+- Data sources
+    - Uniprot entries with links to PDB data entries
+    - This item based on the data of March, 2021 of uniprot (human only).
+- Query
+    - Input
+        - Existence (1: exists, 0 :not exists), uniprot id
+    - Output
+        - Uniprot entries are sorted by the presence or absence of a link to pdb.
+        - If a uniprot id is entered, it returns whether pdb entry exists or not.
+
+
+
 ## Parameters
 
 * `categoryIds` (type: PDB entry existence)

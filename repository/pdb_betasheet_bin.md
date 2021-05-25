@@ -1,5 +1,18 @@
 # PDBエントリをbeta_sheetで分類(ヒトのみ) (フロント開発用)（井手, 守屋）
 
+## Description
+
+- Data sources
+    - The number of beta-sheets recorded in the PDB entry.
+    - This item based on the data of January 20, 2021 of PDBj. 
+        - The latest data can be obtained from the URL below. https://data.pdbj.org/pdbjplus/data/pdb/rdf/
+- Query
+    - Input
+        - Number of beta-sheets, PDB id
+    - Output
+        - The number of PDB entries included in each beta-sheets number
+        - If a PDB id is entered, it returns the beta-sheets value contained in each entry.
+
 ## Endpoint
 
 https://integbio.jp/togosite/sparql

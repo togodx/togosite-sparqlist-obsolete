@@ -5,8 +5,8 @@ Forked from `Ensembl transcript description`
 ## Description
 
 - Data sources
-    - (More data sources description goes here..)
-    - Ensembl human release 102: http://nov2020.archive.ensembl.org/Homo_sapiens/Info/Index
+    - Ensembl human release 102: [http://nov2020.archive.ensembl.org/Homo_sapiens/Info/Index](http://nov2020.archive.ensembl.org/Homo_sapiens/Info/Index)
+    - Definition of gene biotypes is described [here](http://useast.ensembl.org/info/genome/genebuild/biotypes.html).
 - Query
     - (More query details go here..)
     -  Input

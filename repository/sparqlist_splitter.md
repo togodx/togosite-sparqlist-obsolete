@@ -31,47 +31,45 @@ async ({sparqlet, queryIds, categoryId, mode, limit})=>{
       }
     }
     if (body) options.body = body;
+    console.log(body);
     return await fetch(url, options).then(res=>res.json());
   }
   queryIds = queryIds.replace(/,/g, " ");
+  limit = Number(limit);
   if (queryIds.match(/[^\s]/)) {
-    let query_array = queryIds.split(/\s+/);
-    let res;
-    let query_array_tmp = [];
-    let flag = true;
-    for (let i = 0; i < query_array.length; i++){
-      query_array_tmp.push(query_array[i]);
-      if (query_array_tmp.length == limit || i == query_array.length - 1) {
-        let body = "";
-        body += "queryIds=" + query_array_tmp.join(",");
-        if (categoryId.match(/[^\s]/)) body += "&categoryId=" + categoryId;
-        if (mode) body += "&mode=" + mode;
-        let json = await fetchReq(sparqlet, body);
-	    if (!res) {
+    let queryArray = queryIds.split(/\s+/);
+    let size = queryArray.length;
+    let res = undefined;
+    for (let i = 0; i * limit <= size; i++){
+      let start = i * limit;
+      let end = (i + 1) * limit;
+      if (end > size) end = size;
+      let body = "queryIds=" + queryArray.slice(start, end).join(",");
+      if (categoryId.match(/[^\s]/)) body += "&categoryId=" + categoryId;
+      if (mode) body += "&mode=" + mode;
+      let json = await fetchReq(sparqlet, body);
+      if (res === undefined) { // first
           res = json;
-          if (res[0].categoryId) flag = false;
-	    } else {
-          if (flag) res = res.concat(json);
-          else {
-            let plus = {};
-            for (let d of json) {
-              plus[d.categoryId] = d;
+      } else {                 // 2nd or later
+        if (mode == "idList" || mode == "objectList") res = res.concat(json);
+        else {
+          let plus = {};
+          for (let d of json) {
+            plus[d.categoryId] = d;
+          }
+          for (let i = 0; i < res.length; i++) {  // add count to previous result
+            if (plus[res[i].categoryId]) {
+              res[i].count += plus[res[i].categoryId].count;
+              delete(plus[res[i].categoryId]);
             }
-            for (let i = 0; i < res.length; i++) {
-              if (plus[res[i].categoryId]) {
-		        res[i].count += plus[res[i].categoryId].count;
-		        delete(plus[res[i].categoryId]);
-	          }
-	        }
-	        for (let k of Object.keys(plus)) {
-	          res.push(plus[k]);
-	        }
-	      }
+          }
+          if (plus.length > 0) {  // concat remained categories
+            res = res.concat(plus);
+          }
         }
-	    query_array_tmp = [];
       }
     }
-    if (flag) return Array.from(new Set(res));
+    if (mode == "idList" || mode == "objectList") return Array.from(new Set(res)); // unique
     return res;
   }
   return await fetchReq(sparqlet, body);

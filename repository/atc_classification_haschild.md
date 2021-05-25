@@ -2,31 +2,21 @@
 
 *  atc_classification_haschild （objectList はOK）を idList対応に修正 (2021/3/24)
 *  Filterの効率化 (2021/4/2)
+* Parameters:
+	* categoryIds:  WHO ATC code (https://www.whocc.no/atc_ddd_index/)
+    * queryIds: PubChem Compound ID 
+    * mode: 'idList' or 'objectList' or NULL
 
 ## Description 
 * Data sources
 	* PubChem-RDF: ftp://ftp.ncbi.nlm.nih.gov/pubchem/RDF/ （Version 2021-03-01 ） 
-      * https://integbio.jp/rdf/dataset/pubchem より、
-      ChEMBLまたはChEBIとリンクされているノードに関するデータのみを取得
+      * Data for nodes linked to ChEMBL or ChEBI retrieved from https://integbio.jp/rdf/dataset/pubchem
 
 * Query
 	* Input
-  		*  categoryIds:  ATC code (https://www.whocc.no/atc_ddd_index/)
-    	   * デフォルトは空白。
-    	   *  第1階層：英大文字１ケタ, 第2階層：数字２ケタ, 第３階層：英大文字１ケタ, 第４階層：英大文字１ケタ, 第５階層：数字２ケタ （個別の薬）  
-  		* queryIds
-    	  *  PubChem Compound ID (数字のみ）、空白の場合はFDA Approved Drugsであるもの全体
-        * mode  
-  * Output
-    * modeが空の場合
-      * 入力したATCコードで示されるカテゴリのサブカテゴリに含まれるPubChem Compound ID数（サブカテゴリ単位で集計）
-      *  categoryIdsが空の場合は、第1階層の内訳
-      * 一つの薬に複数のATCコードがついていることがありうるがその場合は重複して数えられる 
-    * modeがidListの場合
-      * categoryIdsで指定されたカテゴリに属する物質のPubChem Compound ID
-    * modeがobjectListの場合
-      * categoryIdsで指定されたカテゴリに属する物質のPubChem Compound ID、ATCコード、ラベル
-
+  		* PubChem Compound ID 
+	* Output
+    	* WHO ATC code
 
 ## Endpoint
 

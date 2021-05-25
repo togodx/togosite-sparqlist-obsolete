@@ -3,13 +3,13 @@
 ## Description
 
 - Data sources
-    - ClinVar (limited to variants in TogoVar (i.e. variant with frequency in Japanese poplulations))
+    -  [TogoVar](https://togovar.biosciencedbc.jp/?) (limited to variants with frequency data in Japanese populations)
 - Query
-    -  The query obtains the numbers of variants summed up by clinical significance of ClinVar.
-    -  Input
+    - Input
+        -  [Clinical significance of ClinVar](https://www.ncbi.nlm.nih.gov/clinvar/docs/clinsig/)
         - TogoVar id
     - Output
-        - Clinical significance from ClinVar
+        -  The number of variants categorized by clinical significance of ClinVar
 
 ## Parameters
 

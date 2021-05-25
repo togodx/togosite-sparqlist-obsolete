@@ -1,5 +1,19 @@
 # PDBエントリを結晶化時の温度で分類（井手）
 
+## Description
+ 
+- Data sources
+    - The temperature of crystal formation in the PDB entry
+    - This item based on the data of January 20, 2021 of PDBj. 
+        - The latest data can be obtained from the URL below. https://data.pdbj.org/pdbjplus/data/pdb/rdf/
+- Query
+    - Input
+        - temperature (K), PDB id
+    - Output
+        - The number of PDB entries included in the temperature range
+        - If a PDB id is entered, it returns the temperature of crystal formation in each PDB entry.
+
+
 ## Endpoint
 
 https://integbio.jp/togosite/sparql

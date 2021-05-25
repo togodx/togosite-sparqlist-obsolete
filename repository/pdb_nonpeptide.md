@@ -1,5 +1,18 @@
 # PDBエントリに含まれる非タンパク質で分類(ヒトのみ)（井手）
 
+## Description
+ 
+- Data sources
+    - Non-peptide molecules contained in the 3D structure in the PDB entry
+    - This item based on the data of January 20, 2021 of PDBj. 
+        - The latest data can be obtained from the URL below. https://data.pdbj.org/pdbjplus/data/pdb/rdf/
+- Query
+    - Input
+        - Non-peptide molecules, PDB id
+    - Output
+        - The number of PDB entries included in each non-peptide molecule
+        - If a PDB id is entered, it returns the non-peptide molecule in each PDB entry.
+
 ## Parameters
 
 * `categoryIds`
