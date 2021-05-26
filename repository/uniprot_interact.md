@@ -2,6 +2,18 @@
 
 - 相互作用相手数の内訳
 
+## Description
+
+- Data sources
+    - The number of interacting proteins from UniProt
+    - This item based on the data of March, 2021 of UniProt (human only).
+- Query
+    - Input
+        - UniProt ID, Number of interacting proteins
+    - Output
+        - The number of interacting proteins from UniProt
+        - If a UniProt ID is entered, it returns the number of interacting proteins
+
 ## Parameters
 
 * `categoryIds` (type: interact proteins range)

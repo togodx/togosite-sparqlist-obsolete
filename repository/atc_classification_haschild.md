@@ -1,23 +1,23 @@
 # PubChem で薬を薬効で分類（FDA Approved Drugs → WHO ATC Code）(フロント開発用 with hasChild flag.)（建石, 守屋, 山本）
 
-*  atc_classification_haschild （objectList はOK）を idList対応に修正 (2021/3/24)
-*  Filterの効率化 (2021/4/2)
-* Parameters:
-	* categoryIds:  WHO ATC code (https://www.whocc.no/atc_ddd_index/)
-    * queryIds: PubChem Compound ID 
-    * mode: 'idList' or 'objectList' or NULL
+-  atc_classification_haschild （objectList はOK）を idList対応に修正 (2021/3/24)
+-  Filterの効率化 (2021/4/2)
+- Parameters:
+	- categoryIds:  WHO ATC code (https://www.whocc.no/atc_ddd_index/) or EMPTY
+    - queryIds: PubChem Compound ID or EMPTY
+    - mode: 'idList' or 'objectList' or EMPTY
 
 ## Description 
 
-* Data sources
-	* PubChem-RDF: ftp://ftp.ncbi.nlm.nih.gov/pubchem/RDF/ （Version 2021-03-01 ） 
-      * Data for nodes linked to ChEMBL or ChEBI retrieved from https://integbio.jp/rdf/dataset/pubchem
+- Data sources
+	- PubChem-RDF: ftp://ftp.ncbi.nlm.nih.gov/pubchem/RDF/ （Version 2021-03-01 ） 
+        - Data for nodes linked to ChEMBL or ChEBI retrieved from https://integbio.jp/rdf/dataset/pubchem
 
-* Query
-	* Input
-  		* PubChem Compound ID 
-	* Output
-    	* WHO ATC code (https://www.whocc.no/atc_ddd_index/)
+- Query
+	- Input
+  		- PubChem Compound ID 
+	- Output
+    	- WHO ATC code (https://www.whocc.no/atc_ddd_index/)
 
 ## Endpoint
 
@@ -25,14 +25,14 @@ https://integbio.jp/togosite/sparql
 
 ## Parameters
 
-* `categoryIds`   ATCコード、デフォルトは空。指定された場合、その下の内訳。
-  * default:  
-  * example: J (ANTIINFECTIVES FOR SYSTEMIC USE), J05 (ANTIVIRALS FOR SYSTEMIC USE), J05A (DIRECT ACTING ANTIVIRALS), J05AE (Protease inhibitors)
-* `queryIds` PubChem Compound ID (数字のみ）、空白の場合はFDA Approved Drugsであるもの全体
-  * default: 
-  * example: 3561, 6957673, 3226, 452548, 19861, 41781, 4909, 15814656, 13342, 11597698, 3396, 60937, 86767262, 43507, 3342, 4642, 5311497, 3356, 37464, 5353853 
-* `mode`
-  * example: idList, objectList
+- `categoryIds`   ATCコード、デフォルトは空。指定された場合、その下の内訳。
+  - default:  
+  - example: J (ANTIINFECTIVES FOR SYSTEMIC USE), J05 (ANTIVIRALS FOR SYSTEMIC USE), J05A (DIRECT ACTING ANTIVIRALS), J05AE (Protease inhibitors)
+- `queryIds` PubChem Compound ID (数字のみ）、空白の場合はFDA Approved Drugsであるもの全体
+  - default: 
+  - example: 3561, 6957673, 3226, 452548, 19861, 41781, 4909, 15814656, 13342, 11597698, 3396, 60937, 86767262, 43507, 3342, 4642, 5311497, 3356, 37464, 5353853 
+- `mode`
+  - example: idList, objectList
 
 ## `queryArray`
 - ユーザが指定した ID リストを配列に分割

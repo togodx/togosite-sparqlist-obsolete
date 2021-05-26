@@ -2,6 +2,21 @@
 
 - ChEBML の Reactome パスウェイの内訳
 
+## Description
+
+- Data sources
+    - Reactome-classified pathways for each chemical compound
+    - This item based on the data of  Reactome Version 71 (02, December 2019).
+        - The latest data can be obtained from the URL below. https://reactome.org/download-data
+- Query
+    - Input
+        - Reactome ID , ChEBI ID
+    - Output
+        - The number of ChEBI entries included in each pathways in Reactome
+        - If a ChEBI id is entered, it returns the pathway to which the chemical compound belongs
+
+
+
 ## Parameters
 
 * `categoryIds` (type: reactome)

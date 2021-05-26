@@ -5,7 +5,7 @@
 ## Description
 
 - Data sources
-    - UniProt
+    - [UniProt](https://www.uniprot.org/)
     - For details about UniProt Keywords, see [UniProt documentation](https://www.uniprot.org/help/keywords).
 
 - Query
