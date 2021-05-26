@@ -1,5 +1,19 @@
 # UniProt におけるAssayの有無の内訳を返す（守屋）
 
+## Description
+ 
+- Data sources
+    - Proteins with or without ChEMBL assay from UniProt
+    - ChEMBL-RDF 28.0: http://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBL-RDF/
+- Query
+    - Input
+        - Existence (1: exists, 0: not exists), UniProt ID
+    - Output
+        - The number of UniProt entries link to ChEMBL entries.
+        - If a UniProt ID is entered, it returns whether ChEMBL entry exists or not.
+
+
+
 ## Parameters
 
 * `categoryIds`

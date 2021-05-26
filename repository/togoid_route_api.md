@@ -65,7 +65,7 @@
         disease: ["chembl_target", "uniprot", "ncbigene", "medgen"]
       },
       compound: {
-        comppund: [],
+        compound: [],
         nando: ["chebi", "reactome_reaction", "uniprot", "ncbigene", "medgen", "mondo"],
         disease: ["chebi", "reactome_reaction", "uniprot", "ncbigene", "medgen"]
       },
@@ -84,7 +84,6 @@
     if (config.database[subject].includes(source)) sourceSubject = subject;
     if (config.database[subject].includes(target)) targetSubject = subject;
   }
-  console.log(sourceSubject);
   
   let makeRoute = (source, target, route) => {
     route.unshift(source);

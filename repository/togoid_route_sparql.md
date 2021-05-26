@@ -66,7 +66,7 @@
         disease: ["chembl_target", "uniprot", "ncbigene", "medgen"]
       },
       compound: {
-        comppund: [],
+        compound: [],
         nando: ["chebi", "reactome_reaction", "uniprot", "ncbigene", "medgen", "mondo"],
         disease: ["chebi", "reactome_reaction", "uniprot", "ncbigene", "medgen"]
       },

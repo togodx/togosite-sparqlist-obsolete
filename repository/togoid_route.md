@@ -1,5 +1,8 @@
 # TogoID route
 
+- 検証用（togosite では使っていない）
+- togoid_route_sparql, togoid_route_api の route 生成コード切り出し
+
 ## Parameters
 
 * `source` database
@@ -64,7 +67,7 @@
         disease: ["chembl_target", "uniprot", "ncbigene", "medgen"]
       },
       compound: {
-        comppund: [],
+        compound: [],
         nando: ["chebi", "reactome_reaction", "uniprot", "ncbigene", "medgen", "mondo"],
         disease: ["chebi", "reactome_reaction", "uniprot", "ncbigene", "medgen"]
       },
