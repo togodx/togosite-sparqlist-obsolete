@@ -1,5 +1,15 @@
 # Diseaseカテゴリフィルタ(MeSH階層利用)（三橋）
 
+## Description
+
+- Data sources
+    -  [MeSH](https://mondo.monarchinitiative.org/) (limited to the Diseases [C] category) 
+- Query
+    - Input
+        - MeSH Descriptor
+    - Output
+        -  The number of diseases in each diseases category of MeSH
+
 * Top レベル ('C') はノードじゃ無いため URI もラベルもないので objectList 出力の Attribute は取れるもので最上位を出力
 
 # Parameters

@@ -1,7 +1,7 @@
 # show_graphs
 
 Display all graph names in the endopint.
-This sparqlist is monitored by alive checking system.
+This sparqlist is monitored by uptime monitoring services, [Status cake](https://www.statuscake.com/) and [Uptimerobot](https://uptimerobot.com/).
 
 - author: Mitsuhashi
 

@@ -1,4 +1,4 @@
-# UniProt keywords 'Molecular function' 内訳（守屋）
+# Gene Ontology 'Molecular function' 内訳（守屋）
 
 - Required SPARQLet: uniprot_keywords
 
@@ -11,7 +11,7 @@
     - Input
         - UniProt ID
     - Output
-        - Gene Ontology terms　of molecular function domain
+        - Gene Ontology terms of molecular function domain
 
 ## Parameters
 

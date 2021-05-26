@@ -11,11 +11,7 @@
     - Output
         - The number of variants categorized by the variant consequence.
 
-- author:
-  - 三橋(守屋さんのSPARQListを改造)
-
-
- ## testURL
+## testURL
   - [default](https://integbio.jp/togosite/sparqlist/api/variant_consequence?categoryIds=SO_0001060&queryIds=&mode=)
   - [categoryId+objectList](https://integbio.jp/togosite/sparqlist/api/variant_consequence?categoryIds=SO_0001060&queryIds=&mode=objectList)
   - [catgoryId+queryId+idList](https://integbio.jp/togosite/sparqlist/api/variant_consequence?categoryIds=SO_0001060&queryIds=tgv48208871%2Ctgv48208872%2Ctgv48208877&mode=idList)

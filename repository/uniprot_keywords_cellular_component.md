@@ -2,6 +2,17 @@
 
 - Required SPARQLet: uniprot_keywords
 
+## Description
+
+- Data sources
+    - Gene Ontology Project: [http://geneontology.org/](http://geneontology.org/)
+    
+- Query
+    - Input
+        - UniProt ID
+    - Output
+        - Gene Ontology terms of cellular component domain
+        
 ## Parameters
 
 * `categoryIds` (type: UniProt keyword ID) (Req.) (API:uniprot_keywords_wo: 9998)

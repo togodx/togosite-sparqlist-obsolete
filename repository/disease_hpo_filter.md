@@ -1,14 +1,14 @@
 # Diseaseカテゴリフィルタ(HPO階層利用)
 
-- hasChild 入り
-- Authors:
-  - 三橋、高月、仲里、藤原
- 
- ## testURL
-  - [default](https://integbio.jp/togosite/sparqlist/api/disease_hpo_filter?categoryIds=0000118&queryIds=&mode=)
-  - [catgoryId+queryId+idList](https://integbio.jp/togosite/sparqlist/api/disease_hpo_filter?categoryIds=0000118%2C0000707&queryIds=0003418%2C0002027%2C0001945&mode=idList)
-  - [catgoryId+queryId+objectList](https://integbio.jp/togosite/sparqlist/api/disease_hpo_filter?categoryIds=0000118%2C0000707&queryIds=0003418%2C0002027%2C0001945&mode=objectList)
-  - [catgoryId+queryId(存在しないaaaa)+idList](https://integbio.jp/togosite/sparqlist/api/disease_hpo_filter?categoryIds=0000118%2C0000707&queryIds=aaaa&mode=idList)→検索結果がないことを確認
+## Description
+
+- Data sources
+    -  [Human Phenotype Ontology (HPO)](https://hpo.jax.org/app/) (limited to [phenotypic abnormality(HP:0000118)](https://hpo.jax.org/app/browse/term/HP:0000118)  and its subcategories)
+- Query
+    - Input
+        - HPO id
+    - Output
+        -  The number of phenotypic abnormalities in each category of HPO
 
 ## Parameters
 
@@ -21,6 +21,16 @@
   * example: idList, objectList
 * `is_rewrite_optional` テンプレートのOPTIONALを使わない方が速いと判断して同意（のはず？）に書き換えた。
   * default: true
+
+ ## testURL
+  - [default](https://integbio.jp/togosite/sparqlist/api/disease_hpo_filter?categoryIds=0000118&queryIds=&mode=)
+  - [catgoryId+queryId+idList](https://integbio.jp/togosite/sparqlist/api/disease_hpo_filter?categoryIds=0000118%2C0000707&queryIds=0003418%2C0002027%2C0001945&mode=idList)
+  - [catgoryId+queryId+objectList](https://integbio.jp/togosite/sparqlist/api/disease_hpo_filter?categoryIds=0000118%2C0000707&queryIds=0003418%2C0002027%2C0001945&mode=objectList)
+  - [catgoryId+queryId(存在しないaaaa)+idList](https://integbio.jp/togosite/sparqlist/api/disease_hpo_filter?categoryIds=0000118%2C0000707&queryIds=aaaa&mode=idList)→検索結果がないことを確認
+
+- hasChild 入り
+- Authors:
+  - 三橋、高月、仲里、藤原
 
 ## `queryArray`
 - ユーザが指定した ID リストを配列に分割

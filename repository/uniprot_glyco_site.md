@@ -2,6 +2,17 @@
 
 - タンパク質糖鎖結合サイト数の内訳
 
+## Description
+
+- Data sources
+    - [UniProt](https://www.uniprot.org/)
+
+- Query
+    - Input
+        - UniProt ID
+    - Output
+        - The number of glycosylation site
+
 ## Parameters
 
 * `categoryIds` (type: glyco site range)

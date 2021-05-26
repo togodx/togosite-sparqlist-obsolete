@@ -1,5 +1,16 @@
 # uniprotのエントリを膜貫通回数で分類 (井手, 守屋)
 
+## Description
+
+- Data sources
+    - [UniProt](https://www.uniprot.org/)
+
+- Query
+    - Input
+        - UniProt ID
+    - Output
+        - The number of transmembrane site
+
 ## Parameters
 * `categoryIds` (type: 膜貫通部位数)
   * example: 4,8

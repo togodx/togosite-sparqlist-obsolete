@@ -10,8 +10,8 @@
     - Output
         -  TogoVar id
         -  Variant type (SNV, Insersion, Deletion, InDel, Substitution) 
-        -  [HGNC notation](https://varnomen.hgvs.org/bg-material/simple/)
-        -  Link to TogoVar
+        -  [HGVS notation](https://varnomen.hgvs.org/bg-material/simple/)
+        -  Link to TogoVar. See details about each variant in TogoVar.
 
 ## Parameters
 

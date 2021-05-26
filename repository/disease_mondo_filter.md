@@ -1,12 +1,16 @@
 # Diseaseカテゴリフィルタ(Mondo階層利用)
 
-- hasChild 入り
- 
- ## testURL
-  - [default](https://integbio.jp/togosite/sparqlist/api/disease_mondo_filter?categoryIds=0000001&queryIds=&mode=)
-  - [catgoryId+queryId+idList](https://integbio.jp/togosite/sparqlist/api/disease_mondo_filter?categoryIds=0000001&queryIds=0008903%2C0002691%2C0005260&mode=idList)
-  - [catgoryId+queryId+objectList](https://integbio.jp/togosite/sparqlist/api/disease_mondo_filter?categoryIds=0000001&queryIds=0008903%2C0002691%2C0005260&mode=objectList)
+## Description
 
+- Data sources
+    -  [Mondo](https://mondo.monarchinitiative.org/) 
+- Query
+    - Input
+        - Mondo id
+    - Output
+        -  The number of diseases in each disease category of Mondo
+
+ 
 ## Parameters
 
 * `categoryIds` 指定したMondoノードのリストの下位階層のノード数を返す。
@@ -18,6 +22,11 @@
   * example: idList, objectList
 * `is_rewrite_optional` テンプレートのOPTIONALを使わない方が速いと判断して同意（のはず？）に書き換えた。
   * default: true
+
+ ## testURL
+  - [default](https://integbio.jp/togosite/sparqlist/api/disease_mondo_filter?categoryIds=0000001&queryIds=&mode=)
+  - [catgoryId+queryId+idList](https://integbio.jp/togosite/sparqlist/api/disease_mondo_filter?categoryIds=0000001&queryIds=0008903%2C0002691%2C0005260&mode=idList)
+  - [catgoryId+queryId+objectList](https://integbio.jp/togosite/sparqlist/api/disease_mondo_filter?categoryIds=0000001&queryIds=0008903%2C0002691%2C0005260&mode=objectList)
 
 ## `queryArray`
 - ユーザが指定した ID リストを配列に分割

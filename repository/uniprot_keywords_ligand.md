@@ -2,6 +2,18 @@
 
 - Required SPARQLet: uniprot_keywords
 
+## Description
+
+- Data sources
+    - UniProt
+    - For details about UniProt Keywords, see [UniProt documentation](https://www.uniprot.org/help/keywords).
+
+- Query
+    - Input
+        - UniProt ID
+    - Output
+        - UniProt Keyword in the Ligand category
+
 ## Parameters
 
 * `categoryIds` (type: UniProt keyword ID) (Req.)

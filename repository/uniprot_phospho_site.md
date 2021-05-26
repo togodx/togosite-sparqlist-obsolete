@@ -3,6 +3,17 @@
 - タンパク質リン酸化サイト数の内訳
 
 
+## Description
+
+- Data sources
+    - [UniProt](https://www.uniprot.org/)
+
+- Query
+    - Input
+        - UniProt ID
+    - Output
+        - The number of phosphorylation site
+
 ## Parameters
 
 * `categoryIds` (type: phospho site range)

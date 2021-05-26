@@ -5,7 +5,7 @@
   - Output
   - [ {categoryId:, label:, count: } ]
   
- ## Description
+## Description
 
 - Data sources
     - (More data sources description goes here..)

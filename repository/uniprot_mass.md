@@ -5,6 +5,17 @@
   - range がある場合 bin = range / 10
     - なので range は 10^^n 刻みが望ましい
 
+## Description
+
+- Data sources
+    - [UniProt](https://www.uniprot.org/)
+
+- Query
+    - Input
+        - UniProt ID
+    - Output
+        - Molecular mass (kDa) range
+
 ## Parameters
 
 * `categoryIds` (type: mass range)
