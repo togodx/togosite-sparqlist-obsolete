@@ -31,7 +31,7 @@ async ({togoKey, properties, queryIds})=>{
   let sparqlSplitter = "https://integbio.jp/togosite/sparqlist/api/sparqlist_splitter";
   let togoidApi = "https://integbio.jp/togosite/sparqlist/api/togoid_route_sparql";
   let togositeConfigJson = await fetchReq(togositeConfig, {method: "get"});
-  let idLimit = 4000; // split 判定
+  let idLimit = 2000; // split 判定
   
   // label 取得
   let labelApi = "https://integbio.jp/togosite/sparqlist/api/togokey_label";
