@@ -122,9 +122,18 @@ async ({ids, route})=>{
   }
   
   let togoidApi = "https://api.togoid.dbcls.jp.il3c.com/convert";
+  let resLimit = 10000; // togoid API limit
+  
   let body = "format=json&include=pair";
   body += "&route=" + route.join(",") + "&ids=" + ids;
   let json = await fetchReq(togoidApi, body);
+  if (json.total > resLimit) {
+    let loop = parseInt(json.total / resLimit) + 1;
+    for (let i = 1; i <= loop; i++){
+      let tmp = await fetchReq(togoidApi, body + "&offset=" + (resLimit * i));
+      json.results = json.results.concat(tmp.results);
+    }
+  }
   let pair = json.results.map(d=>{
     return {
       source_id: d[0],
