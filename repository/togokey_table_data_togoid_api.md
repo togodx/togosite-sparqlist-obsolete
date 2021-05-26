@@ -3,15 +3,11 @@
 ## Parameters
 
 * `togoKey`
-  * default: pubchem_compound
+  * default: hgnc
 * `properties`
-  * default: [{"propertyId":"homologene_category","categoryIds":["8"]}]
+  * default: [{"propertyId": "refex_specific_high_expression", "categoryIds": ["v32_40", "v25_40"]}, {"propertyId": "uniprot_keywords_cellular_component","categoryIds": ["472"]}, {"propertyId": "uniprot_pdb_existence", "categoryIds": ["1"]}, {"propertyId": "uniprot_chembl_assay_existence", "categoryIds": ["1"]},{"propertyId": "refex_specific_low_expression"}, {"propertyId": "uniprot_phospho_site"}, {"propertyId": "uniprot_keywords_biological_process"}]
 * `queryIds` togoKey 10個程度ずつ
-  * default: ["129","176","177","187","222","223","271","280","312","649","681","706","712","774","784","888","923","936","943","962","977","1023","1038","1061","1135","1174","2662","3469","4973","5202","5884","5886","5994","5997","6030","6031","6047","6076","6083","6131","6133","6176","8955","9903","10214","14985","15625","15993","18058","27099","27284","27854","29936","32051","34756","35717","60961","64689","64968","65091","77213","83814","87642","91474","104815","104994","114926","122328","145068","159296","159325","160419","164533","171548","222528","439155","439156","439260","441007","444493","444795","444899","445354","445675","446013","447920","448265","451714","504166","638015","643975","643976","1549073","2733535","3434975","5257127","5280360","5280363","5280453","5280490"]
-
-#[{"propertyId": "refex_specific_high_expression", "categoryIds": ["v32_40", "v25_40"]}, {"propertyId": "uniprot_keywords_cellular_component","categoryIds": ["472"]}, {"propertyId": "uniprot_pdb_existence", "categoryIds": ["1"]}, {"propertyId": "uniprot_chembl_assay_existence", "categoryIds": ["1"]},{"propertyId": "refex_specific_low_expression"}, {"propertyId": "uniprot_phospho_site"}, {"propertyId": "uniprot_keywords_biological_process"}]
-
-#["4942","5344","6148", "6265","6344","6677","6735","10593","10718","10876"]
+  * default: ["4942","5344","6148", "6265","6344","6677","6735","10593","10718","10876"]
 
 ## `primaryIds`
 ```javascript
@@ -75,7 +71,7 @@ async ({togoKey, properties, queryIds})=>{
         }
 
         // get attributes of 'primaryKey' Ids
-        let primaryIds = Array.from(new Set(idPair.map(d=>d.target))).join(" ");
+        let primaryIds = Array.from(new Set(idPair.map(d=>d.target_id))).join(" ");
         let categoryIdsParam = "";
         for (let queryProperty of queryProperties) {
           if (queryProperty.propertyId == configProperty.propertyId) {

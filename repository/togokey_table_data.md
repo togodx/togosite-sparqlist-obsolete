@@ -26,11 +26,12 @@ async ({togoKey, properties, queryIds})=>{
       'Content-Type': 'application/x-www-form-urlencoded'
     }
   }
-  
-//  let togositeConfig = "https://raw.githubusercontent.com/dbcls/togosite/develop/config/togosite.config.json";
+
   let togositeConfig = "https://raw.githubusercontent.com/dbcls/togosite/develop/config/togosite-human/properties.json";
+  let sparqlSplitter = "https://integbio.jp/togosite/sparqlist/api/sparqlist_splitter";
   let togoidApi = "https://integbio.jp/togosite/sparqlist/api/togoid_route_sparql";
   let togositeConfigJson = await fetchReq(togositeConfig, {method: "get"});
+  let idLimit = 4000; // split 判定
   
   // label 取得
   let labelApi = "https://integbio.jp/togosite/sparqlist/api/togokey_label";
@@ -64,7 +65,7 @@ async ({togoKey, properties, queryIds})=>{
         }
 
         // get attributes of 'primaryKey' Ids
-        let primaryIds = Array.from(new Set(idPair.map(d=>d.target))).join(" ");
+        let primaryIds = Array.from(new Set(idPair.map(d=>d.target_id))).join(" ");
         let categoryIdsParam = "";
         for (let queryProperty of queryProperties) {
           if (queryProperty.propertyId == configProperty.propertyId) {
@@ -72,7 +73,14 @@ async ({togoKey, properties, queryIds})=>{
             break;
           }
         }
-        let objectList = await fetchReq(configProperty.data, options, "mode=objectList&queryIds=" + encodeURIComponent(primaryIds) + categoryIdsParam);
+        let objectList = [];
+        let body = "mode=objectList&queryIds=" + encodeURIComponent(primaryIds) + categoryIdsParam;
+        if (primaryIds.length <= idLimit) {
+          objectList = await fetchReq(configProperty.data, options, body);
+        } else {
+          body += "&sparqlet=" + encodeURIComponent(configProperty.data) + "&limit=" + idLimit;
+          objectList = await fetchReq(sparqlSplitter, options, body);
+        }
 
         // mapping to 'togoKey' ID
         let primaryId2attribute = {};
