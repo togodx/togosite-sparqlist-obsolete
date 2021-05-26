@@ -1,7 +1,19 @@
 # uniprot reactome pathway（守屋）
+     - UniProt の Reactome パスウェイの内訳
+     - すでに最下層で、下層が無い場合は空配列を返す
+     
+## Description
 
-- UniProt の Reactome パスウェイの内訳
-  - すでに最下層で、下層が無い場合は空配列を返す
+- Data sources
+    - Reactome-classified pathways for each protein
+    - This item based on the data of Reactome Version 71 (02, December 2019).
+       - The latest data can be obtained from the URL below. https://reactome.org/download-data
+- Query
+    - Input
+        - Reactome ID, Uniprot ID
+    - Output
+        - The number of Uniprot entries included in each pathway in Reactome
+        - If a Uniprot id is entered, it returns the pathway to which the protein belongs
 
 ## Parameters
 

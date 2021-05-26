@@ -17,7 +17,7 @@
 	* Input
   		* PubChem Compound ID 
 	* Output
-    	* WHO ATC code
+    	* WHO ATC code (https://www.whocc.no/atc_ddd_index/)
 
 ## Endpoint
 

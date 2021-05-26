@@ -6,7 +6,7 @@
 
 - Data sources
     - (More data sources description goes here..)
-    - ChEMBL-RDF: http://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBL-RDF/28.0/
+    - ChEMBL-RDF 28.0: http://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBL-RDF/
     - Mesh 2021: ftp://ftp.nlm.nih.gov/online/mesh/rdf/
 - Query
     - (More query details go here..)

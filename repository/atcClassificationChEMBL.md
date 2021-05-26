@@ -11,13 +11,13 @@
 - Data sources
     - (More data sources description goes here..)
     - ATC: https://bioportal.bioontology.org/ontologies/ATC
-    - ChEMBL-RDF: http://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBL-RDF/28.0/
+    - ChEMBL-RDF 28.0: http://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBL-RDF/
 - Query
     - (More query details go here..)
     -  Input
-        - ATC category ID
-    - Output
         - ChEMBL ID
+    - Output
+        - ATC category ID
         - ATC category label
 
 ## Endpoint
