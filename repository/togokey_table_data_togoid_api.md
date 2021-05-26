@@ -71,7 +71,7 @@ async ({togoKey, properties, queryIds})=>{
         }
 
         // get attributes of 'primaryKey' Ids
-        let primaryIds = Array.from(new Set(idPair.map(d=>d.target_id))).join(" ");
+        let primaryIds = Array.from(new Set(idPair.map(d=>d.target_id))).join(",");
         let categoryIdsParam = "";
         for (let queryProperty of queryProperties) {
           if (queryProperty.propertyId == configProperty.propertyId) {
