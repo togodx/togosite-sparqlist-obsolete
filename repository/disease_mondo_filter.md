@@ -20,8 +20,6 @@
   * example: 0008903,0002691,0005260    (liver cancer, lung cancer,autism (disease))
 * `mode` 必須パラメータ。内訳の代わりに該当する ID のリストを返す（デフォルトはオフ）idList: リストだけ、objectList: Attributeの入ったリスト（Attribute は下階層ではなく、categoryid で指定したカテゴリ）
   * example: idList, objectList
-* `is_rewrite_optional` テンプレートのOPTIONALを使わない方が速いと判断して同意（のはず？）に書き換えた。
-  * default: true
 
  ## testURL
   - [default](https://integbio.jp/togosite/sparqlist/api/disease_mondo_filter?categoryIds=0000001&queryIds=&mode=)
@@ -65,11 +63,7 @@ PREFIX owl: <http://www.w3.org/2002/07/owl#>
 {{#if mode}}
 SELECT DISTINCT ?mondo ?category ?label
 {{else}}
-{{#if is_rewrite_optional }}
 SELECT ?category ?label (COUNT (DISTINCT ?mondo) AS ?count) 
-{{else}}
-SELECT ?category ?label (COUNT (DISTINCT ?mondo) AS ?count) (SAMPLE(?child_category) AS ?child) 
-{{/if}}
 {{/if}}
 FROM <http://rdf.integbio.jp/dataset/togosite/mondo>
 WHERE {
@@ -88,11 +82,7 @@ WHERE {
 {{/unless}}
   ?category rdfs:label ?label.
   ?mondo rdfs:subClassOf* ?category.
-{{#if is_rewrite_optional }}
   ?mondo rdf:type owl:Class.  # ?hp rdfs:subClassOf* ?category が?mondoの値に関係なく、trueになってしまうため追加。次のOPTIONALも同じ意図だがこちらの方が軽いはず。
-{{else}}
-  OPTIONAL { ?child_category rdfs:subClassOf ?category . }  
-{{/if}}
 } 
 {{#unless mode}}  
 ORDER BY DESC(?count)
