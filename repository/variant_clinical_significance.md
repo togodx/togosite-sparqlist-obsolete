@@ -6,10 +6,9 @@
     -  [TogoVar](https://togovar.biosciencedbc.jp/?) (limited to variants with frequency data in Japanese populations)
 - Query
     - Input
-        -  [Clinical significance of ClinVar](https://www.ncbi.nlm.nih.gov/clinvar/docs/clinsig/)
         - TogoVar id
     - Output
-        -  The number of variants categorized by clinical significance of ClinVar
+        -   [Clinical significance of ClinVar](https://www.ncbi.nlm.nih.gov/clinvar/docs/clinsig/)
 
 ## Parameters
 

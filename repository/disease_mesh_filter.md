@@ -3,14 +3,12 @@
 ## Description
 
 - Data sources
-    -  [MeSH](https://mondo.monarchinitiative.org/) (limited to the Diseases [C] category) 
+    -  [Medical Subject Headings (MeSH)](https://www.nlm.nih.gov/mesh/meshhome.html) 
 - Query
     - Input
         - MeSH Descriptor
     - Output
-        -  The number of diseases in each diseases category of MeSH
-
-* Top レベル ('C') はノードじゃ無いため URI もラベルもないので objectList 出力の Attribute は取れるもので最上位を出力
+        -  [Diseases ([C])](https://meshb.nlm.nih.gov/treeView) and its subcategories of MeSH
 
 ## Parameters
 

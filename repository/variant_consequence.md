@@ -6,10 +6,9 @@
     -  [TogoVar](https://togovar.biosciencedbc.jp/?) (limited to variants with frequency data in Japanese populations)
 - Query
     -  Input
-        - SO (sequence ontology) ID that indicates [a variant consequence calculated with Variant Effect Predictor (VEP)](https://asia.ensembl.org/info/genome/variation/prediction/predicted_data.html#consequences)
         - TogoVar id
     - Output
-        - The number of variants categorized by the variant consequence.
+        -  [Variant consequence calculated with Variant Effect Predictor (VEP)](https://asia.ensembl.org/info/genome/variation/prediction/predicted_data.html#consequences) in terms of [Sequence ontology](http://www.sequenceontology.org/)
 
 ## testURL
   - [default](https://integbio.jp/togosite/sparqlist/api/variant_consequence?categoryIds=SO_0001060&queryIds=&mode=)

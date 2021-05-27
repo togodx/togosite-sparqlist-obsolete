@@ -1,16 +1,15 @@
-# Diseaseカテゴリフィルタ(Mondo階層利用)
+# Diseaseカテゴリフィルタ(Mondo階層利用)(三橋)
 
 ## Description
 
 - Data sources
-    -  [Mondo](https://mondo.monarchinitiative.org/) 
+    -  [Mondo Disease Ontology (Mondo) ](https://mondo.monarchinitiative.org/) 
 - Query
     - Input
         - Mondo id
     - Output
-        -  The number of diseases in each disease category of Mondo
+        -  [Disease and disorder (MONDO_0000001)](https://monarchinitiative.org/disease/MONDO:0000001) and its subcategories of Mondo
 
- 
 ## Parameters
 
 * `categoryIds` 指定したMondoノードのリストの下位階層のノード数を返す。

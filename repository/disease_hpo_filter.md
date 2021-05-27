@@ -1,14 +1,14 @@
-# Diseaseカテゴリフィルタ(HPO階層利用)
+# Diseaseカテゴリフィルタ(HPO階層利用)(三橋)
 
 ## Description
 
 - Data sources
-    -  [Human Phenotype Ontology (HPO)](https://hpo.jax.org/app/) (limited to [phenotypic abnormality(HP:0000118)](https://hpo.jax.org/app/browse/term/HP:0000118)  and its subcategories)
+    -  [Human Phenotype Ontology (HPO)](https://hpo.jax.org/app/) 
 - Query
     - Input
         - HPO id
     - Output
-        -  The number of phenotypic abnormalities in each category of HPO
+        -  [Phenotypic abnormality (HP:0000118)](https://hpo.jax.org/app/browse/term/HP:0000118)  and its subcategories of HPO
 
 ## Parameters
 
