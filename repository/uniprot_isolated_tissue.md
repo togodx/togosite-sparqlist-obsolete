@@ -1,8 +1,22 @@
 # uniprot isolated tissue（守屋）
 
+## Description
+
+- Data sources
+    - [UniProt](https://www.uniprot.org/)
+
+- Query
+    - Obtain tissues to which input UniProt entries link with <https://www.uniprot.org/core/isolatedFrom>.
+    - Input UniProt entries contain a reference describing the protein sequence obtained from a clone isolated from output tissues.
+    - Input
+        - UniProt ID
+    - Output
+        - Tissue
+            - [UniProt Controlled vocabulary of tissues](https://www.uniprot.org/docs/tisslist)
+
 ## Parameters
 
-* `categoryIds` (type: reactome)
+* `categoryIds` (type: uniprot keyword ID)
   * example: 1001 (T-cell)
 * `queryIds` (type: uniprot)
   * example: Q9NYF8,Q4V339,A6NCE7,A7E2F4,P69849,A6NN73,Q92928,Q5T1J5,P0C7P4,Q6DN03,P09874,Q08211,Q5T4S7,P12270,Q9UPN3,P07814,P53621,P49321,P0C629,Q9BZK8,Q9BY65

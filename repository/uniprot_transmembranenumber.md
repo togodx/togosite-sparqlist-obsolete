@@ -123,7 +123,7 @@ WHERE {
     if (mode == "objectList") return filteredData.map(d=>{
       return {
         id: d[idVarName].value.replace(idPrefix, ""),
-        attribute: {categoryIds: d.target_num.value, label: d.target_num.value}
+        attribute: {categoryId: d.target_num.value, label: d.target_num.value}
       }
     });
     if (mode == "idList") return filteredData.map(d=>d[idVarName].value.replace(idPrefix, ""));
@@ -138,11 +138,11 @@ WHERE {
     const num = Number(d.target_num.value);
     if (value < num) {
       for (let emptyValue = value; emptyValue < num; emptyValue++) {
-        res.push( { categoryIds: emptyValue.toString(), label: emptyValue.toString(), count: 0} );
+        res.push( { categoryId: emptyValue.toString(), label: emptyValue.toString(), count: 0} );
       }
     }
     value = num + 1;
-    res.push( { categoryIds: d.target_num.value, label: d.target_num.value, count: Number(d.count.value)} );
+    res.push( { categoryId: d.target_num.value, label: d.target_num.value, count: Number(d.count.value)} );
   }
   return res;
 }
