@@ -134,7 +134,7 @@ WHERE {
           attribute: {
             categoryId: id,
             uri: "http://id.nlm.nih.gov/mesh/" + id,
-            labdl: id2label[id]
+            label: id2label[id]
           }
         })
       }
