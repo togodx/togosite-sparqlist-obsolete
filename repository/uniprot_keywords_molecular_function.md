@@ -5,7 +5,7 @@
 ## Description
 
 - Data sources
-    - Gene Ontology Project: [http://geneontology.org/](http://geneontology.org/)
+    - [UniProt](https://www.uniprot.org/)
     
 - Query
     - Input
