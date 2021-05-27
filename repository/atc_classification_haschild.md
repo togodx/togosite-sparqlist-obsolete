@@ -7,7 +7,7 @@
     - queryIds: PubChem Compound ID or EMPTY
     - mode: 'idList' or 'objectList' or EMPTY
 
-## Description 
+## Description
 
 - Data sources
 	- PubChem-RDF: ftp://ftp.ncbi.nlm.nih.gov/pubchem/RDF/ （Version 2021-03-01 ） 
