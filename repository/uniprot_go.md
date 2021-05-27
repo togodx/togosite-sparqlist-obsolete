@@ -1,4 +1,4 @@
-# uniprot go (GOの代わりに uniprot_keywords 9992,9998,9999 を使うので使わない)
+# uniprot GO 共有 SPARQLet (守屋)
 
 - 指定 GO の1階層下の内訳
   - すでに最下層で、下層が無い場合は空配列を返す
