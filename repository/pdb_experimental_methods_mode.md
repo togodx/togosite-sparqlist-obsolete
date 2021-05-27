@@ -90,7 +90,7 @@ order by DESC(?count)
                 return {
                 id: d.PDBentry.value.replace("https://rdf.wwpdb.org/pdb/", ""), 
                 attribute: {
-                            categoryIds: d.methods_id.value, 
+                            categoryId: d.methods_id.value, 
                             label: capitalize(d.methods.value)
                             }
                 };
@@ -98,7 +98,7 @@ order by DESC(?count)
   if (mode == "idList") return Array.from(new Set(count_methods.results.bindings.map(d=>d.PDBentry.value.replace("https://rdf.wwpdb.org/pdb/", "")))); // unique 
    return count_methods.results.bindings.map(d=>{
      return {
-       categoryIds: d.methods_id.value, 
+       categoryId: d.methods_id.value, 
        label: capitalize(d.methods.value),
        count: Number(d.count.value)
        };

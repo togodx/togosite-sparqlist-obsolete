@@ -137,7 +137,7 @@ SELECT DISTINCT COUNT(?PDBentry) AS ?count_Num
      return {
        id: d.PDBentry.value.replace("https://rdf.wwpdb.org/pdb/", ""), 
        attribute: {
-       categoryIds: d.nonpoly_str.value, 
+       categoryId: d.nonpoly_str.value, 
        label: makeLabel(capitalize(d.nonpoly_name.value), d.nonpoly_compId.value)
                   }
        };
@@ -145,7 +145,7 @@ SELECT DISTINCT COUNT(?PDBentry) AS ?count_Num
    if (mode == "idList") return Array.from(new Set(non_poly.results.bindings.map(d=>d.PDBentry.value.replace("https://rdf.wwpdb.org/pdb/", "")))); // unique 
    return non_poly.results.bindings.map(d=>{
      return {
-       categoryIds: d.nonpoly_str.value, 
+       categoryId: d.nonpoly_str.value, 
        label: makeLabel(capitalize(d.nonpoly_name.value), d.nonpoly_compId.value),
        count: Number(d.count.value)
        };

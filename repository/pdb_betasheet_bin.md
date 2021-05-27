@@ -141,7 +141,7 @@ WHERE{
     if (mode == "objectList") return filteredData.map(d=>{
       return {
         id: d[idVarName].value.replace(idPrefix, ""),
-        attribute: {categoryIds: d.target_num.value, label: d.target_num.value}
+        attribute: {categoryId: d.target_num.value, label: d.target_num.value}
       }
     });
     if (mode == "idList") return filteredData.map(d=>d[idVarName].value.replace(idPrefix, ""));
@@ -157,8 +157,8 @@ WHERE{
   if (!categoryIds) {
     for (let d of withTarget.results.bindings) {
       let num = Number(d.target_num.value);
-      if (num < limit_1) res.push( { categoryIds: d.target_num.value, label: d.target_num.value, count: Number(d.count.value)} );
-      else if (num >= limit_1 && res[res.length - 1].label != limit_1 + "-") res.push( { categoryIds: limit_1 + "-", label: limit_1 + "-", count: Number(d.count.value), hasChild: true} );
+      if (num < limit_1) res.push( { categoryId: d.target_num.value, label: d.target_num.value, count: Number(d.count.value)} );
+      else if (num >= limit_1 && res[res.length - 1].label != limit_1 + "-") res.push( { categoryId: limit_1 + "-", label: limit_1 + "-", count: Number(d.count.value), hasChild: true} );
       else res[res.length - 1].count += Number(d.count.value);
     }
   } else if (categoryIds == limit_1 + "-") {
@@ -167,8 +167,8 @@ WHERE{
       let start = parseInt(num / bin_2) * bin_2;
       let label = start + "-" + (start + 9);
       if (num < limit_1) continue;
-      if (num < limit_2 && res.length <= (num - limit_1) / bin_2) res.push( { categoryIds: label, label: label, count: Number(d.count.value), hasChild: true} );
-      else if (num >= limit_2 && res[res.length - 1].label != limit_2 + "-") res.push( { categoryIds: limit_2 + "-", label: limit_2 + "-", count: Number(d.count.value), hasChild: true} );
+      if (num < limit_2 && res.length <= (num - limit_1) / bin_2) res.push( { categoryId: label, label: label, count: Number(d.count.value), hasChild: true} );
+      else if (num >= limit_2 && res[res.length - 1].label != limit_2 + "-") res.push( { categoryId: limit_2 + "-", label: limit_2 + "-", count: Number(d.count.value), hasChild: true} );
       else res[res.length - 1].count += Number(d.count.value);
     }
   } else {
@@ -176,7 +176,7 @@ WHERE{
     for (let d of withTarget.results.bindings) {
       let num = Number(d.target_num.value);
       if (num < Number(range[0]) || (range[1] && num > Number(range[1]))) continue;
-      res.push( { categoryIds: d.target_num.value, label:  d.target_num.value, count: Number(d.count.value)} );
+      res.push( { categoryId: d.target_num.value, label:  d.target_num.value, count: Number(d.count.value)} );
     }
   }
   return res;

@@ -88,7 +88,7 @@ order by ?pH
      return {
        id: d.PDBentry.value.replace("https://rdf.wwpdb.org/pdb/", ""), 
          attribute: {
-         categoryIds: d.pH_str.value, 
+         categoryId: d.pH_str.value, 
          label: "pH " + d.pH_str.value
          }
        };
@@ -96,7 +96,7 @@ order by ?pH
    if (mode == "idList") return Array.from(new Set(pH.results.bindings.map(d=>d.PDBentry.value.replace("https://rdf.wwpdb.org/pdb/", "")))); // unique
     return pH.results.bindings.map(d=>{
      return {
-       categoryIds: d.pH.value, 
+       categoryId: d.pH.value, 
        label: "pH " + d.pH.value, 
        count: Number(d.count.value)
        };
