@@ -1,6 +1,6 @@
-# chembl mesh（山本, 守屋）→三橋改
+# chembl mesh（山本, 守屋）→WIP: 三橋変更中
 
-* Top レベル ('C') はノードじゃ無いため URI もラベルもないので objectList 出力の Attribute は取れるもので最上位を出力
+* ほんの少し遅いと感じたので変更しようとしているが、作業中。紛らわしい場合は削除してください。
 
 # Parameters
 
