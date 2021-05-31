@@ -1,4 +1,6 @@
-# Interaction attribute（守屋）
+# Interaction summary for TogoSite report（守屋）
+
+- reaction (reactome), PPI (IntAct), ChEMBL assay を取得してまとめてテーブルに
 
 ## Parameters
 * `id`
