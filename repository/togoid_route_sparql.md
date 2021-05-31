@@ -88,6 +88,9 @@
   console.log(sourceSubject);
   
   let makeRoute = (source, target, route) => {
+    // 例外処理
+    if (route[0] == "mondo" && source == "hp") route.unshift("medgen");  // hp - medgen - mondo 
+    if (route[route.length - 1] == "mondo" && target == "hp") route.push("medgen"); // mondo - medgen - hp
     route.unshift(source);
     route.push(target);
     return route.filter((x, i, self) => self.indexOf(x) === i);
