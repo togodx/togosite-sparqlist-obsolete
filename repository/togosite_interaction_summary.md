@@ -25,7 +25,7 @@ PREFIX biopax: <http://www.biopax.org/release/biopax-level3.owl#>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 PREFIX up: <http://purl.uniprot.org/core/>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-SELECT DISTINCT ?reaction ?label ?uniprot ?uniprot_name ?uniprot_uri ?chebi ?chebi_name ?chebi_uri
+SELECT DISTINCT ?reaction ?reaction_label ?uniprot ?uniprot_name ?uniprot_uri ?chebi ?chebi_name ?chebi_uri
 FROM <http://rdf.integbio.jp/dataset/togosite/reactome>
 FROM <http://rdf.integbio.jp/dataset/togosite/chebi>
 FROM <http://rdf.integbio.jp/dataset/togosite/uniprot>
@@ -36,10 +36,10 @@ WHERE {
   VALUES ?uniprot { "{{id}}"^^xsd:string }
   {{/if}}
   {{#if type_chk.chebi}}
-    VALUES ?chebi { "{{id}}"^^xsd:string }
+    VALUES ?chebi { "CHEBI:{{id}}"^^xsd:string }
   {{/if}}
   ?react a ?reaction_type ;
-         biopax:displayName ?label ;
+         biopax:displayName ?reaction_label ;
          biopax:xref [
            biopax:db "Reactome"^^xsd:string ;
            biopax:id ?reaction ;
@@ -69,17 +69,18 @@ WHERE {
 PREFIX up: <http://purl.uniprot.org/core/>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX uniprot: <http://purl.uniprot.org/uniprot/>
-SELECT DISTINCT ?type ?target ?target_name
+SELECT DISTINCT ?uniprot_uri ?type ?target_uri ?target_name ?intact
 FROM <http://rdf.integbio.jp/dataset/togosite/uniprot>
 WHERE {
   {{#if type_chk.uniprot}}
   VALUES ?type { up:Non_Self_Interaction up:Self_Interaction }
-  VALUES ?uniprot { uniprot:{{id}} }
-  ?uniprot a up:Protein ;
+  VALUES ?uniprot_uri { uniprot:{{id}} }
+  ?uniprot_uri a up:Protein ;
            up:interaction [ a ?type ;
-                            ^up:interaction ?target 
+                            ^up:interaction ?target_uri ;
+                            up:participant ?intact
                           ] .
-  ?target up:recommendedName/up:fullName ?target_name .
+  ?target_uri up:recommendedName/up:fullName ?target_name .
   {{/if}}
 }
 ```
@@ -91,21 +92,61 @@ PREFIX taxon: <http://identifiers.org/taxonomy/>
 PREFIX cco: <http://rdf.ebi.ac.uk/terms/chembl#>
 PREFIX uniprot: <http://purl.uniprot.org/uniprot/>
 PREFIX up: <http://purl.uniprot.org/core/>
-SELECT DISTINCT ?uniprot ?uniprot_name ?chembl ?chembl_label ?assay_type
+SELECT DISTINCT ?chembl_uri ?chembl_name ?assay_type
 FROM <http://rdf.integbio.jp/dataset/togosite/chembl>
-FROM <http://rdf.integbio.jp/dataset/togosite/uniprot>
 WHERE {
   {{#if type_chk.uniprot}}
   VALUES ?uniprot { uniprot:{{id}} }
-  ?chembl a cco:SmallMolecule ;
-          skos:prefLabel ?chembl_label ;
+  ?chembl_uri a cco:SmallMolecule ;
+          skos:prefLabel ?chembl_name ;
           cco:hasActivity/cco:hasAssay ?assay .
   ?assay cco:hasTarget/skos:exactMatch/skos:exactMatch ?uniprot .
-  OPTIONAL { ?assay cco:assayType ?assay_type . }
+  ?assay cco:assayType ?assay_type .
   ?uniprot a cco:UniprotRef .
-  GRAPH <http://rdf.integbio.jp/dataset/togosite/uniprot> {
-    ?uniprot up:recommendedName/up:fullName ?uniprot_name .
-  }
   {{/if}}
 }
+```
+
+## `return`
+```javascript
+({type, reaction, ppi, assay})=>{
+  let res = [];
+  if (type == "chebi") {
+    for (let d of reaction.results.bindings) {
+      res.push({
+        "interaction": "Reaction",
+        "details": d.reaction_label.value,
+        "details_link": "http://identifiers.org/reactome/" + d.reaction.value,
+        "target": "<a href='" + d.uniprot_uri.value + "'>" + d.uniprot.value + "</a> " + d.uniprot_name.value
+      })
+	}
+    return res;
+  }
+  for (let d of reaction.results.bindings) {
+    res.push({
+      "interaction": "Reaction (Reactome)",
+      "details": d.reaction_label.value,
+      "details_link": "http://identifiers.org/reactome/" + d.reaction.value,
+      "target": "<a href='" + d.chebi_uri.value + "'>" + d.chebi.value + "</a> " + d.chebi_name.value
+    })
+  }
+  for (let d of ppi.results.bindings) {
+    if (d.type.value.match(/Non_Self_Interaction/) && d.uniprot_uri.value == d.target_uri.value) continue;
+    res.push({
+      "interaction": "Protein-protein interaction (IntAct)",
+      "details": d.intact.value.replace("http://purl.uniprot.org/intact/", ""),
+      "details_link": d.intact.value,
+      "target": "<a href='" + d.target_uri.value + "'>" + d.target_uri.value.replace("http://purl.uniprot.org/uniprot/", "") + "</a> " + d.target_name.value
+    })
+  }  
+  for (let d of assay.results.bindings) {
+    res.push({
+      "interaction": "ChEMBL assay",
+      "details": "Assay type: " + d.assay_type.value,
+      "target": "<a href='" + d.chembl_uri.value + "'>" + d.chembl_uri.value.replace("http://rdf.ebi.ac.uk/resource/chembl/molecule/", "") + "</a> " + d.chembl_name.value
+    })
+  }
+  return res;
+}
+
 ```
