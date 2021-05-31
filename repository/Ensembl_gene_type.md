@@ -27,9 +27,10 @@ https://integbio.jp/togosite/sparql
 * `mode`
   * example: idList, objectList
 
-## `gene_list`
+## `gene_list` queryIdsを配列に
+
 ```javascript
-({ queryIds }) => {
+({queryIds}) => {
   queryIds = queryIds.replace(/\s/g, "");
   if (queryIds) {
     return queryIds.split(",");
@@ -39,11 +40,11 @@ https://integbio.jp/togosite/sparql
 };
 ```
 
-## `category_list`
-- categoryIds を配列に
+## `category_list` categoryIds を配列に
+
 ```javascript
 ({categoryIds}) => {
-  categoryIds = categoryIds.replace(/,/g," ")
+  categoryIds = categoryIds.replace(/,/g, " ")
   if (categoryIds.match(/[^\s]/)) return categoryIds.split(/\s+/);
   return false;
 }
@@ -105,9 +106,9 @@ ORDER BY DESC(?count)
 ## `return`
 
 ```javascript
-({mode, main }) => {
+({mode, main}) => {
   if (mode == "objectList") {
-    return main.results.bindings.map(d=>{
+    return main.results.bindings.map(d => {
       return {
         id: d.id.value,
         attribute: {
@@ -119,10 +120,10 @@ ORDER BY DESC(?count)
     });
   }
   if (mode == "idList") {
-    return Array.from(new Set(main.results.bindings.map(d=>d.id.value))); // unique
+    return Array.from(new Set(main.results.bindings.map(d => d.id.value))); // unique
   }
   else {
-    return main.results.bindings.map(d=>{
+    return main.results.bindings.map(d => {
       return {
         categoryId: d.description.value,
         label: d.description_label.value,

@@ -50,6 +50,14 @@
 }
 ```
 
+## `category_top_flag`
+```javascript
+({categoryIds})=>{
+  if (categoryIds == "GO_0008150" || categoryIds == "GO_0005575" || categoryIds == "GO_0003674") return true;
+  return false;
+}
+```
+
 ## Endpoint
 https://integbio.jp/togosite/sparql
 
@@ -65,7 +73,12 @@ FROM <http://rdf.integbio.jp/dataset/togosite/go>
 WHERE
 {
 {{#if mode}}
+  {{#if category_top_flag}}
+  VALUES ?go_list { {{#each categoryArray}} obo:{{this}} {{/each}} }
+  ?go rdfs:subClassOf ?go_list .
+  {{else}}
   VALUES ?go { {{#each categoryArray}} obo:{{this}} {{/each}} }
+  {{/if}}
 {{else}}
   VALUES ?go_list { {{#each categoryArray}} obo:{{this}} {{/each}} }
   ?go rdfs:subClassOf ?go_list .
