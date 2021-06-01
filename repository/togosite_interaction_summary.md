@@ -19,7 +19,7 @@
 };
 ```
 
-## `typeObj`
+## `chembl`
 ```javascript
 async ({ type, id }) => {
   if (type == "uniprot") return false;
@@ -138,7 +138,7 @@ WHERE {
   ?assay cco:hasTarget/skos:exactMatch/skos:exactMatch ?uniprot_uri .
   ?assay cco:assayType ?assay_type .
   ?uniprot_uri a cco:UniprotRef .
-  GRAPH <http://rdf.integbio.jp/dataset/togosite/chebi> {
+  GRAPH <http://rdf.integbio.jp/dataset/togosite/uniprot> {
     ?uniprot_uri up:recommendedName/up:fullName ?uniprot_name .
   }
   {{/if}}
@@ -161,7 +161,7 @@ WHERE {
     for (let d of assay.results.bindings) {
       res.push({
         "interaction": "ChEMBL assay",
-        "details": d.chembl_uri.value.replace("http://rdf.ebi.ac.uk/resource/chembl/molecule/", "") + " Assay type: " + d.assay_type.value,
+        "details": d.chembl_uri.value.replace("http://rdf.ebi.ac.uk/resource/chembl/molecule/", "") + ", Assay type: " + d.assay_type.value,
         "target": "<a href='" + d.uniprot_uri.value + "'>" + d.uniprot_uri.value.replace("http://purl.uniprot.org/uniprot/", "") + "</a> " + d.uniprot_name.value
       })
     }
