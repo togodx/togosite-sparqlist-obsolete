@@ -19,7 +19,7 @@ async ({togoKey, properties, queryIds})=>{
     return await fetch(url, options).then(res=>res.json());
   }
 
-  const options = {
+  let options = {
     method: 'POST',
     headers: {
       'Accept': 'application/json',
@@ -70,31 +70,23 @@ async ({togoKey, properties, queryIds})=>{
   }
   
   const getAllAttributeData = async (togoKey) => {
-    let attributeData = {};
-    let start = Date.now();
     let promise = [];
     let keys = [];
-    // 並列
     for (let configSubject of togositeConfigJson) {
       for (let configProperty of configSubject.properties) {
         if (queryPropertyIds.includes(configProperty.propertyId)) { // クエリに Hit したら
   	     // console.log(configProperty.propertyId); // debug
-          console.log(Date.now() - start);
           promise.push(getAttributeData(togoKey, configProperty).then(d => d));
           keys.push(configProperty.propertyId);
        }
       }
     }
     
-    return Promise.all(promise).then(d => {
-      console.log(d);
-      let objectList = {};
-      let togo2primary = {};
-      for (let i = 0; i < keys.length; i++) {
-        togo2primary[keys[i]] = d[i].pair;
-        objectList[keys[i]] = d[i].list;
-      }
-      return {"pair": togo2primary, "list": objectList};
+    return Promise.all(promise).then(data => {
+      return keys.reduce((obj, key, i) => {
+        obj[key] = data[i];
+        return obj;
+      }, {});
     });
   } 
   
@@ -112,22 +104,22 @@ async ({togoKey, properties, queryIds})=>{
     tableData[togoId] = [];
   }
     
-  let res = await getAllAttributeData(togoKey);
-  let attributeData = res.list;
-  let togo2primary = res.pair;
+  let attributeData = await getAllAttributeData(togoKey);
+  // console.log(attributeData);
   for (let configSubject of togositeConfigJson) {
     for (let configProperty of configSubject.properties) {
       if (queryPropertyIds.includes(configProperty.propertyId)) { // クエリに Hit したら
-
+        let togo2primary = attributeData[configProperty.propertyId].pair;
+	    let objectList = attributeData[configProperty.propertyId].list;
         // mapping to 'togoKey' ID
         let primaryId2attribute = {};
-        for (let d of attributeData[configProperty.propertyId]) {
+        for (let d of objectList) {
           if (!primaryId2attribute[d.id]) primaryId2attribute[d.id] = [];
           primaryId2attribute[d.id].push(d);
         }
-        for (let togoId of Object.keys(togo2primary[configProperty.propertyId])) {
+        for (let togoId of Object.keys(togo2primary)) {
           let attributeList = [];
-          for (let promaryId of togo2primary[configProperty.propertyId][togoId]) {
+          for (let promaryId of togo2primary[togoId]) {
             if (primaryId2attribute[promaryId]) attributeList = attributeList.concat(primaryId2attribute[promaryId]);
           }
           if (attributeList[0]) { 
