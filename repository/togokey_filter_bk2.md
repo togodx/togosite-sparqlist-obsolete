@@ -1,4 +1,4 @@
-# togokey filter (aggregate SPARQList)(togoID API)
+# togokey filter (aggregate SPARQList)(togoId SPARQL 2)
 
 ## Parameters
 
@@ -32,8 +32,10 @@ async ({togoKey, properties, inputIds})=>{
   }
 
   let togositeConfig = "https://raw.githubusercontent.com/dbcls/togosite/develop/config/togosite-human/properties.json";
-  let togoidApi = "https://integbio.jp/togosite/sparqlist/api/togoid_route_api"; // TogoID API 版
+  let sparqlSplitter = "https://integbio.jp/togosite/sparqlist/api/togoid_sparqlist_splitter";
+  let togoidApi = "https://integbio.jp/togosite/sparqlist/api/togoid_route_sparql"; // SPARQList 版 ID 変換
   let togositeConfigJson = await fetchReq(togositeConfig, {method: "get"});
+  let idLimit = 2000; // split 判定
   
   let start = Date.now(); // debug
 
@@ -67,7 +69,12 @@ async ({togoKey, properties, inputIds})=>{
         let idPair = [];
         if (togoKey != configProperty.primaryKey) {
           let body = "source=" + configProperty.primaryKey + "&target=" + togoKey + "&ids=" +  encodeURIComponent(primaryIds.join(","));
-          idPair = await fetchReq(togoidApi, options, body);
+          if (primaryIds.length <= idLimit) {
+            idPair = await fetchReq(togoidApi, options, body);
+          } else {
+            body += "&sparqlet=" + encodeURIComponent(togoidApi) + "&limit=" + idLimit;
+            idPair = await fetchReq(sparqlSplitter, options, body);
+          }
         } else {
           idPair = primaryIds.map(d => {return {source_id: d, target_id: d} });
         }

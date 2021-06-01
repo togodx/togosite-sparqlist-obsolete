@@ -1,4 +1,4 @@
-# togokey table data (aggregate SPARQList) テーブルデータ取得（絞り込み CategoryIds あり、絞り込み無し）(TogoID API 版)
+# togokey table data (aggregate SPARQList)(togoID API)
 
 ## Parameters
 

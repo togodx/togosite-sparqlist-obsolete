@@ -1,4 +1,4 @@
-# togokey filter (aggregate SPARQList) 絞り込み条件で検索して、条件にあった togo key リストを返す
+# togokey filter (aggregate SPARQList)(非同期版)絞り込み条件で検索して、条件にあった togo key リストを返す
 
 ## Parameters
 
@@ -12,7 +12,7 @@
 ## `primaryIds`
 ```javascript
 async ({togoKey, properties, inputIds})=>{
-  let fetchReq = async (url, options, body) => {
+  const fetchReq = async (url, options, body) => {
     if (body) options.body = body;
     //==== debug code
     let res = await fetch(url, options);
@@ -31,13 +31,61 @@ async ({togoKey, properties, inputIds})=>{
     }
   }
 
-  let togositeConfig = "https://raw.githubusercontent.com/dbcls/togosite/develop/config/togosite-human/properties.json";
-  let sparqlSplitter = "https://integbio.jp/togosite/sparqlist/api/togoid_sparqlist_splitter";
-  let togoidApi = "https://integbio.jp/togosite/sparqlist/api/togoid_route_sparql"; // SPARQList 版 ID 変換
-  let togositeConfigJson = await fetchReq(togositeConfig, {method: "get"});
-  let idLimit = 2000; // split 判定
+  const togositeConfig = "https://raw.githubusercontent.com/dbcls/togosite/develop/config/togosite-human/properties.json";
+  const sparqlSplitter = "https://integbio.jp/togosite/sparqlist/api/togoid_sparqlist_splitter";
+  const togoidApi = "https://integbio.jp/togosite/sparqlist/api/togoid_route_sparql"; // SPARQList 版 ID 変換
+  const togositeConfigJson = await fetchReq(togositeConfig, {method: "get"});
+  const queryProperties = JSON.parse(properties);
+  const queryPropertyIds = queryProperties.map(d => d.propertyId);
+  const idLimit = 2000; // split 判定
   
-  let start = Date.now(); // debug
+  const getIdPair = async (configProperty) => {
+    // get 'primatyKey' ID list by category filtering
+    let queryCategoryIds = "";
+    for (let queryProperty of queryProperties) {
+      if (queryProperty.propertyId == configProperty.propertyId) {
+        queryCategoryIds = queryProperty.categoryIds.join(",");
+        break;
+      }
+    }
+    let primaryIds = await fetchReq(configProperty.data, options, "mode=idList&categoryIds=" + queryCategoryIds);
+        
+    // get 'primalyKey' ID - togoKey' ID list via togoID API
+    let idPair = [];
+    if (togoKey != configProperty.primaryKey) {
+      let body = "source=" + configProperty.primaryKey + "&target=" + togoKey + "&ids=" +  encodeURIComponent(primaryIds.join(","));
+      if (primaryIds.length <= idLimit) {
+        idPair = await fetchReq(togoidApi, options, body);
+      } else {
+        body += "&sparqlet=" + encodeURIComponent(togoidApi) + "&limit=" + idLimit;
+        idPair = await fetchReq(sparqlSplitter, options, body);
+      }
+    } else {
+      idPair = primaryIds.map(d => {return {source_id: d, target_id: d} });
+    }
+    return idPair;
+  }
+
+  const getAllIdPair = async () => {
+    let promise = [];
+    let keys = [];
+    for (let configSubject of togositeConfigJson) {
+      for (let configProperty of configSubject.properties) {
+        if (queryPropertyIds.includes(configProperty.propertyId)) { // クエリに Hit したら
+  	      // console.log(confiogProperty.propertyId); // debug
+          promise.push(getIdPair(configProperty).then(d => d));
+          keys.push(configProperty.propertyId);
+        }
+      }
+    }
+    
+    return Promise.all(promise).then(data => {
+      return keys.reduce((obj, key, i) => {
+        obj[key] = data[i];
+        return obj;
+      }, {});
+    });
+  } 
 
   let togoId = undefined;
   if (inputIds) {
@@ -47,40 +95,18 @@ async ({togoKey, properties, inputIds})=>{
     }
   }
   
-  let queryProperties = JSON.parse(properties);
-  let queryPropertyIds = queryProperties.map(d => d.propertyId);
-  // properties.json を順番に
+  let idPairAll = await getAllIdPair();
+console.log(idPairAll);
+  
   for (let configSubject of togositeConfigJson) {
+    console.log(configSubject);
     for (let configProperty of configSubject.properties) {
+      console.log(configProperty);
       if (queryPropertyIds.includes(configProperty.propertyId)) { // クエリに Hit したら
-
-        // get 'primatyKey' ID list by category filtering
-        let queryCategoryIds = "";
-        for (let queryProperty of queryProperties) {
-          if (queryProperty.propertyId == configProperty.propertyId) {
-            queryCategoryIds = queryProperty.categoryIds.join(",");
-            break;
-          }
-        }
-        let primaryIds = await fetchReq(configProperty.data, options, "mode=idList&categoryIds=" + queryCategoryIds);
-        console.log((Date.now() - start) + " ms"); //debug
+         console.log(configProperty.propertyId);
+        let idPair = idPairAll[configProperty.propertyId];
         
-        // get 'primalyKey' ID - togoKey' ID list via togoID API
-        let idPair = [];
-        if (togoKey != configProperty.primaryKey) {
-          let body = "source=" + configProperty.primaryKey + "&target=" + togoKey + "&ids=" +  encodeURIComponent(primaryIds.join(","));
-          if (primaryIds.length <= idLimit) {
-            idPair = await fetchReq(togoidApi, options, body);
-          } else {
-            body += "&sparqlet=" + encodeURIComponent(togoidApi) + "&limit=" + idLimit;
-            idPair = await fetchReq(sparqlSplitter, options, body);
-          }
-        } else {
-          idPair = primaryIds.map(d => {return {source_id: d, target_id: d} });
-        }
-        // console.log(idPair.length + " pairs"); //debug
-        console.log((Date.now() - start) + " ms"); //debug
-        
+        console.log(idPair);
         // set 'togoKey' Ids
         let filterId = {};
         for (let id of idPair.map(d=>d.target_id)) {

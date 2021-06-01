@@ -1,4 +1,4 @@
-# togokey filter (aggregate SPARQList) (togoID api 代替1版)
+# togokey filter (aggregate SPARQList) (togoID SPARQL)
 
 ## Parameters
 
