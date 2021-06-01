@@ -26,8 +26,7 @@ async ({togoKey, properties, queryIds})=>{
       'Content-Type': 'application/x-www-form-urlencoded'
     }
   }
-  
-//  let togositeConfig = "https://raw.githubusercontent.com/dbcls/togosite/develop/config/togosite.config.json";
+
   let togositeConfig = "https://raw.githubusercontent.com/dbcls/togosite/develop/config/togosite-human/properties.json";
   let togoidApi = "https://integbio.jp/togosite/sparqlist/api/togoid_route_api"; // TogoID API 版
   let togositeConfigJson = await fetchReq(togositeConfig, {method: "get"});
@@ -65,10 +64,6 @@ async ({togoKey, properties, queryIds})=>{
           if (!togo2primary[d.source_id]) togo2primary[d.source_id] = [];
           togo2primary[d.source_id].push(d.target_id);
         }
-        
-        for (let d of idPair) {
-          if (d.source_id == "649") console.log(d); 
-        }
 
         // get attributes of 'primaryKey' Ids
         let primaryIds = Array.from(new Set(idPair.map(d=>d.target_id))).join(",");
@@ -95,6 +90,7 @@ async ({togoKey, properties, queryIds})=>{
           if (attributeList[0]) { 
             tableData[togoId].push({
               propertyId: configProperty.propertyId,
+              propertyLabel: configProperty.label,
               propertyKey: configProperty.primaryKey,
               attributes: attributeList
             })
@@ -105,11 +101,9 @@ async ({togoKey, properties, queryIds})=>{
   }
   // object to list
   return togoIdArray.map(togoId=>{
-    let obj = {
-      id: togoId,
-      properties: tableData[togoId]
-    }
+    let obj = { id: togoId };
     if (togoIdToLabel[togoId]) obj.label = togoIdToLabel[togoId];
+    obj.properties = tableData[togoId];
     return obj;
   });
 }

@@ -96,6 +96,7 @@ async ({togoKey, properties, queryIds})=>{
           if (attributeList[0]) { 
             tableData[togoId].push({
               propertyId: configProperty.propertyId,
+              propertyLabel: configProperty.label,
               propertyKey: configProperty.primaryKey,
               attributes: attributeList
             })
@@ -106,11 +107,9 @@ async ({togoKey, properties, queryIds})=>{
   }
   // object to list
   return togoIdArray.map(togoId=>{
-    let obj = {
-      id: togoId,
-      properties: tableData[togoId]
-    }
+    let obj = { id: togoId };
     if (togoIdToLabel[togoId]) obj.label = togoIdToLabel[togoId];
+    obj.properties = tableData[togoId];
     return obj;
   });
 }
