@@ -27,7 +27,14 @@ async ({togoKey, properties, queryIds})=>{
     }
   }
   
+  const togositeConfig = "https://raw.githubusercontent.com/dbcls/togosite/develop/config/togosite-human/properties.json";
+  const sparqlSplitter = "https://integbio.jp/togosite/sparqlist/api/sparqlist_splitter";
+  const togoidApi = "https://integbio.jp/togosite/sparqlist/api/togoid_route_sparql";
+  const togositeConfigJson = await fetchReq(togositeConfig, {method: "get"});
+  const idLimit = 2000; // split 判定
+  
   const getAttributeData = async (togoKey, configProperty) => {
+     console.log(configProperty.propertyId);  
     // get 'togoKey' ID - 'primalyKey' ID list via TogoID API
     let idPair = [];
     if (togoKey != configProperty.primaryKey) idPair = await fetchReq(togoidApi, options, "source=" + togoKey + "&target=" + configProperty.primaryKey + "&ids=" + encodeURIComponent(togoIdArray.join(" ")));
@@ -56,27 +63,23 @@ async ({togoKey, properties, queryIds})=>{
     }
   }
   
-  const parallel = async (togoKey) => {
+  const getAllAttributeData = async (togoKey) => {
     let attributeData = {};
     let start = Date.now();
     // 並列
     for (let configSubject of togositeConfigJson) {
       for (let configProperty of configSubject.properties) {
         if (queryPropertyIds.includes(configProperty.propertyId)) { // クエリに Hit したら
-  	      console.log(configProperty.propertyId); // debug
+  	     // console.log(configProperty.propertyId); // debug
           console.log(Date.now() - start);
-          attributeData[configProperty.propertyId] = await getAttributeData(togoKey, configProperty, attributeData);
-        }
+         // attributeData[configProperty.propertyId] = await getAttributeData(togoKey, configProperty);
+          attributeData[configProperty.propertyId] = getAttributeData(togoKey, configProperty).then(d => d);
+       }
       }
     }
-    return attributeData;
-  }
-  
-  const togositeConfig = "https://raw.githubusercontent.com/dbcls/togosite/develop/config/togosite-human/properties.json";
-  const sparqlSplitter = "https://integbio.jp/togosite/sparqlist/api/sparqlist_splitter";
-  const togoidApi = "https://integbio.jp/togosite/sparqlist/api/togoid_route_sparql";
-  const togositeConfigJson = await fetchReq(togositeConfig, {method: "get"});
-  const idLimit = 2000; // split 判定
+    return Promise.all(attributeData).then(d => {console.log(d); return d;});
+  //  return attributeData;
+  } 
   
   // label 取得
   const labelApi = "https://integbio.jp/togosite/sparqlist/api/togokey_label";
@@ -92,13 +95,31 @@ async ({togoKey, properties, queryIds})=>{
   for (let togoId of togoIdArray) {
     tableData[togoId] = [];
   }
-  let attributeData = {};
   
-  parallel(togoKey).then(attributeData => {
+  /* let attributeData = {};
+    let start = Date.now();
+    // 並列
     for (let configSubject of togositeConfigJson) {
       for (let configProperty of configSubject.properties) {
         if (queryPropertyIds.includes(configProperty.propertyId)) { // クエリに Hit したら
-
+  	     // console.log(configProperty.propertyId); // debug
+          console.log(Date.now() - start);
+         // attributeData[configProperty.propertyId] = await getAttributeData(togoKey, configProperty);
+          attributeData[configProperty.propertyId] = getAttributeData(togoKey, configProperty).then(d => d);
+       }
+      }
+    }
+   return Promise.all(attributeData).then(attributeData => { */
+    
+  //let attributeData = await getAllAttributeData(togoKey);
+  return await getAllAttributeData(togoKey);
+ // Promise.all(attributeData).then(attributeData => {
+  //  attributeData = getAllAttributeData(togoKey);
+ /*   console.log("hoge");
+    console.log(attributeData);
+    for (let configSubject of togositeConfigJson) {
+      for (let configProperty of configSubject.properties) {
+        if (queryPropertyIds.includes(configProperty.propertyId)) { // クエリに Hit したら
           // mapping to 'togoKey' ID
           let primaryId2attribute = {};
           for (let d of attributeData[configProperty.propertyId]) {
@@ -129,7 +150,7 @@ async ({togoKey, properties, queryIds})=>{
       obj.properties = tableData[togoId];
       return obj;
     })
-  })
+//  }) */
 }
 ```
 
