@@ -8,7 +8,7 @@
   * example: P12270, 15996
 * `type`
   * default: uniprot
-  * example: uniprot chebi
+  * example: uniprot, chebi
   
 ## `type_chk`
 ```javascript
@@ -18,6 +18,28 @@
   return obj;
 };
 ```
+
+## `typeObj`
+```javascript
+async ({ type, id }) => {
+  if (type == "uniprot") return false;
+  const togoidApi = "https://integbio.jp/togosite/sparqlist/api/togoid_route_sparql";
+  const fetchReq = async (url, body) => {
+    let options = {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }
+    }
+    if (body) options.body = body;
+    return await fetch(url, options).then(res=>res.json());
+  }
+  let pair = await fetchReq(togoidApi, "source=chebi&target=chembl_compound&ids=" + id);
+  return pair.map(d => d.target_id);
+}
+```
+
 ## Endpoint
 https://integbio.jp/togosite/sparql
 
@@ -94,17 +116,31 @@ PREFIX taxon: <http://identifiers.org/taxonomy/>
 PREFIX cco: <http://rdf.ebi.ac.uk/terms/chembl#>
 PREFIX uniprot: <http://purl.uniprot.org/uniprot/>
 PREFIX up: <http://purl.uniprot.org/core/>
-SELECT DISTINCT ?chembl_uri ?chembl_name ?assay_type
+PREFIX chembl: <http://rdf.ebi.ac.uk/resource/chembl/molecule/>
+SELECT DISTINCT ?chembl_uri ?chembl_name ?assay_type ?uniprot_uri {{#if chembl}}?uniprot_name{{/if}}
 FROM <http://rdf.integbio.jp/dataset/togosite/chembl>
+FROM <http://rdf.integbio.jp/dataset/togosite/uniprot>
 WHERE {
   {{#if type_chk.uniprot}}
-  VALUES ?uniprot { uniprot:{{id}} }
+  VALUES ?uniprot_uri { uniprot:{{id}} }
   ?chembl_uri a cco:SmallMolecule ;
           skos:prefLabel ?chembl_name ;
           cco:hasActivity/cco:hasAssay ?assay .
-  ?assay cco:hasTarget/skos:exactMatch/skos:exactMatch ?uniprot .
+  ?assay cco:hasTarget/skos:exactMatch/skos:exactMatch ?uniprot_uri .
   ?assay cco:assayType ?assay_type .
-  ?uniprot a cco:UniprotRef .
+  ?uniprot_uri a cco:UniprotRef .
+  {{/if}}
+  {{#if chembl}}
+  VALUES ?chembl_uri { {{#each chembl}} chembl:{{this}} {{/each}} }
+  ?chembl_uri a cco:SmallMolecule ;
+          skos:prefLabel ?chembl_name ;
+          cco:hasActivity/cco:hasAssay ?assay .
+  ?assay cco:hasTarget/skos:exactMatch/skos:exactMatch ?uniprot_uri .
+  ?assay cco:assayType ?assay_type .
+  ?uniprot_uri a cco:UniprotRef .
+  GRAPH <http://rdf.integbio.jp/dataset/togosite/chebi> {
+    ?uniprot_uri up:recommendedName/up:fullName ?uniprot_name .
+  }
   {{/if}}
 }
 ```
@@ -122,6 +158,13 @@ WHERE {
         "target": "<a href='" + d.uniprot_uri.value + "'>" + d.uniprot.value + "</a> " + d.uniprot_name.value
       })
 	}
+    for (let d of assay.results.bindings) {
+      res.push({
+        "interaction": "ChEMBL assay",
+        "details": d.chembl_uri.value.replace("http://rdf.ebi.ac.uk/resource/chembl/molecule/", "") + " Assay type: " + d.assay_type.value,
+        "target": "<a href='" + d.uniprot_uri.value + "'>" + d.uniprot_uri.value.replace("http://purl.uniprot.org/uniprot/", "") + "</a> " + d.uniprot_name.value
+      })
+    }
     return res;
   }
   for (let d of reaction.results.bindings) {
