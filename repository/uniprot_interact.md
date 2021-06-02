@@ -129,7 +129,10 @@ ORDER BY ?target_num
     for (let d of data.results.bindings) {
       let num = Number(d.target_num.value);
       if (num < limit_1) res.push( { categoryId: d.target_num.value, label: d.target_num.value, count: Number(d.count.value)} );
-      else if (num >= limit_1 && res[res.length - 1].label != limit_1 + "-") res.push( { categoryId: limit_1 + "-", label: limit_1 + "-", count: Number(d.count.value), hasChild: true} );
+      // debug begin
+      // else if (num >= limit_1 && res[res.length - 1].label != limit_1 + "-") res.push( { categoryId: limit_1 + "-", label: limit_1 + "-", count: Number(d.count.value), hasChild: true} );
+      else if (num >= limit_1 && (res.length == 0 || res[res.length - 1].label != limit_1 + "-")) res.push( { categoryId: limit_1 + "-", label: limit_1 + "-", count: Number(d.count.value), hasChild: true} );
+      // debug end
       else res[res.length - 1].count += Number(d.count.value);
     }
     return res;
@@ -141,7 +144,10 @@ ORDER BY ?target_num
       let label = start + "-" + (start + 9);
       if (num < limit_1) continue;
       if (num < limit_2 && res.length <= (num - limit_1) / bin_2) res.push( { categoryId: label, label: label, count: Number(d.count.value), hasChild: true} );
-      else if (num >= limit_2 && res[res.length - 1].label != limit_2 + "-") res.push( { categoryId: limit_2 + "-", label: limit_2 + "-", count: Number(d.count.value), hasChild: true} );
+      // debug begin
+      // else if (num >= limit_2 && res[res.length - 1].label != limit_2 + "-") res.push( { categoryId: limit_2 + "-", label: limit_2 + "-", count: Number(d.count.value), hasChild: true} );
+      else if (num >= limit_2 && (res.length == 0 || res[res.length - 1].label != limit_2 + "-")) res.push( { categoryId: limit_2 + "-", label: limit_2 + "-", count: Number(d.count.value), hasChild: true} );
+      // debug end
       else res[res.length - 1].count += Number(d.count.value);
     }
     return res;
