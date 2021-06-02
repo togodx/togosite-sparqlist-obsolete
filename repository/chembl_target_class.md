@@ -47,8 +47,7 @@
 https://integbio.jp/togosite/sparql
 * https://integbio.jp/rdf/mirror/mesh/sparql
 
-## `targetMesh`
-- mesh D番号 と目的 tree 階層の対応表
+## `classLavel`
   - Top レベルだけ例外処理
 ```sparql
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
