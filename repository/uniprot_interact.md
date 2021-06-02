@@ -1,6 +1,9 @@
-# uniprot interact proteins (IntAct)（守屋）
+# uniprot interact human proteins (IntAct)（守屋）
 
 - 相互作用相手数の内訳
+  - human protein - human protein のみ
+  - endpoint に human しか入っていないため
+  - 本家 UniProt には virus protein との相互作用もあるが、RDF が種に依存してるので TogoSite endpoint では相手が取れない
 
 ## Description
 
@@ -9,15 +12,15 @@
     - This item based on the data of March, 2021 of UniProt (human only).
 - Query
     - Input
-        - UniProt ID, Number of interacting proteins
+        - UniProt ID, Number of interacting human proteins
     - Output
-        - The number of interacting proteins from UniProt
+        - The number of interacting human proteins from UniProt
         - If a UniProt ID is entered, it returns the number of interacting proteins
 
 ## Parameters
 
 * `categoryIds` (type: interact proteins range)
-  * example: 20-
+  * example: 3-4, 11-11, 20-
 * `queryIds` (type: uniprot)
   * example: Q9NYF8,Q4V339,A6NCE7,A7E2F4,P69849,A6NN73,Q92928,Q5T1J5,P0C7P4,Q6DN03,P09874,Q08211,Q5T4S7,P12270,Q9UPN3,P07814,P53621,P49321,P0C629,Q9BZK8,Q9BY65
 * `mode`
@@ -40,7 +43,7 @@ https://integbio.jp/togosite/sparql
 - メイン SPARQL
   - 内訳返す場合とタンパク質リスト返す場合を handlebars で条件分岐
   - 相互作用相手数、タンパク質リストでフィルタリング
-  - セルフ interaction を別に取得して UNION
+  - セルフ interaction, interaction 無しを別に取得して UNION
 ```sparql
 PREFIX up: <http://purl.uniprot.org/core/>
 PREFIX uniprot: <http://purl.uniprot.org/uniprot/>
@@ -50,41 +53,50 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 {{#if mode}}
 SELECT DISTINCT ?uniprot ?target_num
 {{else}} 
-SELECT ?target_num ?label (COUNT(DISTINCT ?uniprot) AS ?count)
+SELECT ?target_num (COUNT(DISTINCT ?uniprot) AS ?count)
 {{/if}}
 FROM <http://rdf.integbio.jp/dataset/togosite/uniprot>
 WHERE {
+  # union non-self-, self-, non-
   {
-    SELECT ?uniprot (COUNT (DISTINCT ?target) - 1 AS ?target_num)
+    SELECT ?uniprot (COUNT (DISTINCT ?target) AS ?target_num)
     WHERE {
 {{#if queryArray}}
       VALUES ?uniprot { {{#each queryArray}} uniprot:{{this}} {{/each}} }
 {{/if}}
-      {
+      { # non-self-interaction
         ?uniprot a up:Protein ;
                  up:organism taxon:9606 ;
                  up:proteome ?proteome ;
-                 up:interaction/^up:interaction ?target .
-        FILTER (?target != ?uniprot)                   # filter own
+                 up:interaction ?interaction .
+        ?interaction a up:Non_Self_Interaction ;  # non self
+                     ^up:interaction ?target .
         FILTER(REGEX(STR(?proteome), "UP000005640"))
-      } UNION {                                        # union self-interaction ?uniprot-?target list
-        SELECT DISTINCT ?uniprot ?target
-        WHERE {
-          {
-            SELECT ?uniprot ?interaction (COUNT (DISTINCT ?target) AS ?count)
-            WHERE {
-              ?uniprot a up:Protein ;
-                      up:organism taxon:9606 ;
-                      up:proteome ?proteome ;
-                      up:interaction ?interaction .
-              ?target up:interaction ?interaction  .
-              FILTER(REGEX(STR(?proteome), "UP000005640"))
-            }
-          }
-          FILTER (?count = 1)                           # filter selef-interaction
-          BIND (?uniprot AS ?target)
-        }
-      }
+        FILTER (?target != ?uniprot)
+      } UNION { # self-interaction
+        ?uniprot a up:Protein ;
+                 up:organism taxon:9606 ;
+                 up:proteome ?proteome ;
+                 up:interaction ?interaction .
+        ?interaction a up:Self_Interaction ;  # self
+                     ^up:interaction ?target .
+        FILTER(REGEX(STR(?proteome), "UP000005640"))
+        FILTER (?target = ?uniprot)
+      } 
+    }
+  } UNION { # non-interaction
+    SELECT ?uniprot ?target_num
+    WHERE {
+{{#if queryArray}}
+      VALUES ?uniprot { {{#each queryArray}} uniprot:{{this}} {{/each}} }
+{{/if}}
+      VALUES ?interact_type { up:Self_Interaction up:Non_Self_Interaction }
+      ?uniprot a up:Protein ;
+               up:organism taxon:9606 ;
+               up:proteome ?proteome .
+      FILTER(REGEX(STR(?proteome), "UP000005640"))    
+      MINUS { ?uniprot up:interaction [ a ?interact_type ] . }   
+      BIND (0 AS ?target_num)
     }
   }
 }
@@ -108,6 +120,7 @@ ORDER BY ?target_num
       let range = {begin: 0, end: Infinity};
       if (categoryIds.match(/^[\d\.]+-/)) range.begin = Number(categoryIds.match(/^([\d\.]+)-/)[1]);
       if (categoryIds.match(/-[\d\.]+$/)) range.end = Number(categoryIds.match(/-([\d\.]+)$/)[1]);
+      console.log(range);
       for (let d of data.results.bindings) {
         if (range.begin <= Number(d.target_num.value) && Number(d.target_num.value) <= range.end) filteredData.push(d);
       }
