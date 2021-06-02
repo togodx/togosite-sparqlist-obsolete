@@ -54,7 +54,7 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX meshv: <http://id.nlm.nih.gov/mesh/vocab#>
 PREFIX tree: <http://id.nlm.nih.gov/mesh/>
 SELECT DISTINCT ?mesh ?tree ?label (SAMPLE(?child_tree) AS ?child)
-#FROM <http://integbio.jp/rdf/mirror/ontology/mesh>
+
 FROM <http://rdf.integbio.jp/dataset/togosite/mesh>
 WHERE {
 {{#if top}}
@@ -84,8 +84,7 @@ https://integbio.jp/togosite/sparql
 * https://integbio.jp/rdf/mirror/ebi/sparql
 
 ## `chemblList`
-- ChEMBL molecule - mesh D番号の対応リスト
-  - 変数無いので結果がキャッシュに入れば早い
+
 ```sparql
 PREFIX cco: <http://rdf.ebi.ac.uk/terms/chembl#> 
 SELECT DISTINCT ?molecule ?mesh
