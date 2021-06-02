@@ -53,6 +53,7 @@ async ({togoKey, properties, inputIds})=>{
         break;
       }
     }
+    configProperty.data = configProperty.data.replace("https://integbio.jp/togosite/sparqlist/", "http://localhost:3000/togosite/sparqlist/");
     let primaryIds = await fetchReq(configProperty.data, options, "mode=idList&categoryIds=" + queryCategoryIds);
     const t2 = Date.now() - start; // debug
     

@@ -65,6 +65,7 @@ async ({togoKey, properties, queryIds})=>{
     }
     let body = "mode=objectList&queryIds=" + encodeURIComponent(primaryIds) + categoryIdsParam;
     let objectList = [];
+    configProperty.data = configProperty.data.replace("https://integbio.jp/togosite/sparqlist/", "http://localhost:3000/togosite/sparqlist/");
     if (primaryIds.length <= idLimit) {
       objectList = await fetchReq(configProperty.data, options, body);
     } else {
