@@ -32,8 +32,10 @@ async ({togoKey, properties, inputIds})=>{
   }
 
   const togositeConfig = "https://raw.githubusercontent.com/dbcls/togosite/develop/config/togosite-human/properties.json";
-  const sparqlSplitter = "https://integbio.jp/togosite/sparqlist/api/togoid_sparqlist_splitter";
-  const togoidApi = "https://integbio.jp/togosite/sparqlist/api/togoid_route_sparql"; // SPARQList 版 ID 変換
+  //const sparqlSplitter = "https://integbio.jp/togosite/sparqlist/api/togoid_sparqlist_splitter";
+  //const togoidApi = "https://integbio.jp/togosite/sparqlist/api/togoid_route_sparql";
+  const sparqlSplitter = "http://localhost:3000/togosite/sparqlist/api/togoid_sparqlist_splitter";
+  const togoidApi = "http://localhost:3000/togosite/sparqlist/api/togoid_route_sparql";
   const togositeConfigJson = await fetchReq(togositeConfig, {method: "get"});
   const queryProperties = JSON.parse(properties);
   const queryPropertyIds = queryProperties.map(d => d.propertyId);
@@ -41,6 +43,8 @@ async ({togoKey, properties, inputIds})=>{
   const start = Date.now(); // debug
                          
   const getIdPair = async (configProperty) => {
+     const t1 = Date.now() - start; // debug
+    
     // get 'primatyKey' ID list by category filtering
     let queryCategoryIds = "";
     for (let queryProperty of queryProperties) {
@@ -49,7 +53,6 @@ async ({togoKey, properties, inputIds})=>{
         break;
       }
     }
-    const t1 = Date.now() - start; // debug
     let primaryIds = await fetchReq(configProperty.data, options, "mode=idList&categoryIds=" + queryCategoryIds);
     const t2 = Date.now() - start; // debug
     
@@ -68,6 +71,7 @@ async ({togoKey, properties, inputIds})=>{
     }
     const t3 = Date.now() - start; // debug
     console.log(configProperty.propertyId + ": start " + t1 + ",mid " + t2 + ",fin " + t3);
+    
     return idPair;
   }
 
@@ -76,7 +80,6 @@ async ({togoKey, properties, inputIds})=>{
     for (let configSubject of togositeConfigJson) {
       for (let configProperty of configSubject.properties) {
         if (queryPropertyIds.includes(configProperty.propertyId)) { // クエリに Hit したら
-  	      // console.log(confiogProperty.propertyId); // debug
           idPairAll[configProperty.propertyId] = getIdPair(configProperty).then(d => d);
         }
       }
@@ -93,7 +96,8 @@ async ({togoKey, properties, inputIds})=>{
   }
   
   let idPairAll = await getAllIdPair();
-  //console.log(idPairAll);
+  // console.log(idPairAll);
+  
   for (let configSubject of togositeConfigJson) {
     for (let configProperty of configSubject.properties) {
       if (queryPropertyIds.includes(configProperty.propertyId)) { // クエリに Hit したら  
