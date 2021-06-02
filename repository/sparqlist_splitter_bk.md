@@ -1,4 +1,4 @@
-# SPARQList splitter for togosite attribut bar (非同期版)
+# SPARQList splitter for togosite attribut bar
 
 * 要素のリストを 'limit' で分割して 'sparqlet' に 'categoryIds' 付きで投げて、各結果を整形して返す
   * order は保持されない（order 初期値はフロントエンドが持っている）
@@ -22,7 +22,7 @@
 
 ```javascript
 async ({sparqlet, queryIds, categoryIds, mode, limit})=>{
-  const fetchReq = async function(url, body){
+  let fetchReq = async function(url, body){
     let options = {
       method: 'POST',
       headers:	 {
@@ -31,17 +31,15 @@ async ({sparqlet, queryIds, categoryIds, mode, limit})=>{
       }
     }
     if (body) options.body = body;
-    console.log(url + " " + body); //debug
+    console.log(body);
     return await fetch(url, options).then(res=>res.json());
   }
-  
-  sparqlet = sparqlet.replace("https://integbio.jp/togosite/sparqlist/", "http://localhost:3000/togosite/sparqlist/");
   queryIds = queryIds.replace(/,/g, " ");
+  limit = Number(limit);
   if (queryIds.match(/[^\s]/)) {
-    limit = Number(limit);
-    const queryArray = queryIds.split(/\s+/);
-    const size = queryArray.length;
-    let jsonList = [];
+    let queryArray = queryIds.split(/\s+/);
+    let size = queryArray.length;
+    let res = undefined;
     for (let i = 0; i * limit <= size; i++){
       let start = i * limit;
       let end = (i + 1) * limit;
@@ -49,12 +47,7 @@ async ({sparqlet, queryIds, categoryIds, mode, limit})=>{
       let body = "queryIds=" + queryArray.slice(start, end).join(",");
       if (categoryIds.match(/[^\s]/)) body += "&categoryIds=" + categoryIds;
       if (mode) body += "&mode=" + mode;
-      jsonList.push(fetchReq(sparqlet, body));
-    }
-    
-    let res = undefined;
-    for (let json of jsonList){ 
-      json = await json;
+      let json = await fetchReq(sparqlet, body);
       if (res === undefined) { // first
           res = json;
       } else {                 // 2nd or later
