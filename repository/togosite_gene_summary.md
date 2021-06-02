@@ -1,5 +1,3 @@
-togosite_gene_summary に fork したのでもう不要
-
 ## Endpoint
 
 https://integbio.jp/togosite/sparql

@@ -1,7 +1,5 @@
 # Transcript attributes from Ensembl RDF（井手・八塚・池田）
 
-togosite_transcript_summary に fork したのでもう不要
-
 ## Endpoint
 
 https://integbio.jp/rdf/ebi/sparql
