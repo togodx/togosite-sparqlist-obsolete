@@ -1,4 +1,4 @@
-# ChEMBLでtargetの有無の内訳を返す（信定）
+# ChEMBLでtargetの有無の内訳を返す（信定）未完成
 
 ## Parameters
 
