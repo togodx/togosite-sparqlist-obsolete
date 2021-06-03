@@ -22,12 +22,14 @@
 ## `pValueFlag`
 ```javascript
 ({primaryKey})=>{
+  let obj = {};
   if (primaryKey == "ncbigene" || primaryKey == "ensembl_gene" || primaryKey == "ensembl_transcript" || primaryKey == "uniprot") {
     let obj = {};
     obj[primaryKey] = true;
     return obj;
   }
-  return false;
+  obj.nonPValue = true;
+  return obj;
 }
 ```
 
@@ -72,6 +74,10 @@ WHERE {
   FILTER(REGEX(STR(?proteome), "UP000005640"))
 }
 {{/if}}
+{{#if pValueFlag.nonPValue}}
+WHERE {
+}
+{{/if}}  
 ```
 
 
