@@ -22,12 +22,13 @@
 ## `pValueFlag`
 ```javascript
 ({primaryKey})=>{
+  let obj = {};
   if (primaryKey == "ncbigene" || primaryKey == "ensembl_gene" || primaryKey == "ensembl_transcript" || primaryKey == "uniprot") {
-    let obj = {};
     obj[primaryKey] = true;
     return obj;
   }
-  return false;
+  obj.nonPValue = true;
+  return obj;
 }
 ```
 
@@ -72,6 +73,10 @@ WHERE {
   FILTER(REGEX(STR(?proteome), "UP000005640"))
 }
 {{/if}}
+{{#if pValueFlag.nonPValue}}
+WHERE {
+}
+{{/if}}
 ```
 
 
@@ -92,10 +97,11 @@ async ({sparqlet, categoryIds, userIds, userKey, primaryKey, pValueFlag, populat
     return await fetch(url, options).then(res=>res.json());
   }
   
-  let togoidSparqlistSplitter = "https://integbio.jp/togosite/sparqlist/api/togoid_sparqlist_splitter";  
-  let sparqlistSplitter = "https://integbio.jp/togosite/sparqlist/api/sparqlist_splitter";
-  let togoidApi = "https://integbio.jp/togosite/sparqlist/api/togoid_route_sparql"; // SPARQList での仮実装 2
+  let togoidSparqlistSplitter = "http://localhost:3000/togosite/sparqlist/api/togoid_sparqlist_splitter";  
+  let sparqlistSplitter = "http://localhost:3000/togosite/sparqlist/api/sparqlist_splitter";
+  let togoidApi = "http://localhost:3000/togosite/sparqlist/api/togoid_route_sparql";
   let idLimit = 2000; // split 判定
+  sparqlet = sparqlet.replace("https://integbio.jp/togosite/sparqlist/", "http://ilocalhost:3000/togosite/sparqlist/");
 
   // convert user IDs to primary IDs for SPARQLet
   let queryIds = "";
@@ -125,7 +131,7 @@ async ({sparqlet, categoryIds, userIds, userKey, primaryKey, pValueFlag, populat
 
   // without p-value
   console.log(pValueFlag);
-  if (!pValueFlag) return distribution;
+  if (pValueFlag.nonPValue) return distribution;
 
   // with pvalue (gene, protein)
   let calcPvalue = (a, b, c, d) => {

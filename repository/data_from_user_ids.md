@@ -135,7 +135,7 @@ async ({sparqlet, categoryIds, userIds, userKey, primaryKey, pValueFlag, populat
 
   // without p-value
   console.log(pValueFlag);
-  if (!pValueFlag) return distribution;
+  if (pValueFlag.nonPValue) return distribution;
 
   // with pvalue (gene, protein)
   let calcPvalue = (a, b, c, d) => {
