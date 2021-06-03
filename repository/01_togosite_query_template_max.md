@@ -89,6 +89,10 @@ ORDER BY DESC (?count)
 
 ## `return`
 - 整形
+  - categoryId: string
+  - label: string
+  - count: integer
+  - hasChild: boolean
 ```javascript
 ({mode, data})=>{
   const idVarName = "uniprot";
