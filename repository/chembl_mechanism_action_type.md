@@ -90,7 +90,7 @@ order by desc (?count)
       return {
         id: d.chembl_id.value,
         attribute: {
-          categoryId: parseInt(idStrs[0]),
+          categoryId: idStrs[0],
           label: capitalize(idStrs[1])
         }
       };
@@ -99,7 +99,7 @@ order by desc (?count)
     return query_mechanism_action_type.results.bindings.map(d=>{
       var idStrs = d.mec_id.value.split(":");
       return {
-        categoryId: parseInt(idStrs[0]),
+        categoryId: idStrs[0],
         label: capitalize(idStrs[1]),
         count: Number(d.count.value)
       };

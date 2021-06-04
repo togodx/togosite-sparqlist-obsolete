@@ -90,7 +90,7 @@ ORDER BY Desc(?count)
       return {
         id: d.chembl_id.value,
         attribute: {
-          categoryId: parseInt(idStrs[0]),
+          categoryId: idStrs[0],
           label: idStrs[1]
         }
       };
@@ -99,7 +99,7 @@ ORDER BY Desc(?count)
     return count_substance_type.results.bindings.map(d=>{
       var idStrs = d.type_id.value.split(":");
       return {
-        categoryId: parseInt(idStrs[0]),
+        categoryId: idStrs[0],
         label: idStrs[1],
         count: Number(d.count.value)
       };
