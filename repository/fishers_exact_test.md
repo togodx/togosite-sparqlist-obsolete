@@ -15,6 +15,7 @@
   let d = Number(tmp[3]);
   
   if (a > 100000 || b > 100000 || c > 100000 || d > 100000) return {error: "limit <= 100000"};
+  if (a < 0 || b < 0 || c < 0 || d < 0) return {error: "limit >= 0"};
   
   let sigDigi = (num, exp) => {
     while (num > 10) {
