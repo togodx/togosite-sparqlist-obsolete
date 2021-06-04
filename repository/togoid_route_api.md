@@ -124,7 +124,7 @@ async ({ids, route})=>{
     return await fetch(url, options).then(res=>res.json());
   }
   
-  let togoidApi = "https://api.togoid.dbcls.jp.il3c.com/convert";
+  let togoidApi = "https://api.togoid.dbcls.jp/convert";
   let resLimit = 10000; // togoid API limit
   
   let body = "format=json&include=pair";
