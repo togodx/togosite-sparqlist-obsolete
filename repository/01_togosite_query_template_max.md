@@ -92,7 +92,7 @@ ORDER BY DESC (?count)
   - categoryId: string
   - label: string
   - count: integer
-  - hasChild: boolean
+  - hasChild: boolean (false の場合は無くて良い)
 ```javascript
 ({mode, data})=>{
   const idVarName = "uniprot";
