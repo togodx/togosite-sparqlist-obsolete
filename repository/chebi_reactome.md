@@ -125,7 +125,7 @@ ORDER BY DESC (?count)
       }
     }
   });
-  if (mode == "idList") return data.results.bindings.map(d=>d[idVarName].value);
+  if (mode == "idList") return data.results.bindings.map(d=>d[idVarName].value.replace(idPrefix, ""));
 
   return data.results.bindings.map(d=>{
     let hasChild = false;
