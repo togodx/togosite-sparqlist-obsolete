@@ -56,8 +56,8 @@
       },
       compound: {
         compound: [[]],
-        nando: [["chebi", "reactome_reaction", "uniprot", "ncbigene", "medgen", "mondo"]],
-        disease: [["chebi", "reactome_reaction", "uniprot", "ncbigene", "medgen"], ["chembl_compound", "chembl_target", "uniprot", "ncbigene", "medgen"]],
+        nando: [["chembl_compound", "mesh", "mondo", "medgen"]],
+        disease: [["chembl_compound", "mesh", "mondo"]],
       },
       nando: {
         nando: [[]],
@@ -74,12 +74,20 @@
     if (config.database[subject].includes(source)) sourceSubject = subject;
     if (config.database[subject].includes(target)) targetSubject = subject;
   }
-  // console.log(sourceSubject);
+  
+  // 例外処理
+  // mondo - medgen - hp
+  if ((target == "mondo" && source == "hp") 
+      || (source == "mondo" && target == "hp")) {
+    config.route.disease.disease[0].push("medgen");
+  }
+  // chembl_compound - mesh
+  if ((sourceSubject == "compound" && target == "mesh") 
+      || (targetSubject == "compound" && source == "mesh")) {
+    config.route.compound.disease[0].pop();
+  }
   
   let makeRoute = (source, target, route) => {
-    // 例外処理
-    if (route[0] == "mondo" && source == "hp") route.unshift("medgen");  // hp - medgen - mondo 
-    if (route[route.length - 1] == "mondo" && target == "hp") route.push("medgen"); // mondo - medgen - hp
     route.unshift(source);
     route.push(target);
     return route.filter((x, i, self) => self.indexOf(x) === i);
