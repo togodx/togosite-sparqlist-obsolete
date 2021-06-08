@@ -25,10 +25,12 @@ https://integbio.jp/togosite/sparql
 PREFIX uniprot: <http://purl.uniprot.org/uniprot/>
 PREFIX core: <http://purl.uniprot.org/core/>
 PREFIX keywords: <http://purl.uniprot.org/keywords/>
+PREFIX db: <http://purl.uniprot.org/database/>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 SELECT DISTINCT ?entry ?id ?mnemonic ?full_name ?short_name ?length ?mass 
+(GROUP_CONCAT(distinct ?pdb ; separator = ",") AS ?pdbs)
   (COUNT(?citation) AS ?citation_number)
   (GROUP_CONCAT(DISTINCT ?kw_mf_l, ",") AS ?molecular_function)
   (GROUP_CONCAT(DISTINCT ?kw_cc_l, ",") AS ?cellular_component)
@@ -77,6 +79,10 @@ WHERE{
   OPTIONAL {
     ?entry core:isolatedFrom/skos:prefLabel ?tissue .
   }
+  OPTIONAL {
+    ?entry rdfs:seeAlso ?pdb .
+    ?pdb core:database db:PDB .
+  }
   BIND(CONCAT("", ?sname) AS ?shortname)
   BIND(IF(STRLEN(?shortname)=0,"-", ?shortname) AS ?short_name)  
   BIND(STRLEN(?sequence) AS ?length)
@@ -103,6 +109,9 @@ WHERE{
   if (obj[0]["molecular_function"]) obj[0]["molecular_function"] = "<ul><li>" + obj[0]["molecular_function"].split(/,/).join("</li><li>") + "</li></ul>";
   if (obj[0]["cellular_component"]) obj[0]["cellular_component"] = "<ul><li>" + obj[0]["cellular_component"].split(/,/).join("</li><li>") + "</li></ul>";
   if (obj[0]["isolated_tissue"]) obj[0]["isolated_tissue"] = "<ul><li>" + obj[0]["isolated_tissue"].split(/,/).join("</li><li>") + "</li></ul>";
+  if (obj[0]["pdbs"]) obj[0]["pdbs"] = obj[0]["pdbs"].split(/,/).map(d => {
+    return "<a href='" + d + "'>" + d.replace("http://rdf.wwpdb.org/pdb/", "") + "</a>";
+  }).join(", ");
   return obj;
 };
 ```
