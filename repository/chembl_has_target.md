@@ -22,30 +22,52 @@
 ## Endpoint
 https://integbio.jp/togosite/sparql
 
-## `hasAssay`
+## `level0`
 
 ```sparql
-PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
-PREFIX taxon: <http://identifiers.org/taxonomy/>
 PREFIX cco: <http://rdf.ebi.ac.uk/terms/chembl#>
-PREFIX uniprot: <http://purl.uniprot.org/uniprot/>
+PREFIX chembl_molecule: <http://rdf.ebi.ac.uk/resource/chembl/molecule/>
 {{#if mode}}
   SELECT DISTINCT ?uniprot
 {{else}}
-SELECT COUNT(DISTINCT ?uniprot) AS ?count
+SELECT ?component_type count(distinct?target)   
 {{/if}}
-FROM <http://rdf.integbio.jp/dataset/togosite/chembl>
-WHERE {
-{{#if queryArray}}
-      VALUES ?uniprot { {{#each queryArray}} uniprot:{{this}} {{/each}} }
-{{/if}}
-  ?chembl a cco:SmallMolecule ;
-          cco:hasActivity/cco:hasAssay/cco:hasTarget/skos:exactMatch [
-            cco:taxonomy taxon:9606 ;
-            skos:exactMatch ?uniprot
-          ] . 
-  ?uniprot a cco:UniprotRef .
-}
+  FROM <http://rdf.integbio.jp/dataset/togosite/chembl> 
+  WHERE
+  {
+     ?targetcomponent a cco:TargetComponent ;
+                      cco:componentType ?component_type ;
+                      cco:hasTarget ?target ;
+                      cco:organismName ?organism .
+    OPTIONAL {?targetcomponent cco:hasProteinClassification ?class ;
+        cco:hasTargetDescendant ?descendant .     }
+    FILTER ( ?organism = "Homo sapiens")
+  }
+```
+
+## `protein`
+
+```sparql
+PREFIX cco: <http://rdf.ebi.ac.uk/terms/chembl#>
+PREFIX chembl_molecule: <http://rdf.ebi.ac.uk/resource/chembl/molecule/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT distinct?level   ?label  count(?target)
+  FROM <http://rdf.integbio.jp/dataset/togosite/chembl> 
+  WHERE
+  {
+    values ?level {"L1"}
+     ?targetcomponent a cco:TargetComponent ;
+                      cco:componentType ?component_type ;
+                      cco:hasTarget ?target ;
+                      cco:organismName ?organism ;
+        cco:hasProteinClassification ?class .    
+    ?class cco:classLevel ?level ;
+           rdfs:label ?label ;
+    cco:classPath ?pass .
+    FILTER ( ?organism = "Homo sapiens")
+    FILTER (?component_type = "PROTEIN")
+  }
 ```
 
 ## `return`

@@ -137,7 +137,7 @@ WHERE {
     if (total - sum > 0) {
       arr.push({
         categoryId: "_other",
-        label: "Others",
+        label: "Other molecules",
         count: total - sum
       });
     }
