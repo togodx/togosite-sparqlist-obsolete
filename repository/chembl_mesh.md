@@ -106,9 +106,17 @@ WHERE {
 ```javascript
 ({mode, targetMesh, chemblList, queryIds})=>{
   queryIds = queryIds.replace(/,/g, " ");
-  let chemblFilter = [];
-  if (queryIds.match(/[^\s]/)) chemblFilter = queryIds.split(/\s+/); 
-  let meshList = targetMesh.results.bindings.map(d=>d.mesh.value.replace("http://id.nlm.nih.gov/mesh/", ""));
+  let chemblFilterExist = undefined;
+  if (queryIds.match(/[^\s]/)) {
+    chemblFilterExist = {};
+    for (let d of queryIds.split(/\s+/)) {
+      chemblFilterExist[d] = true;
+    }
+  }
+  let meshExist = {};
+  for (let d of targetMesh.results.bindings) {
+    meshExist[d.mesh.value.replace("http://id.nlm.nih.gov/mesh/", "")] = true;
+  }
   let mesh2id = {};
   let id2label = {};
   let id2child = {};
@@ -125,7 +133,7 @@ WHERE {
   for (let d of chemblList.results.bindings) {
     let mesh = d.mesh.value.replace("http://identifiers.org/mesh/", "");
     let chembl = d.molecule.value.replace("http://rdf.ebi.ac.uk/resource/chembl/molecule/", "");
-    if (meshList.includes(mesh) && (chemblFilter.length == 0 || chemblFilter.includes(chembl))) {
+    if (meshExist[mesh] && (!chemblFilterExist || chemblFilterExist[chembl])) {
       for (let id of mesh2id[mesh]) {
         if (!id2chembl[id]) id2chembl[id] = [];
         id2chembl[id].push(chembl);　// tree number と chembl 対応
