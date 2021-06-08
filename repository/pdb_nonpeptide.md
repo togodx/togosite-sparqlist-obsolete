@@ -16,70 +16,61 @@
 ## Parameters
 
 * `categoryIds`
-  * example: water, ZINC_ION, SULFATE_ION, GLYCEROL, 1,2-ETHANEDIOL, MAGNESIUM_ION, CHLORIDE_ION, CALCIUM_ION, SODIUM_ION, 2-acetamido-2-deoxy-beta-D-glucopyranose
+  * example: ATP,ZN
 * `queryIds` (type: PDB)
-  * example: 1FJS,1FPC,6BNR
+  * example: 1NLV,1FJS,1FPC,6BNR
 * `mode` 
   * example: idList, objectList
 
-## `filter_list`
-- Filter 用 PDB を配列に
+## `input_pdb`
 ```javascript
-({queryIds}) => {
-  queryIds = queryIds.replace(/,/g," ")
-  if (queryIds.match(/[^\s]/)) return queryIds.split(/\s+/);
-  return false;
+({ queryIds }) => {
+  queryIds = queryIds.replace(/,/g, " ");
+  if (queryIds.match(/\S/)) {
+    return queryIds.split(/\s+/);
+  }
 }
 ```
 
-## `nonpoly_list`
-- categoryIds を配列に
+## `input_category`
 ```javascript
-({categoryIds}) => {
-  categoryIds = categoryIds.replace(/\s+/,"")
-  categoryIds = categoryIds.replace("_"," ")
-  if (categoryIds) return categoryIds.split(/,/);
-  return false;
+({ categoryIds }) => {
+  categoryIds = categoryIds.replace(/\s+/, "");
+  if (categoryIds) {
+    return categoryIds.split(/,/);
+  }
 }
 ```
 
 ## Endpoint
 
-https://integbio.jp/togosite/sparql　　　　　　　
-- https://integbio.jp/rdf/sparql 開発用に一時的にendopointを変更
+https://integbio.jp/togosite/sparql
 
-## `non_poly`
-
+## `main`
 ```sparql
-PREFIX pdbo: <https://rdf.wwpdb.org/schema/pdbx-v50.owl#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-PREFIX dc: <http://purl.org/dc/elements/1.1/>
-PREFIX pdbr: <https://rdf.wwpdb.org/pdb/>
+PREFIX taxid: <http://identifiers.org/taxonomy/>
+PREFIX pdbo: <https://rdf.wwpdb.org/schema/pdbx-v50.owl#>
+PREFIX pdb: <https://rdf.wwpdb.org/pdb/>
 
 {{#if mode}}
-SELECT DISTINCT ?PDBentry ?title (REPLACE(?nonpoly_name, " ","_") AS ?nonpoly_str) ?nonpoly_name ?nonpoly_compId
+SELECT DISTINCT ?pdb ?comp_id ?name
 {{else}}
-SELECT DISTINCT ?nonpoly_name (REPLACE(?nonpoly_name, " ","_") AS ?nonpoly_str) ?nonpoly_compId COUNT(DISTINCT ?PDBentry) AS ?count 
+SELECT (COUNT(DISTINCT ?pdb) AS ?count) ?comp_id ?name
 {{/if}}
-  FROM <http://rdf.integbio.jp/dataset/togosite/pdbj>
-   # FROM <http://rdf.integbio.jp/dataset/pdbj>
-    WHERE {
-         {{#if filter_list}} VALUES ?PDBentry { {{#each filter_list}} pdbr:{{this}} {{/each}} } {{/if}}
-          ?PDBentry   a	  pdbo:datablock .
-          ?PDBentry   dc:title  	  ?title .
-          ?PDBentry   pdbo:has_pdbx_entity_nonpolyCategory/pdbo:has_pdbx_entity_nonpoly  ?nonpoly .
-          ?nonpoly pdbo:pdbx_entity_nonpoly.name     ?nonpoly_name .
-          ?nonpoly pdbo:pdbx_entity_nonpoly.comp_id  ?nonpoly_compId .
-         {{#if nonpoly_list}}
-          VALUES ?nonpoly_query { {{#each nonpoly_list}} "{{this}}" {{/each}} }
-          FILTER CONTAINS(?nonpoly_name, ?nonpoly_query)
-         {{/if}}
-          {SELECT DISTINCT ?PDBentry {
-          ?PDBentry  pdbo:has_entityCategory
-               / pdbo:has_entity
-               / rdfs:seeAlso <http://identifiers.org/taxonomy/9606> .
-          }}
-   }
+FROM <http://rdf.integbio.jp/dataset/togosite/pdbj>
+WHERE {
+  {{#if input_category}}
+  VALUES ?comp_id { {{#each input_category}} "{{this}}" {{/each}} }
+  {{/if}}
+  ?pdb a pdbo:datablock ;
+      pdbo:has_entityCategory/pdbo:has_entity/rdfs:seeAlso taxid:9606 ;
+      pdbo:has_pdbx_entity_nonpolyCategory/pdbo:has_pdbx_entity_nonpoly ?nonpoly .
+  ?nonpoly
+      pdbo:pdbx_entity_nonpoly.comp_id ?comp_id ;
+      pdbo:pdbx_entity_nonpoly.name ?name .
+  {{#if input_pdb}} VALUES ?pdb { {{#each input_pdb}} pdb:{{this}} {{/each}} } {{/if}}
+}
 {{#unless mode}}
 order by DESC(?count)
 LIMIT 100
@@ -88,74 +79,80 @@ LIMIT 100
 
 ## `total_count`
 ```sparql
-PREFIX pdbo: <https://rdf.wwpdb.org/schema/pdbx-v50.owl#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-PREFIX dc: <http://purl.org/dc/elements/1.1/>
-PREFIX pdbr: <https://rdf.wwpdb.org/pdb/>
+PREFIX taxid: <http://identifiers.org/taxonomy/>
+PREFIX pdbo: <https://rdf.wwpdb.org/schema/pdbx-v50.owl#>
+PREFIX pdb: <https://rdf.wwpdb.org/pdb/>
 
-SELECT DISTINCT COUNT(?PDBentry) AS ?count_Num 
-     FROM <http://rdf.integbio.jp/dataset/togosite/pdbj>
-   # FROM <http://rdf.integbio.jp/dataset/pdbj>
+SELECT (COUNT(?pdb) AS ?count)
+FROM <http://rdf.integbio.jp/dataset/togosite/pdbj>
+WHERE {
+  {{#if input_pdb}} VALUES ?pdb { {{#each input_pdb}} pdb:{{this}} {{/each}} } {{/if}}
+  ?pdb a pdbo:datablock ;
+      pdbo:has_pdbx_entity_nonpolyCategory/pdbo:has_pdbx_entity_nonpoly ?nonpoly .
+  ?nonpoly
+      pdbo:pdbx_entity_nonpoly.comp_id ?comp_id ;
+      pdbo:pdbx_entity_nonpoly.name ?name .
+  {{#if input_category}}
+  VALUES ?comp_id { {{#each input_category}} "{{this}}" {{/each}} }
+  {{/if}}
+  {
+    SELECT DISTINCT ?pdb
     WHERE {
-         {{#if filter_list}} VALUES ?PDBentry { {{#each filter_list}} pdbr:{{this}} {{/each}} } {{/if}}
-          ?PDBentry   a	  pdbo:datablock .
-          ?PDBentry   pdbo:has_pdbx_entity_nonpolyCategory
-                     /pdbo:has_pdbx_entity_nonpoly
-                     /pdbo:pdbx_entity_nonpoly.name     ?nonpoly_name .
-         {{#if nonpoly_list}}
-          VALUES ?nonpoly_query { {{#each nonpoly_list}} "{{this}}" {{/each}} }
-          FILTER CONTAINS(?nonpoly_name, ?nonpoly_query)
-         {{/if}}
-          {SELECT DISTINCT ?PDBentry {
-          ?PDBentry  pdbo:has_entityCategory
-               / pdbo:has_entity
-               / rdfs:seeAlso <http://identifiers.org/taxonomy/9606> .
-          }}
-   }
+      ?pdb pdbo:has_entityCategory/pdbo:has_entity/rdfs:seeAlso taxid:9606 .
+    }
+  }
+}
 ```
 
 ## `results`
 
 ```javascript
-({mode, non_poly ,total_count})=>{
-  
-   let total = Array.from(new Set(total_count.results.bindings.map(e=>Number(e.count_Num.value)))); 
-                                                        //total_countのSPARQLから出てきた数値を"total"に代入
-   let non_poly_value = non_poly.results.bindings.map(e=>Number(e.count.value));
-   let sum_limit = non_poly_value.reduce((prev,current)=> prev+current,0);   
-                                                     //non_polyのSPARQLでlimit100で取得したCount値の合計を計算
-   if (total != 0) {
-   let non_poly_array = non_poly.results.bindings;  //non_polyの結果を配列に入れて最後に"Other"要素を加える
-   non_poly_array.push({"nonpoly_name": {"type": "literal","value": "_other"},
-               "nonpoly_str":  {"type": "literal","value": "_other" },
-               "nonpoly_compId": { "type": "literal", "value": "_other" },
-      "count": {"type": "typed-literal","datatype": "http://www.w3.org/2001/XMLSchema#integer","value": total-sum_limit }});
-   };
-   //return [total, non_poly_value, sum_limit];
-  
-   if (mode == "objectList") return non_poly.results.bindings.map(d=>{ 
-     return {
-       id: d.PDBentry.value.replace("https://rdf.wwpdb.org/pdb/", ""), 
-       attribute: {
-       categoryId: d.nonpoly_str.value, 
-       label: makeLabel(capitalize(d.nonpoly_name.value), d.nonpoly_compId.value)
-                  }
-       };
+({ mode, main, total_count }) => {
+  if (mode === "idList") {
+    return Array.from(new Set(
+      main.results.bindings.map((elem) =>
+        elem.pdb.value.replace("https://rdf.wwpdb.org/pdb/", ""))
+    ));
+  } else if (mode === "objectList") {
+    return main.results.bindings.map((elem) => ({ 
+      id: elem.pdb.value.replace("https://rdf.wwpdb.org/pdb/", ""), 
+      attribute: {
+        categoryId: elem.comp_id.value,
+        label: makeLabel(elem)
+      }
+    }));
+  } else {
+    const total = total_count.results.bindings[0].count.value;
+    let sum = 0;
+    let arr = [];
+    main.results.bindings.forEach((elem) => {
+      arr.push({
+        categoryId: elem.comp_id.value,
+        label: makeLabel(elem),
+        count: Number(elem.count.value)
+      });
+      sum += Number(elem.count.value);
     });
-   if (mode == "idList") return Array.from(new Set(non_poly.results.bindings.map(d=>d.PDBentry.value.replace("https://rdf.wwpdb.org/pdb/", "")))); // unique 
-   return non_poly.results.bindings.map(d=>{
-     return {
-       categoryId: d.nonpoly_str.value, 
-       label: makeLabel(capitalize(d.nonpoly_name.value), d.nonpoly_compId.value),
-       count: Number(d.count.value)
-       };
-   });
-   
-   function makeLabel(name, compId) {
-    if (name.length > 27) {
-      return compId +": "+name.substr(0,27) +"...";
-    }  else {
-      return name;
+    if (total - sum > 0) {
+      arr.push({
+        categoryId: "_other",
+        label: "Others",
+        count: total - sum
+      });
+    }
+    return arr;
+  }
+
+  function makeLabel(elem) {
+    let label = capitalize(elem.name.value)
+        .replace('(iii)', '(III)').replace('(ii)', '(II)').replace('ix', 'IX')
+        .replace('(2r)', '(2R)').replace('(4r)', '(4R)').replace('(4s)', '(4S)').replace('(9z)', '(9Z)').replace('(n-', '(N-')
+        .replace('-l-', '-L-').replace(/^Nadh /, 'NADH ').replace(/^Nadph /, 'NADPH ').replace(/ fe$/, ' Fe').replace(/^Fe2\/s2/, 'Fe2/S2');
+    if (label.length <= 27) {
+      return label;
+    } else {
+      return `${elem.comp_id.value}: ` + label.substr(0, 27) + '...';
     }
   }
   function capitalize(s) {
@@ -163,4 +160,3 @@ SELECT DISTINCT COUNT(?PDBentry) AS ?count_Num
   }
 }
 ```
-

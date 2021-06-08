@@ -22,32 +22,6 @@
 ## Endpoint
 https://integbio.jp/togosite/sparql
 
-## `uniprotAll`
-
-```sparql
-PREFIX up: <http://purl.uniprot.org/core/>
-PREFIX taxon: <http://purl.uniprot.org/taxonomy/>
-PREFIX uniprot: <http://purl.uniprot.org/uniprot/>
-{{#if mode}}
-  SELECT DISTINCT ?uniprot
-{{else}}
-SELECT COUNT(DISTINCT ?uniprot) AS ?count
-{{/if}}
-FROM <http://rdf.integbio.jp/dataset/togosite/uniprot>
-WHERE {
-{{#if queryArray}}
-      VALUES ?uniprot { {{#each queryArray}} uniprot:{{this}} {{/each}} }
-{{/if}}
-  ?uniprot a up:Protein ;
-           up:organism taxon:9606 ;
-           up:proteome ?proteome .
-  FILTER(REGEX(STR(?proteome), "UP000005640"))
-}
-```
-
-## Endpoint
-https://integbio.jp/togosite/sparql
-
 ## `hasAssay`
 
 ```sparql
