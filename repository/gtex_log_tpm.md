@@ -47,21 +47,21 @@ WHERE {
   {{/if}}
   {{#if idDict.ncbigene}}
   VALUES ?ncbigene { ncbigene:{{idDict.ncbigene}} }
-  GRAPH <http://rdf.integbio.jp/dataset/togosite/togoid> {
+  GRAPH <http://rdf.integbio.jp/dataset/togosite/togoid/ncbigene-ensembl_gene> {
     ?ncbigene rdfs:seeAlso ?ensg .
     FILTER(STRSTARTS(STR(?ensg), "http://identifiers.org/ensembl/"))
   }
   {{/if}}
   {{#if idDict.hgnc}}
   VALUES ?hgnc { hgnc:{{idDict.hgnc}} }
-  GRAPH <http://rdf.integbio.jp/dataset/togosite/togoid> {
+  GRAPH <http://rdf.integbio.jp/dataset/togosite/togoid/hgnc-ensembl_gene> {
     ?hgnc rdfs:seeAlso ?ensg .
     FILTER(STRSTARTS(STR(?ensg), "http://identifiers.org/ensembl/"))
   }
   {{/if}}
   {{#if idDict.enst}}
   VALUES ?enst_input { ensembl:{{idDict.enst}} }
-  GRAPH <http://rdf.integbio.jp/dataset/togosite/togoid> {
+  GRAPH <http://rdf.integbio.jp/dataset/togosite/togoid/ensembl_gene-ensembl_transcript> {
     ?ensg obo:RO_0002511 ?enst_input .
   }
   {{/if}}
