@@ -13,7 +13,7 @@
 - Top レベルかどうかのチェック
 ```javascript
 ({categoryIds})=>{
-  if (categoryIds.match("")) return true;
+  if (categoryIds == '') return true;
   return false;
 }
 ```
@@ -67,7 +67,7 @@ SELECT distinct?label count(?uniprot)
   FROM <http://rdf.integbio.jp/dataset/togosite/chembl> 
    WHERE
   {
-    values ?level { {{#each categoryArray}} {{this}}{{/each}} }
+    values ?level { {{#each categoryArray}} "{{this}}" {{/each}} }
      ?targetcomponent a cco:TargetComponent ;
                       cco:componentType ?component_type ;
                       cco:hasTarget ?chembl_target ;
