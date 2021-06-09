@@ -9,6 +9,25 @@
 * `mode`
   * example: idList, objectList
 
+## `top`
+- Top レベルかどうかのチェック
+```javascript
+({categoryIds})=>{
+  if (categoryIds.match("")) return true;
+  return false;
+}
+```
+
+## `categoryArray`
+- category ID を配列に分割
+```javascript
+({categoryIds}) => {
+  categoryIds = categoryIds.replace(/,/g," ")
+  if (categoryIds.match(/[^\s]/)) return categoryIds.split(/\s+/);
+  return false;
+}
+```
+
 ## `queryArray`
 - Filter 用 chembl_compoundを配列に
 ```javascript
@@ -22,49 +41,33 @@
 ## Endpoint
 https://integbio.jp/togosite/sparql
 
-## `level0`
-
-```sparql
-PREFIX cco: <http://rdf.ebi.ac.uk/terms/chembl#>
-PREFIX chembl_molecule: <http://rdf.ebi.ac.uk/resource/chembl/molecule/>
-{{#if mode}}
-  SELECT DISTINCT ?uniprot
-{{else}}
-SELECT ?component_type count(distinct?target)   
-{{/if}}
-  FROM <http://rdf.integbio.jp/dataset/togosite/chembl> 
-  WHERE
-  {
-     ?targetcomponent a cco:TargetComponent ;
-                      cco:componentType ?component_type ;
-                      cco:hasTarget ?target ;
-                      cco:organismName ?organism .
-    OPTIONAL {?targetcomponent cco:hasProteinClassification ?class ;
-        cco:hasTargetDescendant ?descendant .     }
-    FILTER ( ?organism = "Homo sapiens")
-  }
-```
-
-## `protein`
+## `target`
 
 ```sparql
 PREFIX cco: <http://rdf.ebi.ac.uk/terms/chembl#>
 PREFIX chembl_molecule: <http://rdf.ebi.ac.uk/resource/chembl/molecule/>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-
-SELECT distinct?level   ?label  count(?target)
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+{{#if mode}}
+  SELECT DISTINCT ?uniprot
+{{else}}
+SELECT distinct?label count(?uniprot) 
+{{/if}}
   FROM <http://rdf.integbio.jp/dataset/togosite/chembl> 
-  WHERE
+   WHERE
   {
-    values ?level {"L1"}
+    values ?level {{{#each categoryArray}} "{{this}}" {{/each}}}
      ?targetcomponent a cco:TargetComponent ;
                       cco:componentType ?component_type ;
-                      cco:hasTarget ?target ;
+                      cco:hasTarget ?chembl_target ;
                       cco:organismName ?organism ;
         cco:hasProteinClassification ?class .    
     ?class cco:classLevel ?level ;
            rdfs:label ?label ;
     cco:classPath ?pass .
+    ?chembl_target  cco:targetType ?target_type ;
+                                skos:exactMatch ?targetcomponent2 .
+    ?targetcomponent2 skos:exactMatch ?uniprot .
     FILTER ( ?organism = "Homo sapiens")
     FILTER (?component_type = "PROTEIN")
   }
