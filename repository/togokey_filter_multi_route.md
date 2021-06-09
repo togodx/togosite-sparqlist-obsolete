@@ -39,7 +39,8 @@ async ({togoKey, properties, inputIds})=>{
   const togositeConfigJson = await fetchReq(togositeConfig, {method: "get"});
   const queryProperties = JSON.parse(properties);
   const queryPropertyIds = queryProperties.map(d => d.propertyId);
-  const idLimit = 2000; // split 判定
+  let idLimit = 2000; // split 判定
+  if (togoKey == "pubchem_compound") idLimit = 500; // restrict POST respons size
   const start = Date.now(); // debug
      
  // not filter (togoKey = hgnc, uniprot, pdb, mondo)
