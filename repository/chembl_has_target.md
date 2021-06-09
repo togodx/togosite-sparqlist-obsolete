@@ -48,15 +48,26 @@ PREFIX cco: <http://rdf.ebi.ac.uk/terms/chembl#>
 PREFIX chembl_molecule: <http://rdf.ebi.ac.uk/resource/chembl/molecule/>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
-{{#if mode}}
-  SELECT DISTINCT ?uniprot
+  {{#if top}}         
+  SELECT ?component_type count(distinct?chembl_target)
+         FROM <http://rdf.integbio.jp/dataset/togosite/chembl> 
+   WHERE
+  {
+     ?targetcomponent a cco:TargetComponent ;
+                      cco:componentType ?component_type ;
+                      cco:hasTarget ?chembl_target ;
+                      cco:organismName ?organism .
+    FILTER ( ?organism = "Homo sapiens")
+    }
 {{else}}
+	{{#if mode}}
+  SELECT DISTINCT ?uniprot
+    {{else}}
 SELECT distinct?label count(?uniprot) 
-{{/if}}
   FROM <http://rdf.integbio.jp/dataset/togosite/chembl> 
    WHERE
   {
-    values ?level {{{#each categoryArray}} "{{this}}" {{/each}}}
+    values ?level { {{#each categoryArray}} {{this}}{{/each}} }
      ?targetcomponent a cco:TargetComponent ;
                       cco:componentType ?component_type ;
                       cco:hasTarget ?chembl_target ;
@@ -71,6 +82,8 @@ SELECT distinct?label count(?uniprot)
     FILTER ( ?organism = "Homo sapiens")
     FILTER (?component_type = "PROTEIN")
   }
+	{{/if}}
+{{/if}}
 ```
 
 ## `return`
