@@ -44,7 +44,10 @@ async ({togoKey, properties, inputIds})=>{
 
   // not filter (togoKey = hgnc, uniprot, pdb, mondo)
   const togoidNotFilter = "http://localhost:3000/togosite/sparqlist/api/togokey_not_filter";  
-  if (queryPropertyIds.length == 0 && (togoKey == "hgnc" || togoKey == "uniprot" || togoKey == "pdb" || togoKey == "mondo")) return fetchReq(togoidNotFilter, options, "togoKey=" + togoKey);
+  if (queryPropertyIds.length == 0 && (togoKey == "hgnc" || togoKey == "uniprot" || togoKey == "pdb" || togoKey == "mondo")) {
+    if (inputIds) return JSON.parse(inputIds);
+    return fetchReq(togoidNotFilter, options, "togoKey=" + togoKey);
+  }
   
   const getIdPair = async (configProperty) => {
      const t1 = Date.now() - start; // debug

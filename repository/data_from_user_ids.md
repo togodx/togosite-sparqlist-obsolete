@@ -126,6 +126,7 @@ async ({sparqlet, categoryIds, userIds, userKey, primaryKey, pValueFlag, populat
   if (!queryIds.match(/\w/)) return [];
   
   // get property data
+  sparqlet  = sparqlet.replace("https://integbio.jp/togosite/sparqlist/", "http://localhost:3000/togosite/sparqlist/");
   let distribution = [];
   let body = "queryIds=" + queryIds;
   if (categoryIds) body += "&categoryIds= " + categoryIds;
