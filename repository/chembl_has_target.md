@@ -41,6 +41,35 @@
 ## Endpoint
 https://integbio.jp/togosite/sparql
 
+## `classification`
+
+```sparql
+PREFIX cco: <http://rdf.ebi.ac.uk/terms/chembl#>
+PREFIX chembl_molecule: <http://rdf.ebi.ac.uk/resource/chembl/molecule/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+SELECT   distinct?label ?level   ?parent_label  ?parent_level 
+  FROM <http://rdf.integbio.jp/dataset/togosite/chembl> 
+  WHERE
+  {
+{{#if top}}  
+     values ?level { "L1" }
+{{else}}
+     values ?parent_level { {{#each categoryArray}} "{{this}}" {{/each}} }
+ {{/if}}      
+     ?targetcomponent a cco:TargetComponent ;
+                      cco:organismName ?organism ;
+        cco:hasProteinClassification ?class .    
+    ?class cco:classLevel ?level ;
+           rdfs:label ?label ;
+           cco:classPath ?pass ;
+           rdfs:subClassOf ?parent .
+    ?parent cco:classLevel ?parent_level ;
+           rdfs:label ?parent_label .
+        FILTER ( ?organism = "Homo sapiens")
+    }
+```
+
 ## `target`
 
 ```sparql
