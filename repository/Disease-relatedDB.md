@@ -33,10 +33,11 @@
 - ユーザが指定した ID リストを配列に分割
 
 ```javascript
-({queryIds}) => {
-  queryIds = queryIds.replace(/,/g," ")
-  if (queryIds.match(/[^\s]/)) return queryIds.split(/\s+/);
-  return false;
+({ queryIds }) => {
+  queryIds = queryIds.replace(/,/g, " ")
+  if (queryIds.match(/\S/)) {
+    return queryIds.split(/\s+/);
+  }
 }
 ```
 
@@ -45,10 +46,11 @@
 category ID を配列に分割
 
 ```javascript
-({categoryIds}) => {
-  categoryIds = categoryIds.replace(/,/g," ")
-  if (categoryIds.match(/[^\s]/)) return  categoryIds.split(/\s+/);
-  return false;
+({ categoryIds }) => {
+  categoryIds = categoryIds.replace(/,/g, " ")
+  if (categoryIds.match(/\S/)) {
+    return categoryIds.split(/\s+/);
+  }
 }
 ```
 
@@ -67,33 +69,27 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX oboinowl: <http://www.geneontology.org/formats/oboInOwl#>
 
 {{#if mode}}
- SELECT DISTINCT ?mondo ?name
+SELECT DISTINCT ?mondo ?name
 {{else}}
 SELECT DISTINCT ?name (count (?name) AS ?count)
 {{/if}}       
 FROM <http://rdf.integbio.jp/dataset/togosite/mondo>
 WHERE {
-{{#if queryArray}}
+  {{#if queryArray}}
   VALUES ?mondo { {{#each queryArray}} mondo:{{this}} {{/each}} }
-{{/if}}
-{{#if categoryArray}}
-  VALUES ?category { {{#each categoryArray}} "{{this}}" {{/each}} } 
+  {{/if}}
+  {{#if categoryArray}}
+  VALUES ?category { {{#each categoryArray}} "{{this}}" {{/each}} }
+  FILTER(REGEX(?id, ?category))
+  {{/if}}
   ?mondo oboinowl:hasDbXref ?id .
-  FILTER(REGEX(?id,?category))
-  BIND (strbefore(str(?id), ":") AS ?name).
-{{else}}
-   ?mondo oboinowl:hasDbXref ?id .
-   BIND (strbefore(str(?id), ":") AS ?name)  
-{{/if}}
-   FILTER(!STRSTARTS(str(?id), "http"))
- }
-{{#if mode}}
-ORDER BY DESC(?mondo)
-{{else if queryArray}}
-GROUP BY ?name ORDER BY DESC(?count)
-{{else}}
-GROUP BY ?name HAVING (count (?name) > 580) ORDER BY DESC(?count)
-{{/if}} 
+  BIND (strbefore(str(?id), ":") AS ?name)  
+  FILTER(!STRSTARTS(str(?id), "http"))
+  FILTER isURI(?mondo)
+}
+{{#unless mode}}
+GROUP BY ?name HAVING (count (?name) > 100) ORDER BY DESC(?count)
+{{/unless}} 
 
 ```
 ## `return`

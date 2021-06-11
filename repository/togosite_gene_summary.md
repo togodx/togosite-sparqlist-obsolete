@@ -176,7 +176,7 @@ WHERE {
     { "Tissue specificity": "tissue_labels"},
     { "Synonym": "synonyms" },
     { "Type": "type_of_gene" },
-    { "Others": "other_names" }
+    { "Other names": "other_names" }
   ];
   return array;
 }
