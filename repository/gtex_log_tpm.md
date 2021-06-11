@@ -6,31 +6,7 @@ https://integbio.jp/togosite/sparql
 
 ## Parameters
 * `id`
-  * default: ENSG00000150773
-  * example: ENSG00000150773, ENST00000443779, 1, 5
-* `type`
-  * default: ensembl_gene
-  * example: ensembl_gene, ensembl_transcript, ncbigene, hgnc
-
-## `idDict` returns an id type object
-
-```javascript
-({id, type}) => {
-  var obj = {};
-  switch (type) {
-    case 'ensembl_gene':
-      obj.ensg = id;
-      break;
-    case 'ensembl_transcript':
-      obj.enst = id;
-      break;
-    case 'ncbigene':
-      obj.ncbigene = id;
-      break;
-  }
-  return obj;
-}
-```
+  * example: ENSG00000150773
 
 ## `main`
 
@@ -42,29 +18,7 @@ PREFIX refexo:  <http://purl.jp/bio/01/refexo#>
 
 SELECT DISTINCT ?desc ?tpm ?sd
 WHERE {
-  {{#if idDict.ensg}}
-  VALUES ?ensg { ensembl:{{idDict.ensg}} }
-  {{/if}}
-  {{#if idDict.ncbigene}}
-  VALUES ?ncbigene { ncbigene:{{idDict.ncbigene}} }
-  GRAPH <http://rdf.integbio.jp/dataset/togosite/togoid/ncbigene-ensembl_gene> {
-    ?ncbigene rdfs:seeAlso ?ensg .
-    FILTER(STRSTARTS(STR(?ensg), "http://identifiers.org/ensembl/"))
-  }
-  {{/if}}
-  {{#if idDict.hgnc}}
-  VALUES ?hgnc { hgnc:{{idDict.hgnc}} }
-  GRAPH <http://rdf.integbio.jp/dataset/togosite/togoid/hgnc-ensembl_gene> {
-    ?hgnc rdfs:seeAlso ?ensg .
-    FILTER(STRSTARTS(STR(?ensg), "http://identifiers.org/ensembl/"))
-  }
-  {{/if}}
-  {{#if idDict.enst}}
-  VALUES ?enst_input { ensembl:{{idDict.enst}} }
-  GRAPH <http://rdf.integbio.jp/dataset/togosite/togoid/ensembl_gene-ensembl_transcript> {
-    ?ensg obo:RO_0002511 ?enst_input .
-  }
-  {{/if}}
+  VALUES ?ensg { ensembl:{{id}} }
 
   GRAPH <http://rdf.integbio.jp/dataset/togosite/refex_gtex_v8_summary> {
     ?s refexo:isMeasurementOf ?ensg ;
