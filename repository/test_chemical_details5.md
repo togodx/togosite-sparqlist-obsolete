@@ -75,7 +75,8 @@ VALUES ?pubchem_uri  { <http://rdf.ncbi.nlm.nih.gov/pubchem/compound/CID{{idDict
     BIND(IF(bound(?pubchem_inchi_temp), ?pubchem_inchi_temp,"null") AS ?pubchem_inchi)  
     BIND (strafter(str(?pubchem_uri), "http://rdf.ncbi.nlm.nih.gov/pubchem/compound/") AS ?pubchem_id)
     BIND(CONCAT("https://pubchem.ncbi.nlm.nih.gov/image/imagefly.cgi?cid=",(SUBSTR(STR(?pubchem_id),4)),"&width=500&height=500") AS ?pubchem_formula_fig)
-    BIND(CONCAT('<img src="',  ?pubchem_formula_fig,   '"/>') AS ?pubchem_formula_img)
+    #BIND(CONCAT('<img src="',  ?pubchem_formula_fig,   '"/>') AS ?pubchem_formula_img)
+    BIND( ?pubchem_formula_fig AS ?pubchem_formula_img)
    }}
   {{/if}}
    
@@ -98,7 +99,8 @@ VALUES ?pubchem_uri  { <http://rdf.ncbi.nlm.nih.gov/pubchem/compound/CID{{idDict
   BIND(IF(bound(?smiles_temp), ?smiles_temp,"null") AS ?chembl_smiles)
   BIND(IF(bound(?inchi_temp), ?inchi_temp,"null") AS ?chembl_inchi)
    BIND (strafter(str(?chem_id), "http://rdf.ebi.ac.uk/resource/chembl/molecule/") AS ?chembl_id)
-  BIND(CONCAT('<img src="',  ?chembl_formula_fig,   '"/>') AS  ?chembl_formula_img) 
+  #BIND(CONCAT('<img src="',  ?chembl_formula_fig,   '"/>') AS  ?chembl_formula_img) 
+   BIND(CONCAT(?chembl_formula_fig ) AS  ?chembl_formula_img)
   }}
  {{/if}}
 
