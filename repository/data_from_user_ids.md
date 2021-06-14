@@ -140,6 +140,10 @@ async ({sparqlet, categoryIds, userIds, userKey, primaryKey, pValueFlag, populat
 
   // with pvalue (gene, protein)
   let calcPvalue = (a, b, c, d) => {
+    // 不正数値検出
+    if (a < 0 || b < 0 || c < 0 || d < 0) return false;
+    if (a > 200000 || b > 200000 || c > 200000 || d > 200000) return false; // ensembl_gene: ~113,000
+    
     let sigDigi = (num, exp) => {
       while (num > 10) {
         num /= 10;
