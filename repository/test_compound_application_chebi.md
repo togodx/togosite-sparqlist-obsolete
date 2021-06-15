@@ -62,7 +62,7 @@ SELECT distinct ?compound GROUP_CONCAT(DISTINCT ?label; SEPARATOR = ", ") as ?la
                           ?application                                      
                           GROUP_CONCAT(DISTINCT ?application_label; SEPARATOR = ", ") AS ?application_label
 {{else}}
-SELECT distinct (COUNT (DISTINCT ?compound) AS ?count) ?application ?application_label ?haschild
+SELECT distinct (COUNT (DISTINCT ?compound) AS ?count) ?application ?application_label (bound(?x) as ?haschild)
 {{/if}}
 FROM <http://rdf.integbio.jp/dataset/togosite/chebi>
 WHERE 
@@ -70,16 +70,18 @@ WHERE
   {{#if queryArray}}
     VALUES ?compound { {{#each queryArray}} CHEBI:{{this}} {{/each}} }
   {{/if}}
-  {{#if categoryArray}}    
-      {{#if mode}}
-        VALUES ?app { {{#each categoryArray}} CHEBI:{{this}} {{/each}} }
-      {{else}}
+  {{#if categoryArray}}
+     {{#if mode}}
+        VALUES ?application { {{#each categoryArray}} CHEBI:{{this}} {{/each}} }
+     {{else}}
         VALUES ?parent { {{#each categoryArray}} CHEBI:{{this}} {{/each}} }
-        ?app  rdfs:subClassOf ?parent.   
-        bind(bound(?parent) as ?haschild)   
-      {{/if}}  
+        ?application rdfs:subClassOf ?parent.  
+     {{/if}}
+          
   {{else}}
-    VALUES ?app {obo:CHEBI_33232}
+        VALUES ?parent {obo:CHEBI_33232}
+        ?application rdfs:subClassOf ?parent.  
+  
   {{/if}}
       
   ?compound a owl:Class ;
@@ -88,16 +90,10 @@ WHERE
   ?r a owl:Restriction ;
     owl:onProperty obo:RO_0000087 ;
     owl:someValuesFrom ?role .
-  {{#if mode}}
-      ?role rdfs:subClassOf* ?app .
-      ?app rdfs:label ?application_label .
-      bind(?app as ?application).
-  {{else}}  
-  	?role rdfs:subClassOf* ?application .
-  	?application rdfs:subClassOf ?app ;
-    	rdfs:label ?application_label .
-  {{/if}}  
+  ?role rdfs:subClassOf* ?application .
+  ?application rdfs:label ?application_label .
 
+  ?x rdfs:subClassOf ?application.
 }
 {{#unless mode}}
 
