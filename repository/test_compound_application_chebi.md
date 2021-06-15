@@ -58,15 +58,17 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX CHEBI: <http://purl.obolibrary.org/obo/CHEBI_>
 
 {{#if mode}}
-SELECT distinct ?chebi ?label ?application ?application_label
+SELECT distinct ?compound GROUP_CONCAT(DISTINCT ?label; SEPARATOR = ", ") as ?label 
+                          ?application                                      
+                          GROUP_CONCAT(DISTINCT ?application_label; SEPARATOR = ", ") AS ?application_label
 {{else}}
-SELECT (COUNT (DISTINCT ?chebi) AS ?count) ?application ?application_label 
+SELECT distinct (COUNT (DISTINCT ?compound) AS ?count) ?application ?application_label (bound(?x) as ?haschild)
 {{/if}}
 FROM <http://rdf.integbio.jp/dataset/togosite/chebi>
 WHERE 
 {
   {{#if queryArray}}
-    VALUES ?chebi_id { {{#each queryArray}} CHEBI:{{this}} {{/each}} }
+    VALUES ?compound { {{#each queryArray}} CHEBI:{{this}} {{/each}} }
   {{/if}}
   {{#if categoryArray}}
     VALUES ?app { {{#each categoryArray}} CHEBI:{{this}} {{/each}} }
@@ -74,7 +76,7 @@ WHERE
     VALUES ?app {obo:CHEBI_33232}
   {{/if}}
 
-  ?chebi a owl:Class ;
+  ?compound a owl:Class ;
     rdfs:label ?label ;
     rdfs:subClassOf ?r .
   ?r a owl:Restriction ;
@@ -84,10 +86,12 @@ WHERE
   
   ?application rdfs:subClassOf ?app ;
     rdfs:label ?application_label .
+      
+  OPTIONAL { ?x rdfs:subClassOf ?application } .    
 }
 {{#unless mode}}
 
-GROUP BY ?application_label ?application
+GROUP BY ?application_label ?application ?x
 ORDER BY DESC(?count)
 {{/unless}}
 
@@ -99,7 +103,7 @@ ORDER BY DESC(?count)
 - 整形
 ```javascript
 ({mode, data})=>{
-  const idVarName = "chebi";
+  const idVarName = "compound";
   const idLabelVarName = "label";
   const categoryVarName = "application";
   const categoryLabelVarName = "application_label";
@@ -118,13 +122,13 @@ ORDER BY DESC(?count)
     }
   });
   if (mode == "idList") return Array.from(new Set(data.results.bindings.map(d=>d[idVarName].value.replace(idPrefix, "")))); // unique
-
+  // mode == NULL
   return data.results.bindings.map(d=>{ 
     return {
       categoryId: d[categoryVarName].value.replace(categoryPrefix, ""), 
       label: d[categoryLabelVarName].value,
       count: Number(d.count.value),
-      hasChild: (Number(d.count.value) > 1 ? true : false)
+      hasChild: (d.haschild.value)
     };
   });	
 }
