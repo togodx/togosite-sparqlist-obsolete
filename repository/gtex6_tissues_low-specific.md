@@ -29,6 +29,7 @@ https://integbio.jp/togosite/sparql
 ```javascript
 ({ categoryIds }) => {
   categoryIds = categoryIds.replace(/,/g, " ");
+  categoryIds = categoryIds.replace("low_specificity", "");
   if (categoryIds.match(/\S/)) {
     return categoryIds.split(/\s+/);
   }
@@ -57,7 +58,7 @@ https://integbio.jp/togosite/sparql
 ```javascript
 ({ input_tissues }) => {
   if (input_tissues) {
-    return input_tissues.filter((x) => x.match(/low_specificity/));
+    return input_tissues.filter((x) => x == "low_specificity");
   }
 };
 ```
@@ -130,12 +131,8 @@ WHERE {
   {{#if input_genes}}
   VALUES ?ensg { {{#each input_genes}} ensembl:{{this}} {{/each}} }
   {{/if}}
-  GRAPH <http://rdf.ebi.ac.uk/dataset/ensembl/102/homo_sapiens> {
-    ?ebi_enst obo:SO_transcribed_from ?ebi_ensg .
-    ?ebi_ensg rdfs:seeAlso ?ensg .
-    FILTER(STRSTARTS(STR(?ensg), "http://identifiers.org/ensembl/"))
-  }
-  GRAPH <http://rdf.integbio.jp/dataset/togosite/refex_tissue_specific_genes_gtex_v6>{
+  ?ensg a refexo:GTEx_v6_ts_evaluated_gene .
+  GRAPH <http://rdf.integbio.jp/dataset/togosite/refex_tissue_specific_genes_gtex_v6> {
     FILTER NOT EXISTS {
       ?ensg refexo:isPositivelySpecificTo ?tissue .
     }
