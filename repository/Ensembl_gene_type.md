@@ -69,7 +69,7 @@ SELECT DISTINCT ?description ?type ?id ?gene_name ?gene_symbol ?description_labe
 {{else}}
 SELECT DISTINCT ?description (COUNT(?type) AS ?count) ?description_label
 {{/if}}
-FROM <http://rdf.ebi.ac.uk/dataset/ensembl/102/homo_sapiens>
+FROM <http://rdf.integbio.jp/dataset/togosite/ensembl>
 WHERE {
   {{#if gene_list}}
   VALUES ?ensg { {{#each gene_list}} ensg:{{this}} {{/each}} }

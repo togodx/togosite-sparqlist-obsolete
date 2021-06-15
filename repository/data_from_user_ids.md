@@ -45,24 +45,24 @@ PREFIX taxon_id: <http://identifiers.org/taxonomy/>
 PREFIX id: <http://identifiers.org/>
 SELECT (COUNT (DISTINCT ?entry) AS ?count)
 {{#if pValueFlag.ncbigene}}
-FROM <http://rdf.ebi.ac.uk/dataset/ensembl/102/homo_sapiens>
+FROM <http://rdf.integbio.jp/dataset/togosite/ensembl>
 WHERE {
    ?entry a id:ncbigene ;
           ^rdfs:seeAlso/obo:RO_0002162	taxon_id:9606 . 
 }
 {{/if}}
 {{#if pValueFlag.ensembl_gene}}
-FROM <http://rdf.ebi.ac.uk/dataset/ensembl/102/homo_sapiens>
+FROM <http://rdf.integbio.jp/dataset/togosite/ensembl>
 WHERE {
-  ?entry a obo:SO_0001217 ;
-         obo:RO_0002162	taxon_id:9606 . 
+  ?entry obo:RO_0002162	taxon_id:9606 .
+  FILTER (CONTAINS (STR(?entry), 'http://rdf.ebi.ac.uk/resource/ensembl/ENSG'))
 }
 {{/if}}
 {{#if pValueFlag.ensembl_transcript}}
-FROM <http://rdf.ebi.ac.uk/dataset/ensembl/102/homo_sapiens>
+FROM <http://rdf.integbio.jp/dataset/togosite/ensembl>
 WHERE {
-  ?entry a obo:SO_0000234 ;
-         obo:RO_0002162	taxon_id:9606 . 
+  ?entry obo:RO_0002162	taxon_id:9606 . 
+  FILTER (CONTAINS (STR(?entry), 'http://rdf.ebi.ac.uk/resource/ensembl.transcript/ENST'))
 }
 {{/if}}
 {{#if pValueFlag.uniprot}}
@@ -141,8 +141,9 @@ async ({sparqlet, categoryIds, userIds, userKey, primaryKey, pValueFlag, populat
   // with pvalue (gene, protein)
   let calcPvalue = (a, b, c, d) => {
     // 不正数値検出
+    let maxLimit = 300000; // ensembl_transcript: ~253,000
     if (a < 0 || b < 0 || c < 0 || d < 0) return false;
-    if (a > 200000 || b > 200000 || c > 200000 || d > 200000) return false; // ensembl_gene: ~113,000
+    if (a > maxLimit || b > maxLimit || c > maxLimit || d > maxLimit) return false;
     
     let sigDigi = (num, exp) => {
       while (num > 10) {
