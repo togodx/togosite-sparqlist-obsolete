@@ -1,4 +1,4 @@
-# WIP: ChEBI Application での分類 
+# WIP: ChEBI Application での分類 （川島、建石）
 
 ## Description
 
