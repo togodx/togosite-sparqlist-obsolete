@@ -1,4 +1,4 @@
-# TogoID alt 3: route を生成して、一つの SPARQL で join
+# TogoID alt 3: route (multi) を生成して、一つの SPARQL で join
 
 ## Parameters
 
@@ -9,7 +9,7 @@
 * `ids`
   * default: Q9D7Q1,Q690N0,Q9NYF8,Q4V339,A6NCE7,A7E2F4,P69849,A6NN73,Q92928,Q5T1J5,P0C7P4,Q6DN03,P09874,Q08211,Q5T4S7,P12270,Q9UPN3,P07814
 
-## `route`
+## `routes`
 
 ```javascript
 ({source, target}) => {
@@ -19,63 +19,52 @@
       gene: ["hgnc", "ncbigene", "ensembl_gene", "ensembl_transcript"],
       protein: ["uniprot", "chembl_target"],
       structure: ["pdb"],
-      chembl_compound: ["chembl_compound"],
-      compound: ["pubchem_compound", "chebi"],
+      compound: ["pubchem_compound", "chembl_compound", "chebi"],
       nando: ["nando"],
       disease: ["mondo", "medgen", "omim_phenotype", "orphanet", "hp", "mesh"]
     },
     route: {
       variant: {
-        variant: [],
-        gene: [],
-        protein: ["hgnc", "uniprot"],
-        structure: ["hgnc", "uniprot", "pdb"],
-        chembl_compound: ["hgnc", "uniprot", "chembl_target", "chembl_compound"],
-        compound: ["hgnc", "uniprot", "reactome_reaction", "chebi"],
-        nando: ["medgen", "mondo"],
-        disease: ["medgen"]
+        variant: [[]],
+        gene: [[]],
+        protein: [["hgnc", "uniprot"]],
+        structure: [["hgnc", "uniprot", "pdb"]],
+        compound: [["hgnc", "uniprot", "reactome_reaction", "chebi"], ["hgnc", "uniprot", "chembl_target", "chembl_compound"]],
+        nando: [["medgen", "mondo"]],
+        disease: [["medgen"]]
       },
       gene: {
-        gene: [],
-        protein: ["uniprot"],
-        structure: ["uniprot", "pdb"],
-        chembl_compound: ["uniprot", "chembl_target", "chembl_compound"],
-        compound: ["uniprot", "reactome_reaction", "chebi"],
-        nando: ["ncbigene", "medgen", "mondo"],
-        disease: ["ncbigene", "medgen"]
+        gene: [[]],
+        protein: [["uniprot"]],
+        structure: [["uniprot", "pdb"]],
+        compound: [["uniprot", "reactome_reaction", "chebi"], ["uniprot", "chembl_target", "chembl_compound"]],
+        nando: [["ncbigene", "medgen", "mondo"]],
+        disease: [["ncbigene", "medgen"]]
       },
       protein: {
-        protein: [],
-        structure: [],
-        chembl_compound: ["chembl_target", "chembl_compound"],
-        compound: ["reactome_reaction", "chebi"],
-        nando: ["ncbigene", "medgen", "mondo"],
-        disease: ["ncbigene", "medgen"]
+        protein: [[]],
+        structure: [[]],
+        compound: [["reactome_reaction", "chebi"], ["chembl_target", "chembl_compound"]],
+        nando: [["ncbigene", "medgen", "mondo"]],
+        disease: [["ncbigene", "medgen"]]
       },
       structure: {
-        structure: [],
-        chembl_compound: ["uniprot", "chembl_target", "chembl_compound"],
-        compound: ["uniprot", "reactome_reaction", "chebi"],
-        nando: ["uniprot", "ncbigene", "medgen", "mondo"],
-        disease: ["uniprot", "ncbigene", "medgen"]
-      },
-      chembl_compound: {
-        chembl_compund: [],
-        compound: [],
-        nando: ["chembl_target", "uniprot", "ncbigene", "medgen", "mondo"],
-        disease: ["chembl_target", "uniprot", "ncbigene", "medgen"]
+        structure: [[]],
+        compound: [["uniprot", "reactome_reaction", "chebi"], ["uniprot", "chembl_target", "chembl_compound"]],
+        nando: [["uniprot", "ncbigene", "medgen", "mondo"]],
+        disease: [["uniprot", "ncbigene", "medgen"]]
       },
       compound: {
-        compound: [],
-        nando: ["chebi", "reactome_reaction", "uniprot", "ncbigene", "medgen", "mondo"],
-        disease: ["chebi", "reactome_reaction", "uniprot", "ncbigene", "medgen"]
+        compound: [[]],
+        nando: [["chembl_compound", "mesh", "mondo", "medgen"]],
+        disease: [["chembl_compound", "mesh", "mondo"]],
       },
       nando: {
-        nando: [],
-        disease: ["mondo"]
+        nando: [[]],
+        disease: [["mondo"]]
       },
       disease: {
-        disease: ["mondo"]
+        disease: [["mondo"]]
       }
     }
   };
@@ -85,42 +74,63 @@
     if (config.database[subject].includes(source)) sourceSubject = subject;
     if (config.database[subject].includes(target)) targetSubject = subject;
   }
-  console.log(sourceSubject);
+  
+  // 例外処理
+  // mondo - medgen - hp
+  if ((target == "mondo" && source == "hp") 
+      || (source == "mondo" && target == "hp")) {
+    config.route.disease.disease[0].push("medgen");
+  }
+  // chembl_compound - mesh
+  if ((sourceSubject == "compound" && target == "mesh") 
+      || (targetSubject == "compound" && source == "mesh")) {
+    config.route.compound.disease[0].pop();
+  }
   
   let makeRoute = (source, target, route) => {
-    // 例外処理
-    if (route[0] == "mondo" && source == "hp") route.unshift("medgen");  // hp - medgen - mondo 
-    if (route[route.length - 1] == "mondo" && target == "hp") route.push("medgen"); // mondo - medgen - hp
     route.unshift(source);
     route.push(target);
     return route.filter((x, i, self) => self.indexOf(x) === i);
   }
   
+  let routes = [];
   for (let subject_1 of Object.keys(config.route)) {
     for (let subject_2 of Object.keys(config.route[subject_1])) {
       if (subject_1 == sourceSubject && subject_2 == targetSubject) {
-        return makeRoute(source, target, config.route[subject_1][subject_2]);
+        for (let route of config.route[subject_1][subject_2]) {
+          routes.push(makeRoute(source, target, route));
+        }
       }
       if (subject_1 == targetSubject && subject_2 == sourceSubject) {
-        return makeRoute(source, target, config.route[subject_1][subject_2].reverse());
+        for (let route of config.route[subject_1][subject_2]) {
+          routes.push(makeRoute(source, target, route.reverse()));
+        }
       }
     }
   }
+  return routes;
 }
 ```
 
-## `pairList`
+## `pairListArray`
 ```javascript
-({route})=>{
-  let list = [];
-  for (let i = 0; i < route.length - 1; i++) {
-    let id1 = "id_" + [i];
-    let id2 = "id_" + [i + 1];
-    if (i == 0) id1 = "source_uri";
-    if (i == route.length - 2) id2 = "target_uri";
-    list.push({source: route[i], target: route[i + 1], id1: id1, id2: id2});
+({routes})=>{
+  let array = [];
+  for (let i = 0; i < routes.length; i++) {
+    let route = routes[i];
+    let list = [];
+    for (let j = 0; j < route.length - 1; j++) {
+      let id1 = "id_" + [j];
+      let id2 = "id_" + [j + 1];
+      if (j == 0) id1 = "source_uri";
+      if (j == route.length - 2) id2 = "target_uri";
+      list.push({source: route[j], target: route[j + 1], id1: id1, id2: id2});
+    }
+    let union = "UNION";
+    if (i == routes.length - 1) union = "";
+    array.push({list: list, union: union});
   }
-  return list;
+  return array;
 }
 ```
 
@@ -166,16 +176,23 @@ PREFIX uniprot: <http://purl.uniprot.org/uniprot/>
 SELECT DISTINCT ?source_id ?target_id #?source_uri ?target_uri
 WHERE {
   VALUES ?source_uri { {{#each idList}} {{../source}}:{{this}} {{/each}} }
-  {{#each pairList}}
-    {
-      GRAPH <http://togoid.dbcls.jp/graph/{{source}}-{{target}}> {
-        ?{{id1}} [] ?{{id2}} .
+  {{#each pairListArray}}
+  {
+    SELECT DISTINCT ?source_uri ?target_uri
+    WHERE {
+    {{#each list}}
+      {
+        GRAPH <http://togoid.dbcls.jp/graph/{{source}}-{{target}}> {
+          ?{{id1}} [] ?{{id2}} .
+        }
+      } UNION {
+        GRAPH <http://togoid.dbcls.jp/graph/{{target}}-{{source}}> {
+          ?{{id2}} [] ?{{id1}} .
+        }
       }
-    } UNION {
-      GRAPH <http://togoid.dbcls.jp/graph/{{target}}-{{source}}> {
-        ?{{id2}} [] ?{{id1}} .
-      }
+    {{/each}}
     }
+  } {{union}} 
   {{/each}}
   BIND (replace(str(?source_uri), {{source}}:, '') AS ?source_id)
   BIND (replace(str(?target_uri), {{target}}:, '') AS ?target_id)
