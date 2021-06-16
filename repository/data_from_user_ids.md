@@ -84,7 +84,7 @@ WHERE {
 ## `distribution`
 ```javascript
 async ({sparqlet, categoryIds, userIds, userKey, primaryKey, pValueFlag, population})=>{
-  let fetchReq = async (url, body) => {
+  const fetchReq = async (url, body) => {
     let options = {	
       method: 'POST',
       headers: {
@@ -98,13 +98,14 @@ async ({sparqlet, categoryIds, userIds, userKey, primaryKey, pValueFlag, populat
     return await fetch(url, options).then(res=>res.json());
   }
 
- // let togoidSparqlistSplitter = "https://integbio.jp/togosite/sparqlist/api/togoid_sparqlist_splitter";  
- // let sparqlistSplitter = "https://integbio.jp/togosite/sparqlist/api/sparqlist_splitter";
- // let togoidApi = "https://integbio.jp/togosite/sparqlist/api/togoid_route_sparql";
-  let togoidSparqlistSplitter = "http://localhost:3000/togosite/sparqlist/api/togoid_sparqlist_splitter";  
-  let sparqlistSplitter = "http://localhost:3000/togosite/sparqlist/api/sparqlist_splitter";
-  let togoidApi = "http://localhost:3000/togosite/sparqlist/api/togoid_route_sparql";
+ // const togoidSparqlistSplitter = "https://integbio.jp/togosite/sparqlist/api/togoid_sparqlist_splitter";  
+ // const sparqlistSplitter = "https://integbio.jp/togosite/sparqlist/api/sparqlist_splitter";
+ // const togoidApi = "https://integbio.jp/togosite/sparqlist/api/togoid_route_sparql";
+  const togoidSparqlistSplitter = "http://localhost:3000/togosite/sparqlist/api/togoid_sparqlist_splitter";  
+  const sparqlistSplitter = "http://localhost:3000/togosite/sparqlist/api/sparqlist_splitter";
+  const togoidApi = "http://localhost:3000/togosite/sparqlist/api/togoid_route_sparql";
   let idLimit = 2000; // split 判定
+  if (primaryKey == "chembl_compound") idLimit = 500; // restrict POST response size
   sparqlet = sparqlet.replace("https://integbio.jp/togosite/sparqlist/", "http://localhost:3000/togosite/sparqlist/");
   
   // convert user IDs to primary IDs for SPARQLet

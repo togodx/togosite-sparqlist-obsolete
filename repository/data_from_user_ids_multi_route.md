@@ -103,7 +103,8 @@ async ({sparqlet, categoryIds, userIds, userKey, primaryKey, pValueFlag, populat
   const togoidApi = "http://localhost:3000/togosite/sparqlist/api/togoid_route_sparql_multi_route"; 
   let idLimit = 2000; // split 判定
   if (primaryKey == "chembl_compound") idLimit = 500; // restrict POST response size
-
+  sparqlet = sparqlet.replace("https://integbio.jp/togosite/sparqlist/", "http://localhost:3000/togosite/sparqlist/");
+ 
   // convert user IDs to primary IDs for SPARQLet
   let queryIds = "";
   if (userKey != primaryKey) {
