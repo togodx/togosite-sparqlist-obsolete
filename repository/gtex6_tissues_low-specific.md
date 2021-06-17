@@ -146,7 +146,10 @@ WHERE {
 ```javascript
 ({ main, mode, low_spec, categoryIds }) => {
   if (mode === "idList") {
-    var results = main.results.bindings.concat(low_spec.results.bindings)
+    var results = main.results.bindings
+    if (Object.keys(low_spec.results.bindings[0]).length !=0) {
+      results = results.concat(low_spec_results.bindings)
+    }
     return Array.from(new Set(
       results.map((elem) =>
         elem.ensg.value.replace("http://identifiers.org/ensembl/", "")
