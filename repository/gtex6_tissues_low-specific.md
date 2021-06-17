@@ -58,8 +58,8 @@ https://integbio.jp/togosite/sparql
 ```javascript
 ({ categoryIds }) => {
   categoryIds = categoryIds.replace(/,/g, " ");
-  if (categoryIds.match(/\S/)) {
-    return categoryIds.split(/\s+/).filter((x) => x == "low_specificity");
+  if (categoryIds.split(/\s+/).includes("low_specificity")) {
+    return ["low_specificity"];
   }
 };
 ```
@@ -85,7 +85,6 @@ https://integbio.jp/togosite/sparql
   }
 };
 ```
-
 
 ## `main`
 
@@ -167,22 +166,27 @@ WHERE {
 }
 ```
 
+## `test`
+```javascript
+({ main, mode, low_spec, categoryIds, input_tissues, input_tissues_low_spec, flag_do_main, flag_do_low_spec }) => {
+  var results = main.results.bindings.concat(low_spec.results.bindings).filter((x)=>Object.keys(x).length!=0)
+  return results;
+};
+```
+
 ## `return`
 
 ```javascript
 ({ main, mode, low_spec, categoryIds, input_tissues, input_tissues_low_spec, flag_do_main, flag_do_low_spec }) => {
+  var results = main.results.bindings.concat(low_spec.results.bindings).filter((x)=>Object.keys(x).length!=0)
   if (mode === "idList") {
-    var results = main.results.bindings
-    if (Object.keys(low_spec.results.bindings[0]).length !=0) {
-      results = results.concat(low_spec.results.bindings)
-    }
     return Array.from(new Set(
       results.map((elem) =>
         elem.ensg.value.replace("http://identifiers.org/ensembl/", "")
       )
     ));
   } else if (mode === "objectList") {
-    var objList = main.results.bindings.map((elem) => ({
+    var objList = results.map((elem) => ({
       id: elem.ensg.value.replace("http://identifiers.org/ensembl/", ""),
       attribute: {
         categoryId: elem.tissue.value
