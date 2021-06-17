@@ -56,12 +56,36 @@ https://integbio.jp/togosite/sparql
 
 ## `input_tissues_low_spec`
 ```javascript
-({ input_tissues }) => {
-  if (input_tissues) {
-    return input_tissues.filter((x) => x == "low_specificity");
+({ categoryIds }) => {
+  categoryIds = categoryIds.replace(/,/g, " ");
+  if (categoryIds.match(/\S/)) {
+    return categoryIds.split(/\s+/).filter((x) => x == "low_specificity");
   }
 };
 ```
+
+## `do_main`
+```javascript
+({ input_tissues, input_tissues_low_spec }) => {
+  if (!input_tissues && input_tissues_low_spec) {
+    return false;
+  } else {
+    return true;
+  }
+};
+```
+
+## `do_low_spec`
+```javascript
+({ input_tissues, input_tissues_low_spec }) => {
+  if (input_tissues && !input_tissues_low_spec) {
+    return false;
+  } else {
+    return true;
+  }
+};
+```
+
 
 ## `main`
 
@@ -79,6 +103,7 @@ SELECT DISTINCT ?tissue ?label ?ensg
 SELECT ?tissue ?label (COUNT(DISTINCT ?ensg) AS ?count) (SAMPLE(?child_tissue) AS ?child_example)
 {{/if}}
 WHERE {
+  {{#if do_main}}
   {{#if input_genes}}
   VALUES ?ensg { {{#each input_genes}} ensembl:{{this}} {{/each}} }
   {{/if}}
@@ -108,6 +133,7 @@ WHERE {
   OPTIONAL {
     ?child_tissue skos:broader ?tissue .
   }
+  {{/if}}
 }
 ```
 
@@ -127,7 +153,7 @@ SELECT DISTINCT ?ensg
 SELECT (COUNT(DISTINCT ?ensg) AS ?count)
 {{/if}}
 WHERE {
-  {{#unless categoryIds}}
+  {{#if do_low_spec}}
   {{#if input_genes}}
   VALUES ?ensg { {{#each input_genes}} ensembl:{{this}} {{/each}} }
   {{/if}}
@@ -137,14 +163,14 @@ WHERE {
       ?ensg refexo:isPositivelySpecificTo ?tissue .
     }
   }
-  {{/unless}}
+  {{/if}}
 }
 ```
 
 ## `return`
 
 ```javascript
-({ main, mode, low_spec, categoryIds }) => {
+({ main, mode, low_spec, categoryIds, input_tissues, input_tissues_low_spec }) => {
   if (mode === "idList") {
     var results = main.results.bindings
     if (Object.keys(low_spec.results.bindings[0]).length !=0) {
