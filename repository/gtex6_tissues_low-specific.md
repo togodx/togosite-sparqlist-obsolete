@@ -64,7 +64,7 @@ https://integbio.jp/togosite/sparql
 };
 ```
 
-## `do_main`
+## `flag_do_main`
 ```javascript
 ({ input_tissues, input_tissues_low_spec }) => {
   if (!input_tissues && input_tissues_low_spec) {
@@ -75,7 +75,7 @@ https://integbio.jp/togosite/sparql
 };
 ```
 
-## `do_low_spec`
+## `flag_do_low_spec`
 ```javascript
 ({ input_tissues, input_tissues_low_spec }) => {
   if (input_tissues && !input_tissues_low_spec) {
@@ -103,7 +103,7 @@ SELECT DISTINCT ?tissue ?label ?ensg
 SELECT ?tissue ?label (COUNT(DISTINCT ?ensg) AS ?count) (SAMPLE(?child_tissue) AS ?child_example)
 {{/if}}
 WHERE {
-  {{#if do_main}}
+  {{#if flag_do_main}}
   {{#if input_genes}}
   VALUES ?ensg { {{#each input_genes}} ensembl:{{this}} {{/each}} }
   {{/if}}
@@ -153,7 +153,7 @@ SELECT DISTINCT ?ensg
 SELECT (COUNT(DISTINCT ?ensg) AS ?count)
 {{/if}}
 WHERE {
-  {{#if do_low_spec}}
+  {{#if flag_do_low_spec}}
   {{#if input_genes}}
   VALUES ?ensg { {{#each input_genes}} ensembl:{{this}} {{/each}} }
   {{/if}}
@@ -170,11 +170,11 @@ WHERE {
 ## `return`
 
 ```javascript
-({ main, mode, low_spec, categoryIds, input_tissues, input_tissues_low_spec }) => {
+({ main, mode, low_spec, categoryIds, input_tissues, input_tissues_low_spec, flag_do_main, flag_do_low_spec }) => {
   if (mode === "idList") {
     var results = main.results.bindings
     if (Object.keys(low_spec.results.bindings[0]).length !=0) {
-      results = results.concat(low_spec_results.bindings)
+      results = results.concat(low_spec.results.bindings)
     }
     return Array.from(new Set(
       results.map((elem) =>
@@ -201,7 +201,9 @@ WHERE {
       }
     })));
   } else {
-    var obj = main.results.bindings.map((elem) => ({
+    var objs = []
+    if (flag_do_main) {
+      objs = main.results.bindings.map((elem) => ({
       categoryId: elem.tissue.value
         .replace("http://purl.obolibrary.org/obo/", "")
         .replace("http://www.ebi.ac.uk/efo/", ""),
@@ -209,15 +211,16 @@ WHERE {
       count: Number(elem.count.value),
       hasChild: Boolean(elem.child_example)
     })).sort((a, b) => a.label.toLowerCase() < b.label.toLowerCase() ? -1 : 1);
-    if (!categoryIds) {
-      obj.push({
+    }
+    if (!categoryIds && low_spec.results.bindings[0].count.value != "0") {
+      objs.push({
         categoryId: "low_specificity",
         label: "Low specificity",
         count: Number(low_spec.results.bindings[0].count.value),
         hasChild: false
       });
     }
-    return obj;
+    return objs;
   }
 
   function modifyLabel(label) {
