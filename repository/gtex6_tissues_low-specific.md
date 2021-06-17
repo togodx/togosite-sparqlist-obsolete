@@ -182,7 +182,7 @@ WHERE {
     })).sort((a, b) => a.label.toLowerCase() < b.label.toLowerCase() ? -1 : 1);
     if (!categoryIds) {
       obj.push({
-        categoryId: "",
+        categoryId: "low_specificity",
         label: "Low specificity",
         count: Number(low_spec.results.bindings[0].count.value),
         hasChild: false
