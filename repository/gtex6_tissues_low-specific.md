@@ -97,9 +97,9 @@ PREFIX obo: <http://purl.obolibrary.org/obo/>
 PREFIX efo: <http://www.ebi.ac.uk/efo/>
 
 {{#if mode}}
-SELECT DISTINCT ?tissue ?label ?ensg
+SELECT DISTINCT ?tissue ?tissue_id ?label ?ensg
 {{else}}
-SELECT ?tissue ?label (COUNT(DISTINCT ?ensg) AS ?count) (SAMPLE(?child_tissue) AS ?child_example)
+SELECT ?tissue ?tissue_id ?label (COUNT(DISTINCT ?ensg) AS ?count) (SAMPLE(?child_tissue) AS ?child_example)
 {{/if}}
 WHERE {
   {{#if flag_do_main}}
@@ -132,6 +132,7 @@ WHERE {
   OPTIONAL {
     ?child_tissue skos:broader ?tissue .
   }
+  BIND(REPLACE(REPLACE(STR(?tissue), "http://purl.obolibrary.org/obo/", ""), "http://www.ebi.ac.uk/efo/", "") AS ?tissue_id)
   {{/if}}
 }
 ```
@@ -147,38 +148,39 @@ PREFIX obo: <http://purl.obolibrary.org/obo/>
 PREFIX efo: <http://www.ebi.ac.uk/efo/>
 
 {{#if mode}}
-SELECT DISTINCT ?ensg
+SELECT DISTINCT ?tissue ?tissue_id ?label ?ensg
 {{else}}
-SELECT (COUNT(DISTINCT ?ensg) AS ?count)
+SELECT ?tissue ?tissue_id ?label (COUNT(DISTINCT ?ensg) AS ?count) ?child_example
 {{/if}}
 WHERE {
   {{#if flag_do_low_spec}}
+  BIND("" AS ?tissue)
+  BIND("low_specificity" AS ?tissue_id)
+  BIND("Low specificity" AS ?label)
   {{#if input_genes}}
   VALUES ?ensg { {{#each input_genes}} ensembl:{{this}} {{/each}} }
   {{/if}}
   ?ensg a refexo:GTEx_v6_ts_evaluated_gene .
   GRAPH <http://rdf.integbio.jp/dataset/togosite/refex_tissue_specific_genes_gtex_v6> {
     FILTER NOT EXISTS {
-      ?ensg refexo:isPositivelySpecificTo ?tissue .
+      ?ensg refexo:isPositivelySpecificTo ?t .
     }
   }
   {{/if}}
 }
 ```
 
-## `test`
-```javascript
-({ main, mode, low_spec, categoryIds, input_tissues, input_tissues_low_spec, flag_do_main, flag_do_low_spec }) => {
-  var results = main.results.bindings.concat(low_spec.results.bindings).filter((x)=>Object.keys(x).length!=0)
-  return results;
-};
-```
-
 ## `return`
 
 ```javascript
-({ main, mode, low_spec, categoryIds, input_tissues, input_tissues_low_spec, flag_do_main, flag_do_low_spec }) => {
-  var results = main.results.bindings.concat(low_spec.results.bindings).filter((x)=>Object.keys(x).length!=0)
+({ main, mode, low_spec, flag_do_main, flag_do_low_spec }) => {
+  var results = []
+  if (flag_do_main) {
+    results = main.results.bindings.sort((a, b) => a.label.value.toLowerCase() < b.label.value.toLowerCase() ? -1 : 1);
+  }
+  if (flag_do_low_spec) {
+    results = results.concat(low_spec.results.bindings).filter((x)=>Object.keys(x).length!=0);
+  }
   if (mode === "idList") {
     return Array.from(new Set(
       results.map((elem) =>
@@ -186,45 +188,21 @@ WHERE {
       )
     ));
   } else if (mode === "objectList") {
-    var objList = results.map((elem) => ({
+    return results.map((elem) => ({
       id: elem.ensg.value.replace("http://identifiers.org/ensembl/", ""),
       attribute: {
-        categoryId: elem.tissue.value
-          .replace("http://purl.obolibrary.org/obo/", "")
-          .replace("http://www.ebi.ac.uk/efo/", ""),
+        categoryId: elem.tissue_id.value,
         uri: elem.tissue.value,
         label: capitalize(modifyLabel(elem.label.value))
       }
     }));
-    return objList.concat(low_spec.results.bindings.map((elem) => ({
-      id: elem.ensg.value.replace("http://identifiers.org/ensembl/", ""),
-      attribute: {
-        categoryId: "",
-        uri: "",
-        label: "Low specificity"
-      }
-    })));
   } else {
-    var objs = []
-    if (flag_do_main) {
-      objs = main.results.bindings.map((elem) => ({
-      categoryId: elem.tissue.value
-        .replace("http://purl.obolibrary.org/obo/", "")
-        .replace("http://www.ebi.ac.uk/efo/", ""),
+    return results.map((elem) => ({
+      categoryId: elem.tissue_id.value,
       label: capitalize(modifyLabel(elem.label.value)),
       count: Number(elem.count.value),
       hasChild: Boolean(elem.child_example)
-    })).sort((a, b) => a.label.toLowerCase() < b.label.toLowerCase() ? -1 : 1);
-    }
-    if (!categoryIds && low_spec.results.bindings[0].count.value != "0") {
-      objs.push({
-        categoryId: "low_specificity",
-        label: "Low specificity",
-        count: Number(low_spec.results.bindings[0].count.value),
-        hasChild: false
-      });
-    }
-    return objs;
+    }));
   }
 
   function modifyLabel(label) {

@@ -1,7 +1,16 @@
 # Genes expressed in tissues (GTEx ver6)（小野・池田・千葉）(mode対応版)
 This query allows **multiple tissue flags** for each gene.
 
-Forked from `gtex6_tissues`. Modified to include "low specificity" as a result.
+## Description
+
+- Data sources
+    - Supplementary Table 1 of [A systematic survey of human tissue-specific gene expression and splicing reveals new opportunities for therapeutic target identification and evaluation; R. Y. Yang et al.; bioRxiv 311563](https://doi.org/10.1101/311563)
+    - Mapping from the tissue names to the corresponding UBERON or EFO term is based on [GTEx documentation](https://gtexportal.org/home/samplingSitePage).
+- Query
+    - Input
+        - Ensembl gene ID
+    - Output
+        - UBERON ID or EFO ID
 
 ## Endpoint
 
@@ -11,7 +20,7 @@ https://integbio.jp/togosite/sparql
 * `categoryIds` (type: UBERON or EFO)
   * example: UBERON_0010414,UBERON_0002369,UBERON_0001496,EFO_0000572
 * `queryIds` (type: ensembl_gene)
-  * example: ENSG00000000005,ENSG00000002587,ENSG00000003989,ENSG00000049883
+  * example: ENSG00000000005,ENSG00000002587,ENSG00000003989
 * `mode`
   * example: idList, objectList
 
@@ -29,7 +38,6 @@ https://integbio.jp/togosite/sparql
 ```javascript
 ({ categoryIds }) => {
   categoryIds = categoryIds.replace(/,/g, " ");
-  categoryIds = categoryIds.replace("low_specificity", "");
   if (categoryIds.match(/\S/)) {
     return categoryIds.split(/\s+/);
   }
@@ -54,38 +62,6 @@ https://integbio.jp/togosite/sparql
 };
 ```
 
-## `input_tissues_low_spec`
-```javascript
-({ categoryIds }) => {
-  categoryIds = categoryIds.replace(/,/g, " ");
-  if (categoryIds.split(/\s+/).includes("low_specificity")) {
-    return ["low_specificity"];
-  }
-};
-```
-
-## `flag_do_main`
-```javascript
-({ input_tissues, input_tissues_low_spec }) => {
-  if (!input_tissues && input_tissues_low_spec) {
-    return false;
-  } else {
-    return true;
-  }
-};
-```
-
-## `flag_do_low_spec`
-```javascript
-({ input_tissues, input_tissues_low_spec }) => {
-  if (input_tissues && !input_tissues_low_spec) {
-    return false;
-  } else {
-    return true;
-  }
-};
-```
-
 ## `main`
 
 ```sparql
@@ -97,12 +73,11 @@ PREFIX obo: <http://purl.obolibrary.org/obo/>
 PREFIX efo: <http://www.ebi.ac.uk/efo/>
 
 {{#if mode}}
-SELECT DISTINCT ?tissue ?tissue_id ?label ?ensg
+SELECT DISTINCT ?tissue ?label ?ensg
 {{else}}
-SELECT ?tissue ?tissue_id ?label (COUNT(DISTINCT ?ensg) AS ?count) (SAMPLE(?child_tissue) AS ?child_example)
+SELECT ?tissue ?label (COUNT(DISTINCT ?ensg) AS ?count) (SAMPLE(?child_tissue) AS ?child_example)
 {{/if}}
 WHERE {
-  {{#if flag_do_main}}
   {{#if input_genes}}
   VALUES ?ensg { {{#each input_genes}} ensembl:{{this}} {{/each}} }
   {{/if}}
@@ -132,77 +107,39 @@ WHERE {
   OPTIONAL {
     ?child_tissue skos:broader ?tissue .
   }
-  BIND(REPLACE(REPLACE(STR(?tissue), "http://purl.obolibrary.org/obo/", ""), "http://www.ebi.ac.uk/efo/", "") AS ?tissue_id)
-  {{/if}}
-}
-```
-
-## `low_spec`
-
-```sparql
-PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
-PREFIX ensembl: <http://identifiers.org/ensembl/>
-PREFIX refexo: <http://purl.jp/bio/01/refexo#>
-PREFIX obo: <http://purl.obolibrary.org/obo/>
-PREFIX efo: <http://www.ebi.ac.uk/efo/>
-
-{{#if mode}}
-SELECT DISTINCT ?tissue ?tissue_id ?label ?ensg
-{{else}}
-SELECT ?tissue ?tissue_id ?label (COUNT(DISTINCT ?ensg) AS ?count) ?child_example
-{{/if}}
-WHERE {
-  {{#if flag_do_low_spec}}
-  BIND("" AS ?tissue)
-  BIND("low_specificity" AS ?tissue_id)
-  BIND("Low specificity" AS ?label)
-  {{#if input_genes}}
-  VALUES ?ensg { {{#each input_genes}} ensembl:{{this}} {{/each}} }
-  {{/if}}
-  ?ensg a refexo:GTEx_v6_ts_evaluated_gene .
-  GRAPH <http://rdf.integbio.jp/dataset/togosite/refex_tissue_specific_genes_gtex_v6> {
-    FILTER NOT EXISTS {
-      ?ensg refexo:isPositivelySpecificTo ?t .
-    }
-  }
-  {{/if}}
 }
 ```
 
 ## `return`
 
 ```javascript
-({ main, mode, low_spec, flag_do_main, flag_do_low_spec }) => {
-  var results = []
-  if (flag_do_main) {
-    results = main.results.bindings.sort((a, b) => a.label.value.toLowerCase() < b.label.value.toLowerCase() ? -1 : 1);
-  }
-  if (flag_do_low_spec) {
-    results = results.concat(low_spec.results.bindings).filter((x)=>Object.keys(x).length!=0);
-  }
+({ main, mode }) => {
   if (mode === "idList") {
     return Array.from(new Set(
-      results.map((elem) =>
+      main.results.bindings.map((elem) =>
         elem.ensg.value.replace("http://identifiers.org/ensembl/", "")
       )
     ));
   } else if (mode === "objectList") {
-    return results.map((elem) => ({
+    return main.results.bindings.map((elem) => ({
       id: elem.ensg.value.replace("http://identifiers.org/ensembl/", ""),
       attribute: {
-        categoryId: elem.tissue_id.value,
+        categoryId: elem.tissue.value
+          .replace("http://purl.obolibrary.org/obo/", "")
+          .replace("http://www.ebi.ac.uk/efo/", ""),
         uri: elem.tissue.value,
         label: capitalize(modifyLabel(elem.label.value))
       }
     }));
   } else {
-    return results.map((elem) => ({
-      categoryId: elem.tissue_id.value,
+    return main.results.bindings.map((elem) => ({
+      categoryId: elem.tissue.value
+        .replace("http://purl.obolibrary.org/obo/", "")
+        .replace("http://www.ebi.ac.uk/efo/", ""),
       label: capitalize(modifyLabel(elem.label.value)),
       count: Number(elem.count.value),
       hasChild: Boolean(elem.child_example)
-    }));
+    })).sort((a, b) => a.label.toLowerCase() < b.label.toLowerCase() ? -1 : 1);
   }
 
   function modifyLabel(label) {
