@@ -27,7 +27,7 @@ SELECT DISTINCT ?element ?category ?label
 FROM <http://rdf.integbio.jp/dataset/togosite/refexo>
 FROM <http://rdf.integbio.jp/dataset/togosite/refex_id_relation_human>
 FROM <http://rdf.integbio.jp/dataset/togosite/refex_tissue_specific_genechip_human_GSE7307>
-FROM <http://rdf.integbio.jp/dataset/togosite/refex_tissue_specific_rnaseq_human_PRJEB2445>
+#FROM <http://rdf.integbio.jp/dataset/togosite/refex_tissue_specific_rnaseq_human_PRJEB2445>
 WHERE {
   ?element refexo:affyProbeset ?affy .
 {{#if negatively}}
