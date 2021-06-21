@@ -20,7 +20,7 @@
 
 * `categoryIds` (type: variant consequence)
   * default: 
-  * example: SO_0001060 (sequence_variant)  http://www.sequenceontology.org/browser/current_svn/term/SO:0001060
+  * example: SO_0001583(missense_variant),SO_0001060 (sequence_variant)  http://www.sequenceontology.org/browser/current_svn/term/SO:0001060
 * `queryIds` (type:TogoVar)
   * example: tgv48208871,tgv48208872,tgv48208877,tgv48208884,tgv48208888,tgv48208896,tgv48208897,tgv48208898,tgv48208900,tgv48208904,tgv48208906,tgv48208908,tgv48208938,tgv48208939,tgv48208943,tgv48208945,tgv48208947,tgv48208962,tgv48208965,tgv48208967,tgv48208968,tgv48208970,tgv48208971,tgv48208973,tgv48208977
 * `mode` 必須パラメータ。内訳の代わりに該当する ID のリストを返す（デフォルトはオフ）idList: リストだけ、objectList: Attributeの入ったリスト（Attribute は下階層ではなく、categoryid で指定したカテゴリ）
