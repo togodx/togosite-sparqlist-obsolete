@@ -102,7 +102,7 @@ WHERE {
    ?category rdfs:label ?label.
 }
 {{#if mode}}
-LIMIT 10000
+#LIMIT 10000
 {{else}}  
 ORDER BY DESC(?count)
 {{/if}}
