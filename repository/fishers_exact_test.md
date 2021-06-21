@@ -14,8 +14,10 @@
   let c = Number(tmp[2]);
   let d = Number(tmp[3]);
   
-  if (a > 100000 || b > 100000 || c > 100000 || d > 100000) return {error: "limit <= 100000"};
+  // 不正数値検出
+  const maxLimit = 300000; // ensembl_transcript: ~253,000
   if (a < 0 || b < 0 || c < 0 || d < 0) return {error: "limit >= 0"};
+  if (a > maxLimit || b > maxLimit || c > maxLimit || d > maxLimit) return {error: "limit <= " + maxLimit };
   
   let sigDigi = (num, exp) => {
     while (num > 10) {
