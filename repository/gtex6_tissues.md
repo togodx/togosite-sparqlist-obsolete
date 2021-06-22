@@ -1,7 +1,16 @@
 # Genes expressed in tissues (GTEx ver6)（小野・池田・千葉）(mode対応版)
 This query allows **multiple tissue flags** for each gene.
 
-Forked from `gtex6_tissues`. Modified to include "low specificity" as a result.
+## Description
+
+- Data sources
+    - Supplementary Table 1 of [A systematic survey of human tissue-specific gene expression and splicing reveals new opportunities for therapeutic target identification and evaluation; R. Y. Yang et al.; bioRxiv 311563](https://doi.org/10.1101/311563)
+    - Mapping from the tissue names to the corresponding UBERON or EFO term is based on [GTEx documentation](https://gtexportal.org/home/samplingSitePage).
+- Query
+    - Input
+        - Ensembl gene ID
+    - Output
+        - UBERON ID or EFO ID or "low_specificity"
 
 ## Endpoint
 
@@ -9,7 +18,7 @@ https://integbio.jp/togosite/sparql
 
 ## Parameters
 * `categoryIds` (type: UBERON or EFO)
-  * example: UBERON_0010414,UBERON_0002369,UBERON_0001496,EFO_0000572
+  * example: UBERON_0010414,UBERON_0002369,UBERON_0001496,EFO_0000572,low_specificity
 * `queryIds` (type: ensembl_gene)
   * example: ENSG00000000005,ENSG00000002587,ENSG00000003989,ENSG00000049883
 * `mode`

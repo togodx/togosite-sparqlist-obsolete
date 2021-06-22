@@ -1,4 +1,4 @@
-# Genes on chromosomes
+# Genes on chromosomes (片山、池田)
 
 ## Description
 
