@@ -24,7 +24,7 @@ https://integbio.jp/togosite/sparql
 * `mode`
   * example: idList, objectList
 
-## `gene_list` queryIdsを配列に
+## `input_genes`
 
 ```javascript
 ({queryIds}) => {
@@ -37,7 +37,7 @@ https://integbio.jp/togosite/sparql
 };
 ```
 
-## `category_list` categoryIds を配列に
+## `input_tissues`
 
 ```javascript
 ({categoryIds}) => {
@@ -45,6 +45,24 @@ https://integbio.jp/togosite/sparql
   if (categoryIds.match(/[^\s]/)) return categoryIds.split(/\s+/);
   return false;
 }
+```
+
+## `input_tissues_uberon`
+```javascript
+({ input_tissues }) => {
+  if (input_tissues) {
+    return input_tissues.filter((x) => x.match(/^UBERON/));
+  }
+};
+```
+
+## `input_tissues_efo`
+```javascript
+({ input_tissues }) => {
+  if (input_tissues) {
+    return input_tissues.filter((x) => x.match(/^EFO/));
+  }
+};
 ```
 
 ## `main`
@@ -59,10 +77,19 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX taxonomy: <http://identifiers.org/taxonomy/>
 PREFIX refexo:  <http://purl.jp/bio/01/refexo#>
 PREFIX sio: <http://semanticscience.org/resource/>
+PREFIX schema: <http://schema.org/>
+PREFIX ensg: <http://rdf.ebi.ac.uk/terms/ensembl/>
 
-SELECT DISTINCT (COUNT(DISTINCT ?ensg) AS ?count) ?tissue_name
+{{#if mode}}
+SELECT DISTINCT ?tissue ?tissue_id ?tissue_name ?ensg
+{{else}}
+SELECT ?tissue ?tissue_id ?tissue_name (COUNT(DISTINCT ?ensg) AS ?count) (SAMPLE(?child_tissue) AS ?child_example)
+{{/if}}
 WHERE {
   GRAPH <http://rdf.integbio.jp/dataset/togosite/refex_gtex_v8_summary> {
+    {{#if input_genes}}
+    VALUES ?ensg { {{#each input_genes}} ensembl:{{this}} {{/each}} }
+    {{/if}}
     ?refex a refexo:RefExEntry ;
            sio:SIO_000216 ?exp_bn ;
            refexo:isMeasurementOf ?ensg ;
@@ -70,11 +97,27 @@ WHERE {
     ?exp_bn a refexo:logTPMMax ;
             sio:SIO_000300 0 .
   }
+
+  {{#if input_tissues}}
+  VALUES {{#if mode}} ?tissue {{else}} ?parent {{/if}} { {{#each input_tissues_uberon}} obo:{{this}} {{/each}} {{#each input_tissues_efo}} efo:{{this}} {{/each}} }
+  {{#unless mode}}
+  GRAPH <http://rdf.integbio.jp/dataset/togosite/refexo_tissue_classifications> {
+    ?tissue skos:broader ?parent .
+  }
+  {{/unless}}
+  {{else}}
+  GRAPH <http://rdf.integbio.jp/dataset/togosite/refexo_tissue_classifications> {
+    FILTER NOT EXISTS {
+      ?tissue skos:broader ?parent .
+    }
+  }
+  {{/if}}
+
   GRAPH <http://rdf.integbio.jp/dataset/togosite/refexsample_gtex_v8_summary> {
     ?refexs dcterms:description ?tissue_name ;
             schema:additionalProperty ?sample_bn .
     ?sample_bn schema:name "tissue" ;
-               schema:valueReference ?tissue_uri .
+               schema:valueReference ?tissue .
   }
   GRAPH <http://rdf.integbio.jp/dataset/togosite/ensembl> {
     ?ensg a ?type ;
@@ -87,6 +130,7 @@ WHERE {
                    enso:translated_processed_pseudogene enso:IG_pseudogene enso:translated_unprocessed_pseudogene }
     FILTER(CONTAINS(STR(?type), "http://rdf.ebi.ac.uk/terms/ensembl/"))
   }
+  BIND(REPLACE(REPLACE(STR(?tissue), "http://purl.obolibrary.org/obo/", ""), "http://www.ebi.ac.uk/efo/", "") AS ?tissue_id)
 }
 
 ```
@@ -113,8 +157,8 @@ WHERE {
   else {
     return main.results.bindings.map(d => {
       return {
-        categoryId: d.description.value,
-        label: d.description_label.value,
+        categoryId: d.tissue_id.value,
+        label: d.tissue_name.value,
         count: Number(d.count.value)
       };
     });
