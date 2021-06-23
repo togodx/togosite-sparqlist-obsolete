@@ -105,22 +105,21 @@ WHERE {
   GRAPH <http://rdf.integbio.jp/dataset/togosite/refexo_tissue_classifications> {
     ?tissue skos:broader ?parent .
     ?narrower_tissue skos:broader* ?tissue .
-    OPTIONAL {
-      ?child_tissue skos:broader ?tissue .
-    }
   }
   {{/unless}}
   {{else}}
   GRAPH <http://rdf.integbio.jp/dataset/togosite/refexo_tissue_classifications> {
+    ?narrower_tissue skos:broader* ?tissue .
     FILTER NOT EXISTS {
       ?tissue skos:broader ?parent .
     }
-    ?narrower_tissue skos:broader* ?tissue .
-    OPTIONAL {
+  }
+  {{/if}}
+  OPTIONAL {
+    GRAPH <http://rdf.integbio.jp/dataset/togosite/refexo_tissue_classifications> {
       ?child_tissue skos:broader ?tissue .
     }
   }
-  {{/if}}
 
   GRAPH <http://rdf.integbio.jp/dataset/togosite/refexsample_gtex_v8_summary> {
     ?refexs dcterms:description ?tissue_name ;
