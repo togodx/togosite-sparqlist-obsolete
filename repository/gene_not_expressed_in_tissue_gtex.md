@@ -78,35 +78,37 @@ PREFIX taxonomy: <http://identifiers.org/taxonomy/>
 PREFIX refexo:  <http://purl.jp/bio/01/refexo#>
 PREFIX sio: <http://semanticscience.org/resource/>
 PREFIX schema: <http://schema.org/>
-PREFIX ensg: <http://rdf.ebi.ac.uk/terms/ensembl/>
+PREFIX ensg: <http://rdf.ebi.ac.uk/resource/ensembl/>
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 
 {{#if mode}}
-SELECT DISTINCT ?tissue ?tissue_id ?tissue_name ?ensg
+SELECT DISTINCT ?tissue ?tissue_id ?label ?ensg
 {{else}}
-SELECT ?tissue ?tissue_id ?tissue_name (COUNT(DISTINCT ?ensg) AS ?count) (SAMPLE(?child_tissue) AS ?child_example)
+SELECT ?tissue ?tissue_id ?label (COUNT(DISTINCT ?ensg) AS ?count) (SAMPLE(?child_tissue) AS ?child_example)
 {{/if}}
 WHERE {
   GRAPH <http://rdf.integbio.jp/dataset/togosite/refex_gtex_v8_summary> {
     {{#if input_genes}}
-    VALUES ?ensg { {{#each input_genes}} ensembl:{{this}} {{/each}} }
+    VALUES ?ensg { {{#each input_genes}} ensg:{{this}} {{/each}} }
     {{/if}}
     ?refex a refexo:RefExEntry ;
            sio:SIO_000216 ?exp_bn ;
            refexo:isMeasurementOf ?ensg ;
            refexo:refexSample ?refexs .
     ?exp_bn a refexo:logTPMMax ;
-            sio:SIO_000300 0 .
+            # sio:SIO_000300 0 .
+            sio:SIO_000300 ?logtpmmax .
+    FILTER(?logtpmmax > 0 && ?logtpmmax < 1)
   }
 
   {{#if input_tissues}}
   VALUES {{#if mode}} ?tissue {{else}} ?parent {{/if}} { {{#each input_tissues_uberon}} obo:{{this}} {{/each}} {{#each input_tissues_efo}} efo:{{this}} {{/each}} }
-  {{#unless mode}}
   GRAPH <http://rdf.integbio.jp/dataset/togosite/refexo_tissue_classifications> {
+  {{#unless mode}}
     ?tissue skos:broader ?parent .
+  {{/unless}}
     ?narrower_tissue skos:broader* ?tissue .
   }
-  {{/unless}}
   {{else}}
   GRAPH <http://rdf.integbio.jp/dataset/togosite/refexo_tissue_classifications> {
     ?narrower_tissue skos:broader* ?tissue .
@@ -122,22 +124,33 @@ WHERE {
   }
 
   GRAPH <http://rdf.integbio.jp/dataset/togosite/refexsample_gtex_v8_summary> {
-    ?refexs dcterms:description ?tissue_name ;
-            schema:additionalProperty ?sample_bn .
-    ?sample_bn schema:name "tissue" ;
+    ?refexs schema:additionalProperty ?sample_bn .
+    VALUES ?sample_type { "tissue" "cell type"}
+    ?sample_bn schema:name ?sample_type ;
                schema:valueReference ?narrower_tissue .
   }
   GRAPH <http://rdf.integbio.jp/dataset/togosite/ensembl> {
-    ?ensg a ?type ;
-          rdfs:label ?label .
+    ?ensg a ?type .
     VALUES ?type { enso:protein_coding enso:lncRNA enso:processed_pseudogene enso:unprocessed_pseudogene
                    enso:transcribed_unprocessed_pseudogene enso:LRG_gene enso:transcribed_processed_pseudogene enso:IG_V_pseudogene
                    enso:IG_V_gene enso:TR_V_gene enso:transcribed_unitary_pseudogene enso:unitary_pseudogene enso:TR_J_gene
                    enso:polymorphic_pseudogene enso:IG_D_gene enso:TR_V_pseudogene enso:pseudogene enso:IG_J_gene enso:IG_C_gene
                    enso:IG_C_pseudogene enso:TR_C_gene enso:IG_J_pseudogene enso:TR_D_gene enso:TR_J_pseudogene
                    enso:translated_processed_pseudogene enso:IG_pseudogene enso:translated_unprocessed_pseudogene }
-    FILTER(CONTAINS(STR(?type), "http://rdf.ebi.ac.uk/terms/ensembl/"))
   }
+
+  {
+    GRAPH <http://rdf.integbio.jp/dataset/togosite/efo> {
+      ?tissue rdfs:label ?label .
+    }
+  }
+  UNION
+  {
+    GRAPH <http://rdf.integbio.jp/dataset/togosite/uberon> {
+      ?tissue rdfs:label ?label .
+    }
+  }
+
   BIND(REPLACE(REPLACE(STR(?tissue), "http://purl.obolibrary.org/obo/", ""), "http://www.ebi.ac.uk/efo/", "") AS ?tissue_id)
 }
 
@@ -146,30 +159,57 @@ WHERE {
 ## `return`
 
 ```javascript
-({mode, main}) => {
-  if (mode == "objectList") {
-    return main.results.bindings.map(d => {
-      return {
-        id: d.id.value,
-        attribute: {
-          categoryId: d.description.value,
-          uri: d.type.value,
-          label: d.description_label.value
-        }
-      };
-    });
+({ main, mode }) => {
+  if (mode === "idList") {
+    return Array.from(new Set(
+      main.results.bindings.map((elem) =>
+        elem.ensg.value.replace("http://rdf.ebi.ac.uk/resource/ensembl/", "")
+      )
+    ));
+  } else if (mode === "objectList") {
+    return main.results.bindings.map((elem) => ({
+      id: elem.ensg.value.replace("http://rdf.ebi.ac.uk/resource/ensembl/", ""),
+      attribute: {
+        categoryId: elem.tissue.value
+          .replace("http://purl.obolibrary.org/obo/", "")
+          .replace("http://www.ebi.ac.uk/efo/", ""),
+        uri: elem.tissue.value,
+        label: capitalize(modifyLabel(elem.label.value))
+      }
+    }));
+  } else {
+    return main.results.bindings.map((elem) => ({
+      categoryId: elem.tissue.value
+        .replace("http://purl.obolibrary.org/obo/", "")
+        .replace("http://www.ebi.ac.uk/efo/", ""),
+      label: capitalize(modifyLabel(elem.label.value)),
+      count: Number(elem.count.value),
+      hasChild: Boolean(elem.child_example)
+    })).sort((a, b) => a.label.toLowerCase() < b.label.toLowerCase() ? -1 : 1);
   }
-  if (mode == "idList") {
-    return Array.from(new Set(main.results.bindings.map(d => d.id.value))); // unique
+
+  function modifyLabel(label) {
+    const map = new Map([
+      ["breast epithelium", "breast"],
+      ["right lobe of liver", "liver"],
+      ["upper lobe of left lung", "lung"],
+      ["anterior lingual gland", "minor salivary gland"],
+      ["gastrocnemius medialis", "skeletal muscle"],
+      ["body of pancreas", "pancreas"],
+      ["Peyer's patch", "small intestine"],
+      ["venous blood", "blood"],
+      ["skin of body", "skin"],
+    ]);
+
+    if (map.has(label)) {
+      return map.get(label);
+    } else {
+      return label;
+    }
   }
-  else {
-    return main.results.bindings.map(d => {
-      return {
-        categoryId: d.tissue_id.value,
-        label: d.tissue_name.value,
-        count: Number(d.count.value)
-      };
-    });
+
+  function capitalize(str) {
+    return str.charAt(0).toUpperCase() + str.substring(1);
   }
 };
 ```
