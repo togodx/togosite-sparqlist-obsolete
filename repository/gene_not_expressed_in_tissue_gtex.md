@@ -79,6 +79,7 @@ PREFIX refexo:  <http://purl.jp/bio/01/refexo#>
 PREFIX sio: <http://semanticscience.org/resource/>
 PREFIX schema: <http://schema.org/>
 PREFIX ensg: <http://rdf.ebi.ac.uk/terms/ensembl/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 
 {{#if mode}}
 SELECT DISTINCT ?tissue ?tissue_id ?tissue_name ?ensg
@@ -103,12 +104,20 @@ WHERE {
   {{#unless mode}}
   GRAPH <http://rdf.integbio.jp/dataset/togosite/refexo_tissue_classifications> {
     ?tissue skos:broader ?parent .
+    ?narrower_tissue skos:broader* ?tissue .
+    OPTIONAL {
+      ?child_tissue skos:broader ?tissue .
+    }
   }
   {{/unless}}
   {{else}}
   GRAPH <http://rdf.integbio.jp/dataset/togosite/refexo_tissue_classifications> {
     FILTER NOT EXISTS {
       ?tissue skos:broader ?parent .
+    }
+    ?narrower_tissue skos:broader* ?tissue .
+    OPTIONAL {
+      ?child_tissue skos:broader ?tissue .
     }
   }
   {{/if}}
@@ -117,7 +126,7 @@ WHERE {
     ?refexs dcterms:description ?tissue_name ;
             schema:additionalProperty ?sample_bn .
     ?sample_bn schema:name "tissue" ;
-               schema:valueReference ?tissue .
+               schema:valueReference ?narrower_tissue .
   }
   GRAPH <http://rdf.integbio.jp/dataset/togosite/ensembl> {
     ?ensg a ?type ;
