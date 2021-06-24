@@ -96,9 +96,9 @@ WHERE {
            refexo:isMeasurementOf ?ensg ;
            refexo:refexSample ?refexs .
     ?exp_bn a refexo:logTPMMax ;
-            # sio:SIO_000300 0 .
-            sio:SIO_000300 ?logtpmmax .
-    FILTER(?logtpmmax > 0 && ?logtpmmax < 1)
+            sio:SIO_000300 0 .
+            #sio:SIO_000300 ?logtpmmax .
+    #FILTER(?logtpmmax > 0 && ?logtpmmax < 0.1)
   }
 
   {{#if input_tissues}}
