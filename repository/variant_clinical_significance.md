@@ -41,11 +41,13 @@
 ({categoryIds}) => {
   
   var id2label = {};
-  id2label["uncertain_significance"] = "Uncertain significance";
-  id2label["likely_benign"] = "Likely beneign"
+  id2label["uncertain_significance"] = "Uncertain significance"
+  id2label["likely_benign"] = "Likely benign"
+  id2label["benign"] = "Benign"
   id2label["pathogenic"] = "Pathogenic"
   id2label["likely_pathogenic"] = "Likely pathogenic"
   id2label["conflicting_interpretations_of_pathogenicity"] = "Conflicting interpretations of pathogenicity"
+  id2label["not_provided"] = "Not provided"
   id2label["benign_or_likely_benign"] = "Benign/Likely benign"
   id2label["pathogenic_or_likely_pathogenic"] = "Pathogenic/Likely pathogenic"
   id2label["other"] = "other"
