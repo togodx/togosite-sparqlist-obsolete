@@ -105,7 +105,6 @@ WHERE {
 
 ```javascript
 ({mode, queryIds, categoryIds, withTarget, withoutTarget})=>{
-  if (categoryIds.match(/^\d+$/)) categoryIds = categoryIds + "-" + categoryIds;
   if (mode) {
     const idVarName = "uniprot";
     const idPrefix = "http://purl.uniprot.org/uniprot/";
@@ -120,7 +119,7 @@ WHERE {
       for (let d of withTarget.results.bindings) {
         if (range.begin <= Number(d.target_num.value) && Number(d.target_num.value) <= range.end) filteredData.push(d);
       }
-    } else filteredData = withTarSget.results.bindings;
+    } else filteredData = withTarget.results.bindings;
     if (mode == "objectList") return filteredData.map(d=>{
       return {
         id: d[idVarName].value.replace(idPrefix, ""),
@@ -129,41 +128,6 @@ WHERE {
     });
     if (mode == "idList") return filteredData.map(d=>d[idVarName].value.replace(idPrefix, ""));
   }
-  // 仮想階層制御
-  if (!queryIds || withoutTarget.results.bindings[0].count.value != 0) {
-    withTarget.results.bindings.unshift( {count: {value: withoutTarget.results.bindings[0].count.value}, target_num: {value: "0"}}  ); // カウント 0 を追加
-  }
-  const limit_1 = 20;
-  const limit_2 = 100;
-  const bin_2 = 10;
-  let res = [];
-  if (!categoryIds) {
-    for (let d of withTarget.results.bindings) {
-      let num = Number(d.target_num.value);
-      if (num < limit_1) res.push( { categoryId: d.target_num.value, label: d.target_num.value, count: Number(d.count.value)} );
-      else if (num >= limit_1 && res[res.length - 1].label != limit_1 + "-") res.push( { categoryId: limit_1 + "-", label: limit_1 + "-", count: Number(d.count.value), hasChild: true} );
-      else res[res.length - 1].count += Number(d.count.value);
-    }
-  } else if (categoryIds == limit_1 + "-") {
-    for (let d of withTarget.results.bindings) {
-      let num = Number(d.target_num.value);
-      let start = parseInt(num / bin_2) * bin_2;
-      let label = start + "-" + (start + 9);
-      if (num < limit_1) continue;
-      if (num < limit_2 && res.length <= (num - limit_1) / bin_2) res.push( { categoryId: label, label: label, count: Number(d.count.value), hasChild: true} );
-      else if (num >= limit_2 && res[res.length - 1].label != limit_2 + "-") res.push( { categoryId: limit_2 + "-", label: limit_2 + "-", count: Number(d.count.value), hasChild: true} );
-      else res[res.length - 1].count += Number(d.count.value);
-    }
-  } else {
-    let range = categoryIds.split(/-/);
-    for (let d of withTarget.results.bindings) {
-      let num = Number(d.target_num.value);
-      if (num < Number(range[0]) || (range[1] && num > Number(range[1]))) continue;
-      res.push( { categoryId: d.target_num.value, label:  d.target_num.value, count: Number(d.count.value)} );
-    }
-  }
-  return res;
-  /*
   // 仮想階層制御
   if (!queryIds || withoutTarget.results.bindings[0].count.value != 0) {
     withTarget.results.bindings.unshift( {count: {value: withoutTarget.results.bindings[0].count.value}, target_num: {value: "0"}}  ); // カウント 0 を追加
@@ -180,6 +144,6 @@ WHERE {
     value = num + 1;
     res.push( { categoryId: d.target_num.value, label: d.target_num.value, count: Number(d.count.value)} );
   }
-  return res; */
+  return res;
 }
 ```

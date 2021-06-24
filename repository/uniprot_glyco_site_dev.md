@@ -1,6 +1,17 @@
-# uniprot glyco site (binning ver.)（守屋）
+# uniprot glyco site（守屋）
 
 - タンパク質糖鎖結合サイト数の内訳
+
+## Description
+
+- Data sources
+    - [UniProt](https://www.uniprot.org/)
+
+- Query
+    - Input
+        - UniProt ID
+    - Output
+        - The number of glycosylation site
 
 ## Parameters
 
@@ -109,7 +120,6 @@ WHERE {
 - 上位を合算
 ```javascript
 ({mode, queryIds, categoryIds, withTarget, withoutTarget})=>{
-  if (categoryIds.match(/^\d+$/)) categoryIds = categoryIds + "-" + categoryIds;
   if (mode) {
     const idVarName = "uniprot";
     const idPrefix = "http://purl.uniprot.org/uniprot/";
@@ -137,34 +147,17 @@ WHERE {
   if (!queryIds || withoutTarget.results.bindings[0].count.value != 0) {
     withTarget.results.bindings.unshift( {count: {value: withoutTarget.results.bindings[0].count.value}, target_num: {value: "0"}}  ); // カウント 0 を追加
   }
-  const limit_1 = 20;
-  const limit_2 = 100;
-  const bin_2 = 10;
+  let value = 0;
   let res = [];
-  if (!categoryIds) {
-    for (let d of withTarget.results.bindings) {
-      let num = Number(d.target_num.value);
-      if (num < limit_1) res.push( { categoryId: d.target_num.value, label: d.target_num.value, count: Number(d.count.value)} );
-      else if (num >= limit_1 && res[res.length - 1].label != limit_1 + "-") res.push( { categoryId: limit_1 + "-", label: limit_1 + "-", count: Number(d.count.value), hasChild: true} );
-      else res[res.length - 1].count += Number(d.count.value);
+  for (let d of withTarget.results.bindings) {
+    const num = Number(d.target_num.value);
+    if (value < num) {
+      for (let emptyValue = value; emptyValue < num; emptyValue++) {
+        res.push( { categoryId: emptyValue.toString(), label: emptyValue.toString(), count: 0} );
+      }
     }
-  } else if (categoryIds == limit_1 + "-") {
-    for (let d of withTarget.results.bindings) {
-      let num = Number(d.target_num.value);
-      let start = parseInt(num / bin_2) * bin_2;
-      let label = start + "-" + (start + 9);
-      if (num < limit_1) continue;
-      if (num < limit_2 && res.length <= (num - limit_1) / bin_2) res.push( { categoryId: label, label: label, count: Number(d.count.value), hasChild: true} );
-      else if (num >= limit_2 && res[res.length - 1].label != limit_2 + "-") res.push( { categoryId: limit_2 + "-", label: limit_2 + "-", count: Number(d.count.value), hasChild: true} );
-      else res[res.length - 1].count += Number(d.count.value);
-    }
-  } else {
-    let range = categoryIds.split(/-/);
-    for (let d of withTarget.results.bindings) {
-      let num = Number(d.target_num.value);
-      if (num < Number(range[0]) || (range[1] && num > Number(range[1]))) continue;
-      res.push( { categoryId: d.target_num.value, label:  d.target_num.value, count: Number(d.count.value)} );
-    }
+    value = num + 1;
+    res.push( { categoryId: d.target_num.value, label: d.target_num.value, count: Number(d.count.value)} );
   }
   return res;
 }
