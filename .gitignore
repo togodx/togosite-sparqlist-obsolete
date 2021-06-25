@@ -1,7 +1,0 @@
-.env
-LICENSE
-README.md
-docker-compose.yml
-restart_sparqlist.sh
-sparqlist
-togosite.env
