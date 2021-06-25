@@ -13,7 +13,7 @@
 
 ## Parameters
 * `categoryIds` (type: 膜貫通部位数)
-  * example: 4,8 4-7 -5 20-
+  * example: 4-7 -5 20-
 * `queryIds` (type: uniprot)
   * example: Q5VV42,Q9BSA9,Q12884,P04233,O15162,O00322,P16070,O75844,Q9BXK5,Q12983,P08195,Q496J9,P63027,P51681,P58335,Q9Y5U4,P12830,P08581,Q96NB2,O75746,Q9Y548
 * `mode`
@@ -29,13 +29,19 @@
 }
 ```
 
-## `categoryArray`
-
+## `filter`
 ```javascript
-({categoryIds}) => {
-  categoryIds = categoryIds.replace(/,/g," ");
-  if (categoryIds.match(/[^\s]/)) return categoryIds.split(/\s+/);
-  return false;
+({mode, categoryIds})=>{
+  if (!mode || !categoryIds) return "";
+  else if (categoryIds.match(/^[^-]+$/)) {
+    let filters = categoryIds.split(/,/).map(d=>{ return "?target_num = " + d });
+　  return "FILTER( " + filters.join(" || ") + " )";
+  } else {
+    let filters = [];
+    if (categoryIds.match(/^[\d\.]+-/)) filters.push("?target_num >= " + categoryIds.match(/^([\d\.]+)-/)[1]);
+    if (categoryIds.match(/-[\d\.]+$/)) filters.push("?target_num <= " + categoryIds.match(/-([\d\.]+)$/)[1]);
+    return "FILTER( " + filters.join(" && ") + " )";
+  }
 }
 ```
 
@@ -56,7 +62,9 @@ SELECT DISTINCT ?uniprot ?target_num
 {{else}} 
 SELECT ?target_num (COUNT(DISTINCT ?uniprot) AS ?count)
 {{/if}}
-WHERE{
+FROM <http://rdf.integbio.jp/dataset/togosite/uniprot>
+WHERE {
+  {
 	SELECT ?uniprot (COUNT(DISTINCT ?annotation) AS ?target_num)
 	WHERE {
         {{#if queryArray}}
@@ -69,10 +77,20 @@ WHERE{
   		?annotation rdf:type up:Transmembrane_Annotation .
   	FILTER(REGEX(STR(?proteome), "UP000005640"))
     }
+  }
+  {{filter}}
 }    
 {{#unless mode}}                      
 ORDER BY ?target_num
 {{/unless}}
+```
+
+## `zero_check`
+```javascript
+({categoryIds})=>{
+  if (!categoryIds || categoryIds.match(/^0*-\d/) || categoryIds.split(/,/).includes("0")) return true;
+  return false;
+}
 ```
 
 ## `withoutTarget`
@@ -86,7 +104,9 @@ SELECT DISTINCT ?uniprot ?target_num
 {{else}} 
 SELECT (COUNT(DISTINCT ?uniprot) AS ?count)
 {{/if}}
+FROM <http://rdf.integbio.jp/dataset/togosite/uniprot>
 WHERE {
+{{#if zero_check}}
   {{#if queryArray}}
   VALUES ?uniprot { {{#each queryArray}} upid:{{this}} {{/each}} }
   {{/if}}
@@ -98,6 +118,7 @@ WHERE {
     ?uniprot up:annotation [ a up:Transmembrane_Annotation ] .
   }
   BIND ("0" AS ?target_num)
+{{/if}}
 }
 ```
 

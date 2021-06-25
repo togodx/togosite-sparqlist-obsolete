@@ -20,7 +20,7 @@
 ## Parameters
 
 * `categoryIds` (type: interact proteins range)
-  * example: 3-4, 11-11, 20-
+  * example: 3-5 -5 20-
 * `queryIds` (type: uniprot)
   * example: Q9NYF8,Q4V339,A6NCE7,A7E2F4,P69849,A6NN73,Q92928,Q5T1J5,P0C7P4,Q6DN03,P09874,Q08211,Q5T4S7,P12270,Q9UPN3,P07814,P53621,P49321,P0C629,Q9BZK8,Q9BY65
 * `mode`
@@ -33,6 +33,22 @@
   queryIds = queryIds.replace(/,/g," ")
   if (queryIds.match(/[^\s]/)) return queryIds.split(/\s+/);
   return false;
+}
+```
+
+## `filter`
+```javascript
+({mode, categoryIds})=>{
+  if (!mode || !categoryIds) return "";
+  else if (categoryIds.match(/^[^-]+$/)) {
+    let filters = categoryIds.split(/,/).map(d=>{ return "?target_num = " + d });
+　  return "FILTER( " + filters.join(" || ") + " )";
+  } else {
+    let filters = [];
+    if (categoryIds.match(/^[\d\.]+-/)) filters.push("?target_num >= " + categoryIds.match(/^([\d\.]+)-/)[1]);
+    if (categoryIds.match(/-[\d\.]+$/)) filters.push("?target_num <= " + categoryIds.match(/-([\d\.]+)$/)[1]);
+    return "FILTER( " + filters.join(" && ") + " )";
+  }
 }
 ```
 
@@ -99,30 +115,42 @@ WHERE {
       BIND (0 AS ?target_num)
     }
   }
+  {{filter}}
 }
 {{#unless mode}}
 ORDER BY ?target_num
 {{/unless}}
 ```
 
-## `return`
-- 上位を合算
+## `results`
+
 ```javascript
-({mode, categoryIds, data})=>{
+({mode, queryIds, categoryIds, data})=>{
+  // renge
+  let range = {begin: 0, end: Infinity};
+  let cids = false;
+  if (categoryIds) {
+    if (categoryIds.match(/^[\d\.]+-/)) range.begin = Number(categoryIds.match(/^([\d\.]+)-/)[1]);
+    if (categoryIds.match(/-[\d\.]+$/)) range.end = Number(categoryIds.match(/-([\d\.]+)$/)[1]);
+    if (categoryIds.match(/^[^-]+$/)) {
+      cids = categoryIds.split(/,/).reduce((obj, a)=>{
+        obj[Number(a)] = true;
+        return obj;
+      }, {});
+    }
+  }
+  
   if (mode) {
     const idVarName = "uniprot";
     const idPrefix = "http://purl.uniprot.org/uniprot/";
-    // add without-binding-site-data
-    // if (withoutTarget.results.bindings[0] && without.results.bindings[0].uniprot) data.results.bindings = data.results.bindings.concat(without.results.bindings);
     let filteredData = [];
     if (categoryIds) {
-      // range
-      let range = {begin: 0, end: Infinity};
-      if (categoryIds.match(/^[\d\.]+-/)) range.begin = Number(categoryIds.match(/^([\d\.]+)-/)[1]);
-      if (categoryIds.match(/-[\d\.]+$/)) range.end = Number(categoryIds.match(/-([\d\.]+)$/)[1]);
-      console.log(range);
       for (let d of data.results.bindings) {
-        if (range.begin <= Number(d.target_num.value) && Number(d.target_num.value) <= range.end) filteredData.push(d);
+        const num = Number(d.target_num.value);
+        if ((!cids && range.begin <= num && num <= range.end)
+            || (cids[num])) {
+          filteredData.push(d);
+        }
       }
     } else filteredData = data.results.bindings;
     if (mode == "objectList") return filteredData.map(d=>{
@@ -133,46 +161,26 @@ ORDER BY ?target_num
     });
     if (mode == "idList") return filteredData.map(d=>d[idVarName].value.replace(idPrefix, ""));
   }
-  // 仮想階層制御
-  const limit_1 = 20;
-  const limit_2 = 100;
-  const bin_2 = 10;
-  if (!categoryIds) {
-    let res = [];
-    for (let d of data.results.bindings) {
-      let num = Number(d.target_num.value);
-      if (num < limit_1) res.push( { categoryId: d.target_num.value, label: d.target_num.value, count: Number(d.count.value)} );
-      // debug begin
-      // else if (num >= limit_1 && res[res.length - 1].label != limit_1 + "-") res.push( { categoryId: limit_1 + "-", label: limit_1 + "-", count: Number(d.count.value), hasChild: true} );
-      else if (num >= limit_1 && (res.length == 0 || res[res.length - 1].label != limit_1 + "-")) res.push( { categoryId: limit_1 + "-", label: limit_1 + "-", count: Number(d.count.value), hasChild: true} );
-      // debug end
-      else res[res.length - 1].count += Number(d.count.value);
+
+  let value = 0;
+  let res = [];
+  for (let d of data.results.bindings) {
+    const num = Number(d.target_num.value);
+    if (value < num) {
+      // fill missing value by 0
+      for (let emptyValue = value; emptyValue < num; emptyValue++) {
+        if ((!queryIds) 
+            && ((!categoryIds) || ((!cids && range.begin <= emptyValue && emptyValue <= range.end) || (cids[emptyValue])))) {
+        	res.push( { categoryId: emptyValue.toString(), label: emptyValue.toString(), count: 0} );
+        }
+      }
     }
-    return res;
-  } else if (categoryIds == limit_1 + "-") {
-    let res = [];
-    for (let d of data.results.bindings) {
-      let num = Number(d.target_num.value);
-      let start = parseInt(num / bin_2) * bin_2;
-      let label = start + "-" + (start + 9);
-      if (num < limit_1) continue;
-      if (num < limit_2 && res.length <= (num - limit_1) / bin_2) res.push( { categoryId: label, label: label, count: Number(d.count.value), hasChild: true} );
-      // debug begin
-      // else if (num >= limit_2 && res[res.length - 1].label != limit_2 + "-") res.push( { categoryId: limit_2 + "-", label: limit_2 + "-", count: Number(d.count.value), hasChild: true} );
-      else if (num >= limit_2 && (res.length == 0 || res[res.length - 1].label != limit_2 + "-")) res.push( { categoryId: limit_2 + "-", label: limit_2 + "-", count: Number(d.count.value), hasChild: true} );
-      // debug end
-      else res[res.length - 1].count += Number(d.count.value);
+    value = num + 1;
+    if ((!categoryIds)
+      || ((!cids && range.begin <= num && num <= range.end) || (cids[num]))) {
+      res.push( { categoryId: d.target_num.value, label: d.target_num.value, count: Number(d.count.value)} );
     }
-    return res;
-  } else {
-    let range = categoryIds.split(/-/);
-    let res = [];
-    for (let d of data.results.bindings) {
-      let num = Number(d.target_num.value);
-      if (num < Number(range[0]) || (range[1] && num > Number(range[1]))) continue;
-      res.push( { categoryId: d.target_num.value, label:  d.target_num.value, count: Number(d.count.value)} );
-    }
-    return res;
-  }
+  }       
+  return res;
 }
 ```
