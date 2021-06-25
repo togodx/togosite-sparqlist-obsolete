@@ -56,6 +56,7 @@ SELECT DISTINCT ?uniprot ?target_num
 {{else}} 
 SELECT ?target_num (COUNT(DISTINCT ?uniprot) AS ?count)
 {{/if}}
+FROM <http://rdf.integbio.jp/dataset/togosite/uniprot>
 WHERE{
 	SELECT ?uniprot (COUNT(DISTINCT ?annotation) AS ?target_num)
 	WHERE {
@@ -86,6 +87,7 @@ SELECT DISTINCT ?uniprot ?target_num
 {{else}} 
 SELECT (COUNT(DISTINCT ?uniprot) AS ?count)
 {{/if}}
+FROM <http://rdf.integbio.jp/dataset/togosite/uniprot>
 WHERE {
   {{#if queryArray}}
   VALUES ?uniprot { {{#each queryArray}} upid:{{this}} {{/each}} }
@@ -120,7 +122,7 @@ WHERE {
       for (let d of withTarget.results.bindings) {
         if (range.begin <= Number(d.target_num.value) && Number(d.target_num.value) <= range.end) filteredData.push(d);
       }
-    } else filteredData = withTarSget.results.bindings;
+    } else filteredData = withTarget.results.bindings;
     if (mode == "objectList") return filteredData.map(d=>{
       return {
         id: d[idVarName].value.replace(idPrefix, ""),
@@ -163,11 +165,11 @@ WHERE {
     }
   }
   return res;
-  /*
+  
   // 仮想階層制御
-  if (!queryIds || withoutTarget.results.bindings[0].count.value != 0) {
+  /*if (!queryIds || withoutTarget.results.bindings[0].count.value != 0) {
     withTarget.results.bindings.unshift( {count: {value: withoutTarget.results.bindings[0].count.value}, target_num: {value: "0"}}  ); // カウント 0 を追加
-  }
+  } 
   let value = 0;
   let res = [];
   for (let d of withTarget.results.bindings) {
