@@ -13,7 +13,7 @@
 
 ## Parameters
 * `categoryIds` (type: 膜貫通部位数)
-  * example: 4,8
+  * example: 4,8 4-7 -5 20-
 * `queryIds` (type: uniprot)
   * example: Q5VV42,Q9BSA9,Q12884,P04233,O15162,O00322,P16070,O75844,Q9BXK5,Q12983,P08195,Q496J9,P63027,P51681,P58335,Q9Y5U4,P12830,P08581,Q96NB2,O75746,Q9Y548
 * `mode`
@@ -56,7 +56,6 @@ SELECT DISTINCT ?uniprot ?target_num
 {{else}} 
 SELECT ?target_num (COUNT(DISTINCT ?uniprot) AS ?count)
 {{/if}}
-FROM <http://rdf.integbio.jp/dataset/togosite/uniprot>
 WHERE{
 	SELECT ?uniprot (COUNT(DISTINCT ?annotation) AS ?target_num)
 	WHERE {
@@ -87,7 +86,6 @@ SELECT DISTINCT ?uniprot ?target_num
 {{else}} 
 SELECT (COUNT(DISTINCT ?uniprot) AS ?count)
 {{/if}}
-FROM <http://rdf.integbio.jp/dataset/togosite/uniprot>
 WHERE {
   {{#if queryArray}}
   VALUES ?uniprot { {{#each queryArray}} upid:{{this}} {{/each}} }
@@ -107,7 +105,20 @@ WHERE {
 
 ```javascript
 ({mode, queryIds, categoryIds, withTarget, withoutTarget})=>{
-  if (categoryIds.match(/^\d+$/)) categoryIds = categoryIds + "-" + categoryIds;
+  // renge
+  let range = {begin: 0, end: Infinity};
+  let cids = false;
+  if (categoryIds) {
+    if (categoryIds.match(/^[\d\.]+-/)) range.begin = Number(categoryIds.match(/^([\d\.]+)-/)[1]);
+    if (categoryIds.match(/-[\d\.]+$/)) range.end = Number(categoryIds.match(/-([\d\.]+)$/)[1]);
+    if (categoryIds.match(/^[^-]+$/)) {
+      cids = categoryIds.split(/,/).reduce((obj, a)=>{
+        obj[Number(a)] = true;
+        return obj;
+      }, {});
+    }
+  }
+  
   if (mode) {
     const idVarName = "uniprot";
     const idPrefix = "http://purl.uniprot.org/uniprot/";
@@ -115,12 +126,12 @@ WHERE {
     if (withoutTarget.results.bindings[0] && withoutTarget.results.bindings[0][idVarName]) withTarget.results.bindings = withTarget.results.bindings.concat(withoutTarget.results.bindings);
     let filteredData = [];
     if (categoryIds) {
-      // range
-      let range = {begin: 0, end: Infinity};
-      if (categoryIds.match(/^[\d\.]+-/)) range.begin = Number(categoryIds.match(/^([\d\.]+)-/)[1]);
-      if (categoryIds.match(/-[\d\.]+$/)) range.end = Number(categoryIds.match(/-([\d\.]+)$/)[1]);
       for (let d of withTarget.results.bindings) {
-        if (range.begin <= Number(d.target_num.value) && Number(d.target_num.value) <= range.end) filteredData.push(d);
+        const num = Number(d.target_num.value);
+        if ((!cids && range.begin <= num && num <= range.end)
+            || (cids[num])) {
+          filteredData.push(d);
+        }
       }
     } else filteredData = withTarget.results.bindings;
     if (mode == "objectList") return filteredData.map(d=>{
@@ -131,57 +142,29 @@ WHERE {
     });
     if (mode == "idList") return filteredData.map(d=>d[idVarName].value.replace(idPrefix, ""));
   }
-  // 仮想階層制御
+
   if (!queryIds || withoutTarget.results.bindings[0].count.value != 0) {
     withTarget.results.bindings.unshift( {count: {value: withoutTarget.results.bindings[0].count.value}, target_num: {value: "0"}}  ); // カウント 0 を追加
   }
-  const limit_1 = 20;
-  const limit_2 = 100;
-  const bin_2 = 10;
-  let res = [];
-  if (!categoryIds) {
-    for (let d of withTarget.results.bindings) {
-      let num = Number(d.target_num.value);
-      if (num < limit_1) res.push( { categoryId: d.target_num.value, label: d.target_num.value, count: Number(d.count.value)} );
-      else if (num >= limit_1 && res[res.length - 1].label != limit_1 + "-") res.push( { categoryId: limit_1 + "-", label: limit_1 + "-", count: Number(d.count.value), hasChild: true} );
-      else res[res.length - 1].count += Number(d.count.value);
-    }
-  } else if (categoryIds == limit_1 + "-") {
-    for (let d of withTarget.results.bindings) {
-      let num = Number(d.target_num.value);
-      let start = parseInt(num / bin_2) * bin_2;
-      let label = start + "-" + (start + 9);
-      if (num < limit_1) continue;
-      if (num < limit_2 && res.length <= (num - limit_1) / bin_2) res.push( { categoryId: label, label: label, count: Number(d.count.value), hasChild: true} );
-      else if (num >= limit_2 && res[res.length - 1].label != limit_2 + "-") res.push( { categoryId: limit_2 + "-", label: limit_2 + "-", count: Number(d.count.value), hasChild: true} );
-      else res[res.length - 1].count += Number(d.count.value);
-    }
-  } else {
-    let range = categoryIds.split(/-/);
-    for (let d of withTarget.results.bindings) {
-      let num = Number(d.target_num.value);
-      if (num < Number(range[0]) || (range[1] && num > Number(range[1]))) continue;
-      res.push( { categoryId: d.target_num.value, label:  d.target_num.value, count: Number(d.count.value)} );
-    }
-  }
-  return res;
-  
-  // 仮想階層制御
-  /*if (!queryIds || withoutTarget.results.bindings[0].count.value != 0) {
-    withTarget.results.bindings.unshift( {count: {value: withoutTarget.results.bindings[0].count.value}, target_num: {value: "0"}}  ); // カウント 0 を追加
-  } 
   let value = 0;
   let res = [];
   for (let d of withTarget.results.bindings) {
     const num = Number(d.target_num.value);
     if (value < num) {
+      // fill missing value by 0
       for (let emptyValue = value; emptyValue < num; emptyValue++) {
-        res.push( { categoryId: emptyValue.toString(), label: emptyValue.toString(), count: 0} );
+        if ((!queryIds) 
+            && ((!categoryIds) || ((!cids && range.begin <= emptyValue && emptyValue <= range.end) || (cids[emptyValue])))) {
+        	res.push( { categoryId: emptyValue.toString(), label: emptyValue.toString(), count: 0} );
+        }
       }
     }
     value = num + 1;
-    res.push( { categoryId: d.target_num.value, label: d.target_num.value, count: Number(d.count.value)} );
-  }
-  return res; */
+    if ((!categoryIds)
+      || ((!cids && range.begin <= num && num <= range.end) || (cids[num]))) {
+      res.push( { categoryId: d.target_num.value, label: d.target_num.value, count: Number(d.count.value)} );
+    }
+  }       
+  return res;
 }
 ```
