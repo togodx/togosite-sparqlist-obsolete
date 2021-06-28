@@ -21,13 +21,27 @@
 
 ## `pValueFlag`
 ```javascript
-({primaryKey})=>{
+({primaryKey, sparqlet})=>{
   let obj = {};
-  if (primaryKey == "ncbigene" || primaryKey == "ensembl_gene" || primaryKey == "ensembl_transcript" || primaryKey == "uniprot") {
-    let obj = {};
+  if (primaryKey == "uniprot") {  // || primaryKey == "pdb") {
     obj[primaryKey] = true;
-    return obj;
+  } else if (sparqlet.match(/gene_biotype_ensembl$/) || sparqlet.match(/Ensembl_gene_type$/)) {
+    obj.ensembl_gene_biotype = true;  
+  } else if (sparqlet.match(/gene_chromosome_ensembl$/)) {
+    obj.ensembl_gene_chromosome = true;  
+  } else if (sparqlet.match(/gene_number_of_exons_ensembl$/) || sparqlet.match(/Ensembl-exon-count$/)) {
+    obj.ensembl_transcript_exons = true;  
+  } else if (sparqlet.match(/gene_number_of_paralogs_homologene$/) || sparqlet.match(/homologene_human_paralog_count$/)
+            || sparqlet.match(/gene_evolutionary_conservation_homologene$/) || sparqlet.match(/homologene_category$/)) {
+    obj.ncbigene_homologene = true;  
+  } else if (sparqlet.match(/gene_\w+_level_expression_refex$/) || sparqlet.match(/refex_specific_\w+_expression$/)) {
+    obj.ncbigene_refex = true;  
+  } else if (sparqlet.match(/gene_high_level_expression_gtex6$/) || sparqlet.match(/gtex6_tissues$/)) {
+    obj.ensembl_gene_gtex6 = true;  
+  } else if (sparqlet.match(/gene_transcription_factors_chip_atlas$/) || sparqlet.match(/chip_atlas$/)) {
+    obj.ensembl_gene_chip_atlas = true;  
   }
+  if (Object.keys(obj).length) return obj;
   obj.nonPValue = true;
   return obj;
 }
@@ -38,43 +52,97 @@ https://integbio.jp/togosite/sparql
 
 ## `population`
 ```sparql
+PREFIX obo: <http://purl.obolibrary.org/obo/>
+PREFIX taxid: <http://identifiers.org/taxonomy/>
+PREFIX faldo: <http://biohackathon.org/resource/faldo#>
+PREFIX orth: <http://purl.org/net/orth#>
+PREFIX refexo: <http://purl.jp/bio/01/refexo#>
 PREFIX uniprot: <http://purl.uniprot.org/core/>
 PREFIX taxon_up: <http://purl.uniprot.org/taxonomy/>
-PREFIX obo: <http://purl.obolibrary.org/obo/>
-PREFIX taxon_id: <http://identifiers.org/taxonomy/>
-PREFIX id: <http://identifiers.org/>
-SELECT (COUNT (DISTINCT ?entry) AS ?count)
-{{#if pValueFlag.ncbigene}}
+PREFIX pdbo: <https://rdf.wwpdb.org/schema/pdbx-v50.owl#>
+{{#if pValueFlag.ensembl_gene_biotype}}
+SELECT (COUNT(DISTINCT ?ensg) AS ?total_count)
 FROM <http://rdf.integbio.jp/dataset/togosite/ensembl>
 WHERE {
-   ?entry a id:ncbigene ;
-          ^rdfs:seeAlso/obo:RO_0002162	taxon_id:9606 . 
+  ?ensg obo:RO_0002162 taxid:9606 ; # in taxon
+      a ?type .
+  ?enst obo:SO_transcribed_from ?ensg .
+  FILTER regex(str(?type), "/terms/ensembl/")
 }
 {{/if}}
-{{#if pValueFlag.ensembl_gene}}
+{{#if pValueFlag.ensembl_gene_chromosome}}
+SELECT (COUNT(DISTINCT ?ensg) AS ?total_count)
 FROM <http://rdf.integbio.jp/dataset/togosite/ensembl>
 WHERE {
-  ?entry obo:RO_0002162	taxon_id:9606 .
-  FILTER (CONTAINS (STR(?entry), 'http://rdf.ebi.ac.uk/resource/ensembl/ENSG'))
+  ?enst obo:SO_transcribed_from ?ensg .
+  ?ensg obo:RO_0002162 taxid:9606 ; # in taxon
+    faldo:location ?ensg_location .
+  BIND (strbefore(strafter(str(?ensg_location), "GRCh38/"), ":") AS ?chromosome)
+  VALUES ?chromosome {
+    "1" "2" "3" "4" "5" "6" "7" "8" "9" "10"
+    "11" "12" "13" "14" "15" "16" "17" "18" "19" "20" "21" "22"
+    "X" "Y" "MT"
+  }
 }
 {{/if}}
-{{#if pValueFlag.ensembl_transcript}}
+{{#if pValueFlag.ensembl_transcript_exons}}
+SELECT (COUNT(DISTINCT ?enst) AS ?total_count)
 FROM <http://rdf.integbio.jp/dataset/togosite/ensembl>
 WHERE {
-  ?entry obo:RO_0002162	taxon_id:9606 . 
-  FILTER (CONTAINS (STR(?entry), 'http://rdf.ebi.ac.uk/resource/ensembl.transcript/ENST'))
+  ?enst obo:SO_has_part ?exon ;
+      obo:SO_transcribed_from ?ensg .
+  ?ensg obo:RO_0002162 taxid:9606 . # in taxon
+}
+{{/if}}
+{{#if pValueFlag.ncbigene_homologene}}
+SELECT (COUNT(DISTINCT ?human_gene) AS ?total_count)
+FROM <http://rdf.integbio.jp/dataset/togosite/homologene/data>
+WHERE {
+  ?human_gene orth:taxon taxid:9606 .
+}
+{{/if}}
+{{#if pValueFlag.ncbigene_refex}}
+SELECT (COUNT(?gene) AS ?total_count)
+FROM <http://rdf.integbio.jp/dataset/togosite/refex_id_relation_human>
+WHERE {
+  ?gene refexo:affyProbeset ?affy .
+}
+{{/if}}
+{{#if pValueFlag.ensembl_gene_gtex6}}
+SELECT (COUNT(DISTINCT ?ensg) AS ?total_count)
+FROM <http://rdf.integbio.jp/dataset/togosite/refex_tissue_specific_genes_gtex_v6>
+WHERE {
+  ?ensg a refexo:GTEx_v6_ts_evaluated_gene
+}
+{{/if}}
+{{#if pValueFlag.ensembl_gene_chip_atlas}}
+SELECT (COUNT(?ensg) AS ?total_count)
+FROM <http://rdf.integbio.jp/dataset/togosite/chip_atlas_ncbigene_ensembl>
+WHERE {
+  ?ensg refexo:ncbigene ?ncbigene .
 }
 {{/if}}
 {{#if pValueFlag.uniprot}}
+SELECT (COUNT (DISTINCT ?uniprot) AS ?total_count)
 FROM <http://rdf.integbio.jp/dataset/togosite/uniprot>
 WHERE {
-  ?entry a uniprot:Protein ;
+  ?uniprot a uniprot:Protein ;
          uniprot:organism taxon_up:9606 ;
          uniprot:proteome ?proteome .
   FILTER(REGEX(STR(?proteome), "UP000005640"))
 }
 {{/if}}
+{{#if pValueFlag.pdb}}
+SELECT (COUNT(DISTINCT ?pdb) AS ?total_count)
+FROM <http://rdf.integbio.jp/dataset/togosite/pdbj>
+WHERE {
+  ?pdb a pdbo:datablock ;
+      pdbo:has_pdbx_entity_nonpolyCategory ?nonpoly ;
+      pdbo:has_entityCategory/pdbo:has_entity/rdfs:seeAlso taxid:9606 .
+}
+{{/if}}
 {{#if pValueFlag.nonPValue}}
+SELECT ?s
 WHERE {
 }
 {{/if}}  
@@ -143,6 +211,7 @@ async ({sparqlet, categoryIds, userIds, userKey, primaryKey, pValueFlag, populat
   let calcPvalue = (a, b, c, d) => {
     // 不正数値検出
     let maxLimit = 300000; // ensembl_transcript: ~253,000
+    // console.log([a,b,c,d].join(","));
     if (a < 0 || b < 0 || c < 0 || d < 0) return false;
     if (a > maxLimit || b > maxLimit || c > maxLimit || d > maxLimit) return false;
     
@@ -186,7 +255,7 @@ async ({sparqlet, categoryIds, userIds, userKey, primaryKey, pValueFlag, populat
     return pValue;
   }
   
-  population = Number(population.results.bindings[0].count.value);
+  population = Number(population.results.bindings[0].total_count.value);
   let queries = queryIds.split(/,/).length;
   
   // category count
@@ -197,6 +266,7 @@ async ({sparqlet, categoryIds, userIds, userKey, primaryKey, pValueFlag, populat
   for (let d of res) {
     categoryTotal[d.categoryId] = d.count;
   }
+  console.log(res);
   
   for (let i = 0; i < distribution.length; i++) {
     if (distribution[i].count == 1) distribution[i].pValue = 1;
