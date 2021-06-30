@@ -96,7 +96,6 @@ https://integbio.jp/togosite/sparql
 ```
 
 ## `main`
-
 ```sparql
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
@@ -108,7 +107,7 @@ PREFIX efo: <http://www.ebi.ac.uk/efo/>
 {{#if mode}}
 SELECT DISTINCT ?tissue ?tissue_id ?label ?ensg
 {{else}}
-SELECT ?tissue ?tissue_id ?label (COUNT(DISTINCT ?ensg) AS ?count) (SAMPLE(?child_tissue) AS ?child_example)
+SELECT ?tissue ?tissue_id ?label (COUNT(DISTINCT ?ensg) AS ?count)
 {{/if}}
 WHERE {
   {{#if flag_do_main}}
@@ -116,38 +115,27 @@ WHERE {
   VALUES ?ensg { {{#each input_genes}} ensembl:{{this}} {{/each}} }
   {{/if}}
   {{#if input_tissues}}
-  VALUES {{#if mode}} ?tissue {{else}} ?parent {{/if}} { {{#each input_tissues_uberon}} obo:{{this}} {{/each}} {{#each input_tissues_efo}} efo:{{this}} {{/each}} }
-  {{#unless mode}} ?tissue skos:broader ?parent . {{/unless}}
-  {{else}}
-  FILTER NOT EXISTS {
-    ?tissue skos:broader ?parent .
-  }
+  VALUES ?tissue_id { {{#each input_tissues}} "{{this}}" {{/each}}  }
   {{/if}}
-  ?narrower_tissue skos:broader* ?tissue .
   GRAPH <http://rdf.integbio.jp/dataset/togosite/refex_tissue_specific_genes_gtex_v6> {
-    ?ensg refexo:isPositivelySpecificTo ?narrower_tissue .
+    ?ensg refexo:isPositivelySpecificTo ?obo_tissue .
   }
-  {
-    GRAPH <http://rdf.integbio.jp/dataset/togosite/efo> {
-      ?tissue rdfs:label ?label .
-    }
+
+  GRAPH <http://rdf.integbio.jp/dataset/togosite/refexsample_gtex_v8_summary> {
+    VALUES ?sample_type { "tissue" "cell type" }
+    ?tissue dcterms:description ?label ;
+            dcterms:identifier ?tissue_id ;
+            schema:additionalProperty [
+              schema:name ?sample_type ;
+              schema:valueReference ?obo_tissue ;
+              a schema:PropertyValue
+            ] .
   }
-  UNION
-  {
-    GRAPH <http://rdf.integbio.jp/dataset/togosite/uberon> {
-      ?tissue rdfs:label ?label .
-    }
-  }
-  OPTIONAL {
-    ?child_tissue skos:broader ?tissue .
-  }
-  BIND(REPLACE(REPLACE(STR(?tissue), "http://purl.obolibrary.org/obo/", ""), "http://www.ebi.ac.uk/efo/", "") AS ?tissue_id)
   {{/if}}
-}
+} ORDER BY ?label
 ```
 
 ## `low_spec`
-
 ```sparql
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
@@ -159,7 +147,7 @@ PREFIX efo: <http://www.ebi.ac.uk/efo/>
 {{#if mode}}
 SELECT DISTINCT ?tissue ?tissue_id ?label ?ensg
 {{else}}
-SELECT ?tissue ?tissue_id ?label (COUNT(DISTINCT ?ensg) AS ?count) ?child_example
+SELECT ?tissue ?tissue_id ?label (COUNT(DISTINCT ?ensg) AS ?count)
 {{/if}}
 WHERE {
   {{#if flag_do_low_spec}}
@@ -185,7 +173,7 @@ WHERE {
 ({ main, mode, low_spec, flag_do_main, flag_do_low_spec }) => {
   var results = []
   if (flag_do_main) {
-    results = main.results.bindings.sort((a, b) => a.label.value.toLowerCase() < b.label.value.toLowerCase() ? -1 : 1);
+    results = main.results.bindings;
   }
   if (flag_do_low_spec) {
     results = results.concat(low_spec.results.bindings).filter((x)=>Object.keys(x).length!=0);
@@ -202,15 +190,15 @@ WHERE {
       attribute: {
         categoryId: elem.tissue_id.value,
         uri: elem.tissue.value,
-        label: capitalize(modifyLabel(elem.label.value))
+        label: elem.label.value
       }
     }));
   } else {
     return results.map((elem) => ({
       categoryId: elem.tissue_id.value,
-      label: capitalize(modifyLabel(elem.label.value)),
+      label: elem.label.value,
       count: Number(elem.count.value),
-      hasChild: Boolean(elem.child_example)
+      hasChild: false
     }));
   }
 

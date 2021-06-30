@@ -1,5 +1,5 @@
 # Genes expressed in tissues (GTEx ver6)（小野・池田・千葉）(mode対応版)
-This query allows **multiple tissue flags** for each gene.
+`low_specificity` 対応前のバックアップ
 
 ## Description
 
