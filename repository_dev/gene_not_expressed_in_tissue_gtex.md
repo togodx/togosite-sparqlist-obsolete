@@ -67,9 +67,10 @@ https://integbio.jp/togosite/sparql
 
 ## `main`
 ```sparql
+# Endpoint: https://integbio.jp/togosite/sparql
 PREFIX obo: <http://purl.obolibrary.org/obo/>
-PREFIX efo: <http://www.ebi.ac.uk/efo/>
 PREFIX enso: <http://rdf.ebi.ac.uk/terms/ensembl/>
+PREFIX dcterms: <http://purl.org/dc/terms/>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX refexo:  <http://purl.jp/bio/01/refexo#>
 PREFIX sio: <http://semanticscience.org/resource/>
@@ -78,109 +79,47 @@ PREFIX ensg: <http://rdf.ebi.ac.uk/resource/ensembl/>
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 
 {{#if mode}}
-SELECT DISTINCT ?tissue ?ensg
+SELECT DISTINCT ?sample_label ?sample_id ?ensg
 {{else}}
-SELECT ?tissue (COUNT (DISTINCT ?ensg) AS ?count)
+SELECT ?sample_label ?sample_id (COUNT (DISTINCT ?ensg) AS ?count)
 {{/if}}
-FROM <http://rdf.integbio.jp/dataset/togosite/refexsample_gtex_v8_summary>
-FROM <http://rdf.integbio.jp/dataset/togosite/refex_gtex_v8_summary>
-FROM <http://rdf.integbio.jp/dataset/togosite/ensembl>
-FROM <http://rdf.integbio.jp/dataset/togosite/refexo_tissue_classifications>
 WHERE {
-  {
-    SELECT DISTINCT ?refex ?ensg ?tissue
-    WHERE { 
-      {
-        SELECT DISTINCT ?refex ?ensg ?tissue
-        WHERE {
-          {
-            SELECT DISTINCT ?narrower_tissue ?tissue
-            WHERE {
-              {
-                SELECT DISTINCT ?narrower_tissue
-                WHERE {
-                  [] refexo:refexSample/schema:additionalProperty/schema:valueReference ?narrower_tissue .
-                }
-              }
-              {{#if input_tissues}}
-              VALUES {{#if mode}} ?tissue {{else}} ?parent {{/if}} { {{#each input_tissues_uberon}} obo:{{this}} {{/each}} {{#each input_tissues_efo}} efo:{{this}} {{/each}} }
-              GRAPH <http://rdf.integbio.jp/dataset/togosite/refexo_tissue_classifications> {
-                {{#unless mode}}
-                ?tissue skos:broader ?parent .
-                {{/unless}}
-                ?narrower_tissue skos:broader* ?tissue .
-              }
-              {{else}}
-              GRAPH <http://rdf.integbio.jp/dataset/togosite/refexo_tissue_classifications> {
-                ?narrower_tissue skos:broader* ?tissue .
-                MINUS { ?tissue skos:broader ?parent . }
-              }
-              {{/if}}
-              #OPTIONAL { ?child_tissue skos:broader ?tissue . }
-              #?tissue rdfs:label ?label .
-              #BIND(REPLACE(REPLACE(STR(?tissue), "http://purl.obolibrary.org/obo/", ""), "http://www.ebi.ac.uk/efo/", "") AS ?tissue_id)
-            }
-          }
-          {{#if input_genes}}
-          VALUES ?ensg { {{#each input_genes}} ensg:{{this}} {{/each}} }
-          {{/if}}
-          ?refex refexo:isMeasurementOf ?ensg ;
-                 refexo:refexSample/schema:additionalProperty [
-                   schema:valueReference ?narrower_tissue ;
-                   schema:name ?sample_type
-                 ] .
-          VALUES ?sample_type { "tissue" "cell type"}
-        }
-      }
-      GRAPH <http://rdf.integbio.jp/dataset/togosite/refex_gtex_v8_summary> {
-        ?refex sio:SIO_000216 [
-          a refexo:logTPMMax ;
-          sio:SIO_000300 ?logtpmmax 
-        ] . 
-      }
-      FILTER(?logtpmmax = 0)
-    }
+  GRAPH <http://rdf.integbio.jp/dataset/togosite/refex_gtex_v8_summary> {
+    {{#if input_genes}}
+    VALUES ?ensg { {{#each input_genes}} ensg:{{this}} {{/each}} }
+    {{/if}}
+    ?refex a refexo:RefExEntry ;
+           sio:SIO_000216 [
+             a refexo:logTPMMax ;
+             sio:SIO_000300 0
+             #sio:SIO_000300 ?logtpmmax
+           ] ;
+           refexo:isMeasurementOf ?ensg ;
+           refexo:refexSample ?refexs .
+    #FILTER(?logtpmmax >= 0 && ?logtpmmax < 1)
   }
+  
+  GRAPH <http://rdf.integbio.jp/dataset/togosite/refexsample_gtex_v8_summary> {
+    {{#if input_tissues}}
+    VALUES ?sample_id { {{#each input_tissues}} "{{this}}" {{/each}}  }
+    {{/if}}
+    ?refexs dcterms:description ?sample_label ;
+            dcterms:identifier ?sample_id .
+  }
+
   GRAPH <http://rdf.integbio.jp/dataset/togosite/ensembl> {
     ?ensg a ?type .
     VALUES ?type { enso:lncRNA obo:SO_0001217 obo:SO_0000336 enso:TEC }
     MINUS { ?ensg a enso:rRNA_pseudogene }
   }
-}
-```
 
-## `tissue_label`
-```sparql
-PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-PREFIX refexo:  <http://purl.jp/bio/01/refexo#>
-PREFIX schema: <http://schema.org/>
-PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
-
-SELECT DISTINCT ?tissue ?label  (SAMPLE(?child_tissue) AS ?child_example)
-FROM <http://rdf.integbio.jp/dataset/togosite/refexsample_gtex_v8_summary>
-FROM <http://rdf.integbio.jp/dataset/togosite/refex_gtex_v8_summary>
-FROM <http://rdf.integbio.jp/dataset/togosite/refexo_tissue_classifications>
-FROM <http://rdf.integbio.jp/dataset/togosite/efo> 
-FROM <http://rdf.integbio.jp/dataset/togosite/uberon>
-WHERE {
-  {
-    SELECT DISTINCT ?narrower_tissue
-    WHERE {
-      [] refexo:refexSample/schema:additionalProperty/schema:valueReference ?narrower_tissue .
-    }
-  }
-  ?narrower_tissue skos:broader* ?tissue .
-  OPTIONAL { ?child_tissue skos:broader ?tissue . }
-  ?tissue rdfs:label ?label .
-}
+}ORDER BY ?sample_label
 ```
 
 ## `return`
 
 ```javascript
-({ main, tissue_label, mode }) => {
-  let urlToLabel = new Map(tissue_label.results.bindings.map(o => [o.tissue.value, o.label.value]))
-  let urlToChild = new Map(tissue_label.results.bindings.map(o => [o.tissue.value, o.child_example?.value]))
+({ main, mode }) => {
   if (mode === "idList") {
     return Array.from(new Set(
       main.results.bindings.map((elem) =>
@@ -191,22 +130,18 @@ WHERE {
     return main.results.bindings.map((elem) => ({
       id: elem.ensg.value.replace("http://rdf.ebi.ac.uk/resource/ensembl/", ""),
       attribute: {
-        categoryId: elem.tissue.value
-          .replace("http://purl.obolibrary.org/obo/", "")
-          .replace("http://www.ebi.ac.uk/efo/", ""),
-        uri: elem.tissue.value,
-        label: capitalize(modifyLabel(urlToLabel.get(elem.tissue.value)))
+        categoryId: elem.sample_id.value,
+        uri: "http://refex.dbcls.jp/sample/" + elem.sample_id.value,
+        label: elem.sample_label.value
       }
     }));
   } else {
     return main.results.bindings.map((elem) => ({
-      categoryId: elem.tissue.value
-        .replace("http://purl.obolibrary.org/obo/", "")
-        .replace("http://www.ebi.ac.uk/efo/", ""),
-      label: capitalize(modifyLabel(urlToLabel.get(elem.tissue.value))),
+      categoryId: elem.sample_id.value,
+      label: elem.sample_label.value,
       count: Number(elem.count.value),
-      hasChild: Boolean(urlToChild.get(elem.tissue.value))
-    })).sort((a, b) => a.label.toLowerCase() < b.label.toLowerCase() ? -1 : 1);
+      hasChild: false
+    }));
   }
 
   function modifyLabel(label) {
