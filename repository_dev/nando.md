@@ -11,14 +11,13 @@
 ## Description
 
 - Data sources
-    - NANDOは日本国内の認定された希少性難病疾患をまとめた語彙集で、厚労省認定の難病疾患と、小児慢性疾患の二つに大きくカテゴライズされている。
-    - Nanbyo Disease Ontology ver0.4.3: http://nanbyodata.jp/ontology/nando
-- Query
-    -  NANDOの階層を辿るクエリー。
-    -  Input
-        - NANDO id
+    - Nanbyo Disease Ontology (NANDO):[http://nanbyodata.jp/ontology/nando](http://nanbyodata.jp/ontology/nando)
+- Input/Output
+     -  Input
+        - NANDO ID
     - Output
         - NANDO category
+- Supplementary information
 
 ## Parameters
 

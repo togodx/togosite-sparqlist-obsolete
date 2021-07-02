@@ -8,7 +8,7 @@
     - Input
         - ChEBI id (number)
     - Output
-        -  [Biological Role (CHEBI:24432)](https://www.ebi.ac.uk/chebi/searchId.do?chebiId=CHEBI:24432) and its subcategories of Mondo
+        -  [Biological Role (CHEBI:24432)](https://www.ebi.ac.uk/chebi/searchId.do?chebiId=CHEBI:24432) and its subcategories
 
 ## Parameters
 

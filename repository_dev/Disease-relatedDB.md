@@ -8,14 +8,15 @@
 ## Description
 
 - Data sources
-    - (More data sources description goes here..)
-    - Mondo disease ontlogy: https://mondo.monarchinitiative.org/
-- Query
-    - 各MondoIDに紐づいている、関連のデータベースについて、その種類と関連するIDの数を集計
-    -  Input
-        - MONDO id
+     - Mondo disease ontlogy: [https://mondo.monarchinitiative.org/](https://mondo.monarchinitiative.org/)
+- Input/Output
+     -  Input
+        - MONDO ID
     - Output
         - Related Databases category
+- Supplementary information
+     - The data counted the number of associations for each of the approximate 70 disease DBs associated with the lexical data MONDO, which is an exhaustive collection of disease names.
+     - 網羅的に疾患名を集めている語彙データMONDOに関連づけられているおおよそ70の各疾患DBに対して、関連付けされた数をカウントしたデータ。
   
 ## Parameters
 * `categoryIds` 必須パラメータ。デフォルトは空。数える対象の ID リスト。

@@ -6,13 +6,14 @@ Forked from `Ensembl transcript description`
 
 - Data sources
     - Ensembl human release 102: [http://nov2020.archive.ensembl.org/Homo_sapiens/Info/Index](http://nov2020.archive.ensembl.org/Homo_sapiens/Info/Index)
-    - Definition of gene biotypes is described [here](http://useast.ensembl.org/info/genome/genebuild/biotypes.html).
-- Query
-    - (More query details go here..)
+- Input/Output
     -  Input
         - Ensembl Gene ID
     - Output
         - Gene type
+ - Supplementary information
+ 	- A gene or transcript classification such as "protein coding" and "lincRNA". Definition of gene biotypes is described [here](http://useast.ensembl.org/info/genome/genebuild/biotypes.html).
+	- protein coding, lncRNA といった遺伝子/転写産物の分類です。遺伝子の分類の定義については [こちらをご覧ください](http://useast.ensembl.org/info/genome/genebuild/biotypes.html)。
 
 ## Endpoint
 

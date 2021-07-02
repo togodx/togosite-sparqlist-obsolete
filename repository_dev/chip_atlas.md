@@ -47,21 +47,37 @@ https://integbio.jp/togosite/sparql
 };
 ```
 
+## `ensgs`
+```sparql
+PREFIX taxid: <http://identifiers.org/taxonomy/>
+PREFIX faldo: <http://biohackathon.org/resource/faldo#>
+PREFIX dc: <http://purl.org/dc/elements/1.1/>
+PREFIX obo: <http://purl.obolibrary.org/obo/>
+
+SELECT DISTINCT ?ensg
+FROM <http://rdf.integbio.jp/dataset/togosite/ensembl> {
+  ?enst obo:SO_transcribed_from ?ebiensg .
+  ?ebiensg obo:RO_0002162 taxid:9606 ; # in taxon
+           faldo:location ?ensg_location ;
+           dc:identifier ?ensg_id .
+  BIND (strbefore(strafter(str(?ensg_location), "GRCh38/"), ":") AS ?chromosome)
+  VALUES ?chromosome {
+    "1" "2" "3" "4" "5" "6" "7" "8" "9" "10"
+    "11" "12" "13" "14" "15" "16" "17" "18" "19" "20" "21" "22"
+    "X" "Y" "MT"
+    }
+  BIND(URI(CONCAT("http://identifiers.org/ensembl/", ?ensg_id)) AS ?ensg)
+}
+```
+
 ## `main`
 
 ```sparql
 PREFIX obo: <http://purl.obolibrary.org/obo/>
 PREFIX refexo: <http://purl.jp/bio/01/refexo#>
 PREFIX ensembl: <http://identifiers.org/ensembl/>
-PREFIX taxid: <http://identifiers.org/taxonomy/>
-PREFIX faldo: <http://biohackathon.org/resource/faldo#>
-PREFIX dc: <http://purl.org/dc/elements/1.1/>
 
-{{#if mode}}
 SELECT DISTINCT ?id ?ensg
-{{else}}
-SELECT ?id (COUNT(DISTINCT ?ensg) AS ?count)
-{{/if}}
 WHERE {
   {
     {{#if input_genes}}
@@ -73,21 +89,8 @@ WHERE {
   UNION
   {
     {{#if input_genes}}
-    VALUES ?ensg_id { {{#each input_genes}} {{this}} {{/each}} }
+    VALUES ?ensg { {{#each input_genes}} ensembl:{{this}} {{/each}} }
     {{/if}}
-    GRAPH <http://rdf.integbio.jp/dataset/togosite/ensembl> {
-      ?enst obo:SO_transcribed_from ?ebiensg .
-      ?ebiensg obo:RO_0002162 taxid:9606 ; # in taxon
-               faldo:location ?ensg_location ;
-               dc:identifier ?ensg_id .
-      BIND (strbefore(strafter(str(?ensg_location), "GRCh38/"), ":") AS ?chromosome)
-      VALUES ?chromosome {
-        "1" "2" "3" "4" "5" "6" "7" "8" "9" "10"
-        "11" "12" "13" "14" "15" "16" "17" "18" "19" "20" "21" "22"
-        "X" "Y" "MT"
-      }
-      BIND(URI(CONCAT("http://identifiers.org/ensembl/", ?ensg_id)) AS ?ensg)
-    }
     FILTER NOT EXISTS {
       ?upstream obo:RO_0002428 ?ensg .
     }
@@ -97,7 +100,22 @@ WHERE {
   VALUES ?id { {{#each input_categories}} "{{this}}" {{/each}} }
   {{/if}}
 }
+```
 
+## `filter`
+```javascript
+({ main, ensgs, mode }) => {
+  var ids = ensgs.results.bindings.map((elem) => elem.ensg.value);
+  var filtered = main.results.bindings.filter(function(elem) {
+    return elem.ensg.value in ids;
+  });
+  if(mode) {
+    return filtered;
+  } else {
+    return [{id:1, count:filtered.filter(function(elem){return elem.id===1;})},
+            {id:2, count:filtered.filter(function(elem){return elem.id===2;})}];
+  }
+}
 ```
 
 ## `return`

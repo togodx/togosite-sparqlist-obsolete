@@ -4,11 +4,14 @@
 
 - Data sources
     - Ensembl Human
-- Query
+- Input/Output
     -  Input
         - Ensembl gene ID
     - Output
         - Chromosome number
+ - Supplementary information
+        - The number of the chromosome on which each human gene is encoded.
+        - ヒトの各遺伝子がコードされている染色体の番号を示します。
 
 ## Endpoint
 
