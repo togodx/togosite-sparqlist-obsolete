@@ -9,7 +9,9 @@
         - ChEBI id (number) for chemical compound(s)
     - Output
         -  ChEBI id (number) for application type(s) (subcategories of [Application (CHEBI:33232)](https://www.ebi.ac.uk/chebi/searchId.do?chebiId=CHEBI:33232) ) corresponding to the compound(s)
-
+- Supplementary Information
+	-  The classification of compounds according to their application, defined in ChEBI ontology.
+	- ChEBI Ontologyに定義された用途による、	化合物の分類です。
 ## Parameters
 
 * `categoryIds` Application（CHEBI:33232）の下位階層のID（数字のみ）またはIDのリスト
