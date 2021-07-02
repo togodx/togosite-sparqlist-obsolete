@@ -98,11 +98,10 @@ https://integbio.jp/togosite/sparql
 ## `main`
 ```sparql
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 PREFIX ensembl: <http://identifiers.org/ensembl/>
 PREFIX refexo: <http://purl.jp/bio/01/refexo#>
-PREFIX obo: <http://purl.obolibrary.org/obo/>
-PREFIX efo: <http://www.ebi.ac.uk/efo/>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX schema: <http://schema.org/>
 
 {{#if mode}}
 SELECT DISTINCT ?tissue ?tissue_id ?label ?ensg
@@ -129,7 +128,7 @@ WHERE {
               schema:name ?sample_type ;
               schema:valueReference ?obo_tissue ;
               a schema:PropertyValue
-            ] .
+            ]
   }
   {{/if}}
 } ORDER BY ?label
@@ -141,8 +140,6 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 PREFIX ensembl: <http://identifiers.org/ensembl/>
 PREFIX refexo: <http://purl.jp/bio/01/refexo#>
-PREFIX obo: <http://purl.obolibrary.org/obo/>
-PREFIX efo: <http://www.ebi.ac.uk/efo/>
 
 {{#if mode}}
 SELECT DISTINCT ?tissue ?tissue_id ?label ?ensg
