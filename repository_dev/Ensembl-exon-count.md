@@ -3,8 +3,8 @@
 ## Description
 
 - Data sources
-    - Ensembl human release 102: http://nov2020.archive.ensembl.org/Homo_sapiens/Info/Index
-- Query
+    - Ensembl human release 102: [http://nov2020.archive.ensembl.org/Homo_sapiens/Info/Index](http://nov2020.archive.ensembl.org/Homo_sapiens/Info/Index)
+- Input/Output
     -  Input
         - Ensembl Transcription ID -> queryIds
         - "(Number of exons)" or range ("(Min number of exons)-(Max number of exons)") -> categoryIds
@@ -12,6 +12,9 @@
         - Output1("mode": none): List of number of exons for each category
         - Output2("mode": idList): List of Ensembl Transcription ID
         - Output3("mode": objectList): List of Ensembl Transcription ID and attribute of category
+- Supplementary information
+    - This is the result of counting the number of exons for each transcript of each gene.
+    - 各遺伝子の転写産物ごとにエクソン数をカウントした結果です。
         
 ## Endpoint
 
