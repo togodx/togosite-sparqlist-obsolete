@@ -1,15 +1,16 @@
 # Number of human genes in each ortholog group（千葉）(mode対応版)
 
 ## Description
-* Data sources
-  * HomoloGene Release 68
-    * https://www.ncbi.nlm.nih.gov/homologene/statistics/
-
-* Query
-  * Input
-    * NCBI Gene ID
-  * Output
-    * Number of paralogs
+- Data sources
+  - HomoloGene Release 68: [https://www.ncbi.nlm.nih.gov/homologene/statistics/](https://www.ncbi.nlm.nih.gov/homologene/statistics/)
+- Input/Output
+  - Input
+    - NCBI Gene ID
+  - Output
+    - Number of paralogs
+- Supplementary information
+  - The number of duplicated genes (paralogs) in each human gene.
+  - ヒトの各遺伝子における重複遺伝子（パラログ）の数です。
 
 ## Endpoint
 

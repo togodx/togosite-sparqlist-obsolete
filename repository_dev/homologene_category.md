@@ -1,14 +1,16 @@
 # Evolutionary conservation of human genes（千葉・池田）(mode対応版)
 
 ## Description
-* Data sources
-  * HomoloGene Release 68: https://www.ncbi.nlm.nih.gov/homologene/statistics/
-
-* Query
-  * Input
-    * NCBI Gene ID
-  * Output
-    * Organisms
+- Data sources
+  - HomoloGene Release 68: [https://www.ncbi.nlm.nih.gov/homologene/statistics/](https://www.ncbi.nlm.nih.gov/homologene/statistics/)
+- Input/Output 
+  - Input
+    - NCBI Gene ID
+  - Output
+    - Organisms
+- Supplementary information
+  - On the basis of HomoloGene database including 21 eukaryotic species and divergence times between human and each species, the most distant organisms where each human gene is conserved are shown.
+  - 真核生物21種を含むHomoloGeneデータベースおよびヒトと各生物種との分岐年代に基づいて、ヒト遺伝子が保存されている生物のうち最も遠縁の生物を表示しています。
 
 ## Endpoint
 
