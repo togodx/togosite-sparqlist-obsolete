@@ -8,7 +8,7 @@
     - Input
         - ChEBI id (number)
     - Output
-        -  [Chemical Role (CHEBI:51086)](https://www.ebi.ac.uk/chebi/searchId.do?chebiId=CHEBI:51086) and its subcategories of Mondo
+        -  [Chemical Role (CHEBI:51086)](https://www.ebi.ac.uk/chebi/searchId.do?chebiId=CHEBI:51086) and its subcategories
 
 ## Parameters
 

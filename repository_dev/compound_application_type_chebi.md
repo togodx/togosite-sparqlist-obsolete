@@ -8,7 +8,7 @@
     - Input
         - ChEBI id (number)
     - Output
-        -  [Application (CHEBI:33232)](https://www.ebi.ac.uk/chebi/searchId.do?chebiId=CHEBI:33232) and its subcategories of Mondo
+        -  [Application (CHEBI:33232)](https://www.ebi.ac.uk/chebi/searchId.do?chebiId=CHEBI:33232) and its subcategories
 
 ## Parameters
 
