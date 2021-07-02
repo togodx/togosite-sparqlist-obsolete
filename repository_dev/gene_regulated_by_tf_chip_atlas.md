@@ -1,25 +1,24 @@
-# Genes with hypothetical upstream TFs in ChIP-Atlas（大田・池田・小野・千葉）(mode対応版)
+# Target genes of TFs in ChIP-Atlas （大田・池田・小野・千葉）(mode対応版)
 
 ## Description
 
 - Data sources
     - ChIP-Atlas: [http://dbarchive.biosciencedbc.jp/kyushu-u/hg38/target/](http://dbarchive.biosciencedbc.jp/kyushu-u/hg38/target/)
-    - The genes in `<Transcription Factor>.10.tsv` were defined to be "Genes with hypothetical upstream TF".
+    - The genes in `<Transcription Factor>.10.tsv` were defined to be "target genes of <Transcription Factor>".
 
 - Query
-    - The output ID 1 and 2 are assigned to "Genes with hypothetical upstream TF" and Genes without hypothetical upstream TF" respectively.
     - Input
         - Ensembl gene ID
     - Output
-        - with or without hypothetical upstream TF
+        - TF
 
 ## Endpoint
 
 https://integbio.jp/togosite/sparql
 
 ## Parameters
-* `categoryIds` (type: 1 or 2)
-  * example: 1
+* `categoryIds` (type: ensembl gene ID of TF)
+  * example: ENSG00000275700,ENSG00000101544,ENSG00000048052
 * `queryIds` (type: ensembl gene)
   * example: ENSG00000000005,ENSG00000002587,ENSG00000115942
 * `mode` (type: string)
@@ -51,7 +50,6 @@ https://integbio.jp/togosite/sparql
 
 ```sparql
 PREFIX obo: <http://purl.obolibrary.org/obo/>
-PREFIX refexo: <http://purl.jp/bio/01/refexo#>
 PREFIX ensembl: <http://identifiers.org/ensembl/>
 PREFIX taxid: <http://identifiers.org/taxonomy/>
 PREFIX faldo: <http://biohackathon.org/resource/faldo#>
@@ -70,10 +68,11 @@ WHERE {
     {{/if}}
     ?tf obo:RO_0002428 ?ensg .
     BIND(STRAFTER(STR(?tf), "http://identifiers.org/ensembl/") AS ?tf_id)
+    BIND(URI(CONCAT("http://rdf.ebi.ac.uk/resource/ensembl/", ?tf_id)) AS ?ebi_tf)
     GRAPH <http://rdf.integbio.jp/dataset/togosite/ensembl> {
-      ?tf rdfs:label ?tf_label .
+      ?ebi_tf rdfs:label ?tf_label .
     }
- }
+  }
   UNION
   {
     {{#if input_genes}}
@@ -103,7 +102,7 @@ WHERE {
   {{#if input_categories}}
   VALUES ?tf_id { {{#each input_categories}} "{{this}}" {{/each}} }
   {{/if}}
-}
+} ORDER BY ?tf_label
 ```
 
 ## `return`
@@ -120,25 +119,16 @@ WHERE {
     return main.results.bindings.map((elem) => ({
       id: elem.ensg.value.replace("http://identifiers.org/ensembl/", ""),
       attribute: {
-        categoryId: elem.upstream_id.value,
-        label: makeLabel(elem.id.value)
+        categoryId: elem.tf_id.value,
+        label: elem.tf_label.value
       }
     }));
   } else {
     return main.results.bindings.map((elem) => ({
-      categoryId: elem.id.value,
-      label: makeLabel(elem.id.value),
+      categoryId: elem.tf_id.value,
+      label: elem.tf_label.value,
       count: Number(elem.count.value),
     }));
-  }
-
-  function makeLabel(id) {
-    if (id === "1") 
-      return "Genes with hypothetical upstream TF" ;
-    else if (id === "2")
-      return "Genes without hypothetical upstream TF";
-    else
-      return "";
   }
 }
 ```
