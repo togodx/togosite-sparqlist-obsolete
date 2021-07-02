@@ -6,9 +6,9 @@
     -  [Chemical Entities of Biological Interest (ChEBI) ](https://www.ebi.ac.uk/chebi/) 
 - Query
     - Input
-        - ChEBI id (number)
+        - ChEBI id (number) for chemical compound(s)
     - Output
-        -  [Application (CHEBI:33232)](https://www.ebi.ac.uk/chebi/searchId.do?chebiId=CHEBI:33232) and its subcategories
+        -  ChEBI id (number) for application type(s) (subcategories of [Application (CHEBI:33232)](https://www.ebi.ac.uk/chebi/searchId.do?chebiId=CHEBI:33232) ) corresponding to the compound(s)
 
 ## Parameters
 
