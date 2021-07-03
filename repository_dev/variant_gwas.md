@@ -8,11 +8,11 @@
     - Input
         - TogoVar id
     - Output
-        -  [Mapped trait used in GWAS Catalog](https://)
+        -  [Mapped trait used in GWAS Catalog](https://www.ebi.ac.uk/gwas/docs/ontology)
 
 ## Parameters
 
-* `categoryIds` (type: Mapped trait in terms of Experimental factor ontology (EFO))
+* `categoryIds` (type: Mapped trait represented in Experimental factor ontology (EFO))
   * default: EFO_0000408
   * example: EFO_0000408,MONDO_0020683,Orphanet_68335
 * `queryIds` (type:TogoVar)
