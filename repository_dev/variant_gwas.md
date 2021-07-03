@@ -14,7 +14,7 @@
 
 * `categoryIds` (type: Mapped trait in terms of Experimental factor ontology (EFO))
   * default: EFO_0000408
-  * example: EFO_0000408,EFO_0000001,IAO_0000030 
+  * example: EFO_0000408,MONDO_0020683,Orphanet_68335
 * `queryIds` (type:TogoVar)
   * example: tgv704775,tgv704941,tgv772580,tgv246970,tgv39969772,tgv40054079,tgv42043030
 * `mode` 必須パラメータ。内訳の代わりに該当する ID のリストを返す（デフォルトはオフ）idList: リストだけ、objectList: Attributeの入ったリスト（Attribute は下階層ではなく、categoryid で指定したカテゴリ）
@@ -40,8 +40,8 @@
 ```javascript
 ({categoryIds}) => {
   categoryIds = categoryIds.replace(/,/g," ").replace(/^\s+/,"").replace(/\s+$/,"");
-  return (categoryIds == "" ? false :  categoryIds.split(/\s+/).map(categoryId=>categoryId.replace("EFO_","efo:EFO_").replace("MONDO_","mondo:MONDO_")))
-}
+  return (categoryIds == "" ? false :  categoryIds.split(/\s+/).map(categoryId=>categoryId.replace("EFO_","efo:EFO_").replace("MONDO_","mondo:MONDO_").replace("Orphanet_","ordo:Orphanet_")))
+ }
 ```
 
 ## Endpoint
@@ -53,14 +53,15 @@ https://test100.biosciencedbc.jp/sparql
 ```sparql
 PREFIX dct: <http://purl.org/dc/terms/>
 PREFIX efo: <http://www.ebi.ac.uk/efo/>
-PREFIX gwas: <http://rdf.ebi.ac.uk/terms/gwas/>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX ordo: <http://www.orpha.net/ORDO/>
 PREFIX owl: <http://www.w3.org/2002/07/owl#>
 PREFIX ro: <http://www.obofoundry.org/ro/ro.owl#>
 PREFIX terms: <http://med2rdf.org/gwascatalog/terms/>
 PREFIX tgv: <http://togovar.biosciencedbc.jp/variation/>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX mondo: <http://purl.obolibrary.org/obo/>
 
 {{#if mode}}
 SELECT DISTINCT ?tgv_id ?category ?label
@@ -114,24 +115,25 @@ ORDER BY DESC(?count)
   const idVarName = "tgv_id";
   const idPrfix_mondo = "http://purl.obolibrary.org/obo/";
   const idPrfix_efo = "http://www.ebi.ac.uk/efo/";
+  const idPrfix_ordo="http://www.orpha.net/ORDO/";
   const categoryPrefix = "";
 
   if (mode == "objectList") return data.results.bindings.map(d=>{
     return {
       id: d[idVarName].value, 
       attribute: {
-        categoryId: d.category.value.replace(idPrfix_mondo,"").replace(idPrfix_efo,""),
+        categoryId: d.category.value.replace(idPrfix_mondo,"").replace(idPrfix_efo,"").replace(idPrfix_ordo,""),
         uri: d.category.value,
         label : d.label.value.charAt(0).toUpperCase() + d.label.value.slice(1)   // 先頭の１文字だけを大文字にする。
       }
     }
   });
 
-  if (mode == "idList") return Array.from(new Set(data.results.bindings.map(d=>d[idVarName].value.replace(idPrfix_mondo,"").replace(idPrfix_efo,"")))); 
+  if (mode == "idList") return Array.from(new Set(data.results.bindings.map(d=>d[idVarName].value.replace(idPrfix_mondo,"").replace(idPrfix_efo,"").replace(idPrfix_ordo,"")))); 
 
   return data.results.bindings.map(d=>{ 
     return {
-      categoryId: d.category.value.replace(idPrfix_mondo,"").replace(idPrfix_efo,""),
+      categoryId: d.category.value.replace(idPrfix_mondo,"").replace(idPrfix_efo,"").replace(idPrfix_ordo,""),
       label: d.label.value.charAt(0).toUpperCase() + d.label.value.slice(1),   // 先頭の１文字だけを大文字にする。
       count: Number(d.count.value),
       hasChild: (Number(d.count.value) > 1 ? true : false)  
