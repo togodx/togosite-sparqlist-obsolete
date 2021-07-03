@@ -40,11 +40,7 @@
 ```javascript
 ({categoryIds}) => {
   categoryIds = categoryIds.replace(/,/g," ").replace(/^\s+/,"").replace(/\s+$/,"");
-  if(categoryIds == ""){ return false; }
-  else {
-    return categoryIds.split(/\s+/).map(categoryId=>{
-      return categoryId.replace("EFO_","efo:EFO_").replace("MONDO_","mondo:MONDO_"); });
-  }
+  return (categoryIds == "" ? false :  categoryIds.split(/\s+/).map(categoryId=>categoryId.replace("EFO_","efo:EFO_").replace("MONDO_","mondo:MONDO_")))
 }
 ```
 
