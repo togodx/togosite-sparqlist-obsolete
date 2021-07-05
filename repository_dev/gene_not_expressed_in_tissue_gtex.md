@@ -4,12 +4,11 @@
 
 - Data sources
     - [GTEx version 8](https://gtexportal.org/home/datasets)
-    - Definition of gene biotypes is described [here](http://useast.ensembl.org/info/genome/genebuild/biotypes.html).
 - Query
     -  Input
         - Ensembl Gene ID
     - Output
-        - Gene type
+        - RefEx Sample ID for tissues
 
 ## Endpoint
 
@@ -17,8 +16,8 @@ https://integbio.jp/togosite/sparql
 
 ## Parameters
 
-* `categoryIds` (type: UBERON or EFO)
-  * example: UBERON_0010414,UBERON_0002369,UBERON_0001496,EFO_0000572
+* `categoryIds` (type: RefEx Sample ID)
+  * example: RES00003651,RES00003662,RES00003690,RES00003701
 * `queryIds` (type: ensembl_gene)
   * example: ENSG00000230748,ENSG00000213070,ENSG00000271527,ENSG00000227776,ENSG00000230898
 * `mode`
