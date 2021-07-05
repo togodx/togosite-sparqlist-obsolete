@@ -14,7 +14,7 @@
 
 * `categoryIds` (type: Mapped trait represented in Experimental factor ontology (EFO))
   * default: EFO_0000408
-  * example: EFO_0000408,MONDO_0020683,Orphanet_68335
+  * example: EFO_0000401,EFO_0000408,MONDO_0020683,Orphanet_68335
 * `queryIds` (type:TogoVar)
   * example: tgv704775,tgv704941,tgv772580,tgv246970,tgv39969772,tgv40054079,tgv42043030
 * `mode` 必須パラメータ。内訳の代わりに該当する ID のリストを返す（デフォルトはオフ）idList: リストだけ、objectList: Attributeの入ったリスト（Attribute は下階層ではなく、categoryid で指定したカテゴリ）
@@ -23,10 +23,10 @@
   * default: https://test100.biosciencedbc.jp/sparql
 
 ## testURL
-- [default](https://integbio.jp/togosite/sparqlist/api/variant_clinical_significance?categoryIds=&queryIds=&mode=)
-- [queryId+categoryId](https://integbio.jp/togosite/sparqlist/api/variant_clinical_significance?categoryIds=uncertain_significance%2Clikely_benign%2Cpathogenic&queryIds=tgv48208871%2Ctgv48208872%2Ctgv48208877&mode=)
-- [queryId+categoryId+idList](https://integbio.jp/togosite/sparqlist/api/variant_clinical_significance?categoryIds=uncertain_significance%2Clikely_benign%2Cbenign%2Cpathogenic&queryIds=tgv48208871%2Ctgv48208872%2Ctgv48208877&mode=idList)
-- [queyId+categoryId+objectList](https://integbio.jp/togosite/sparqlist/api/variant_clinical_significance?categoryIds=uncertain_significance%2Clikely_benign%2Cbenign%2Cpathogenic&queryIds=tgv48208871%2Ctgv48208872%2Ctgv48208877&mode=objectList)
+- [default](https://integbio.jp/togosite/sparqlist/api/variant_gwas?categoryIds=EFO_0000401&queryIds=&mode=)
+- [queryId+categoryId](https://integbio.jp/togosite/sparqlist/api/variant_gwas?categoryIds=EFO_0000401&queryIds=tgv704775%2Ctgv704941&mode=)
+- [queryId+categoryId+idList](https://integbio.jp/togosite/sparqlist/api/variant_gwas?categoryIds=EFO_0000401&queryIds=tgv48208871%2Ctgv48208872%2Ctgv48208877&mode=idList)
+- [queyId+categoryId+objectList](https://integbio.jp/togosite/sparqlist/api/variant_gwas?categoryIds=EFO_0000401&queryIds=tgv48208871%2Ctgv48208872%2Ctgv48208877&mode=objectList)
 
 ## `queryArray`
 ```javascript
