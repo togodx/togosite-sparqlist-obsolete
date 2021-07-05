@@ -94,8 +94,9 @@ WHERE
     owl:someValuesFrom ?role .
   ?role rdfs:subClassOf* ?application .
   ?application rdfs:label ?application_label .
-
-  ?x rdfs:subClassOf ?application.
+  optional{
+  	?x rdfs:subClassOf ?application.
+  }
 }
 {{#unless mode}}
 

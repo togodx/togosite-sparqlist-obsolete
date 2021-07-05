@@ -92,8 +92,9 @@ WHERE
     owl:someValuesFrom ?role .
   ?role rdfs:subClassOf* ?chemical_role .
   ?chemical_role rdfs:label ?chemical_role_label .
-
-  ?x rdfs:subClassOf ?chemical_role .
+  optional {
+    ?x rdfs:subClassOf ?chemical_role .
+  }
 }
 {{#unless mode}}
 

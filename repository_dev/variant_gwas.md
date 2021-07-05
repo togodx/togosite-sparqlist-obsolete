@@ -1,4 +1,4 @@
-# variant GWAS (Genome-wide association study) 
+# variant GWAS (Genome-wide association study) (三橋)
 
 ## Description
 
