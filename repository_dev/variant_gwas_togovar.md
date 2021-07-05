@@ -23,10 +23,10 @@
   * default: https://test100.biosciencedbc.jp/sparql
 
 ## testURL
-- [default](https://integbio.jp/togosite/sparqlist/api/variant_gwas?categoryIds=EFO_0000401&queryIds=&mode=)
-- [queryId+categoryId](https://integbio.jp/togosite/sparqlist/api/variant_gwas?categoryIds=EFO_0000401&queryIds=tgv704775%2Ctgv704941&mode=)
-- [queryId+categoryId+idList](https://integbio.jp/togosite/sparqlist/api/variant_gwas?categoryIds=EFO_0000401&queryIds=tgv48208871%2Ctgv48208872%2Ctgv48208877&mode=idList)
-- [queyId+categoryId+objectList](https://integbio.jp/togosite/sparqlist/api/variant_gwas?categoryIds=EFO_0000401&queryIds=tgv48208871%2Ctgv48208872%2Ctgv48208877&mode=objectList)
+- [default](https://integbio.jp/togosite/sparqlist/api/variant_gwas_togovar?categoryIds=EFO_0000401&queryIds=&mode=)
+- [queryId+categoryId](https://integbio.jp/togosite/sparqlist/api/variant_gwas_togovar?categoryIds=EFO_0000401&queryIds=tgv704775%2Ctgv704941&mode=)
+- [queryId+categoryId+idList](https://integbio.jp/togosite/sparqlist/api/variant_gwas_togovar?categoryIds=EFO_0000401&queryIds=tgv48208871%2Ctgv48208872%2Ctgv48208877&mode=idList)
+- [queyId+categoryId+objectList](https://integbio.jp/togosite/sparqlist/api/variant_gwas_togovar?categoryIds=EFO_0000401&queryIds=tgv48208871%2Ctgv48208872%2Ctgv48208877&mode=objectList)
 
 ## `queryArray`
 ```javascript
@@ -40,7 +40,7 @@
 ```javascript
 ({categoryIds}) => {
   categoryIds = categoryIds.replace(/,/g," ").replace(/^\s+/,"").replace(/\s+$/,"");
-  return (categoryIds == "" ? false :  categoryIds.split(/\s+/).map(categoryId=>categoryId.replace("EFO_","efo:EFO_").replace("MONDO_","mondo:MONDO_").replace("Orphanet_","ordo:Orphanet_")))
+  return (categoryIds == "" ? false :  categoryIds.split(/\s+/).map(categoryId=>categoryId.replace("EFO_","efo:EFO_").replace("MONDO_","obo:MONDO_").replace("Orphanet_","ordo:Orphanet_").replace("BFO_","obo:BFO_").replace("IAO_","obo:IAO_")))
  }
 ```
 
@@ -55,22 +55,22 @@ PREFIX dct: <http://purl.org/dc/terms/>
 PREFIX efo: <http://www.ebi.ac.uk/efo/>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX obo: <http://purl.obolibrary.org/obo/>
 PREFIX ordo: <http://www.orpha.net/ORDO/>
 PREFIX owl: <http://www.w3.org/2002/07/owl#>
 PREFIX ro: <http://www.obofoundry.org/ro/ro.owl#>
 PREFIX terms: <http://med2rdf.org/gwascatalog/terms/>
 PREFIX tgv: <http://togovar.biosciencedbc.jp/variation/>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-PREFIX mondo: <http://purl.obolibrary.org/obo/>
 
 {{#if mode}}
 SELECT DISTINCT ?tgv_id ?category ?label
 {{else}}
 SELECT ?category ?label (COUNT (DISTINCT ?tgv_id) AS ?count) 
 {{/if}}
-FROM <http://togovar.biosciencedbc.jp/variation>
-FROM <http://togovar.biosciencedbc.jp/gwas-catalog>
-FROM <http://togovar.biosciencedbc.jp/efo>
+FROM <http://rdf.integbio.jp/dataset/togosite/variation>
+FROM <http://rdf.integbio.jp/dataset/togosite/gwas-catalog>
+FROM <http://rdf.integbio.jp/dataset/togosite/efo>
 WHERE {
 {{#if queryArray}}
   VALUES ?tgv_id { {{#each queryArray}} {{this}} {{/each}} }
@@ -83,7 +83,7 @@ WHERE {
   {{/if}}
 {{/if}}
 
-  GRAPH <http://togovar.biosciencedbc.jp/efo>{
+  GRAPH <http://rdf.integbio.jp/dataset/togosite/efo>{
 {{#unless  mode}}
     ?category rdfs:subClassOf ?parent.
 {{/unless}}
@@ -92,28 +92,26 @@ WHERE {
     ?efo rdf:type owl:Class.  # ?efo rdfs:subClassOf* ?category が?efoの値に関係なくtrueになってしまうため追加
   }
 
-  GRAPH <http://togovar.biosciencedbc.jp/gwas-catalog>{
+  GRAPH <http://rdf.integbio.jp/dataset/togosite/gwas-catalog>{
     ?assoc terms:mapped_trait_uri ?efo.
     ?assoc terms:dbsnp_url ?dbsnp.
     ?assoc terms:mapped_trait ?mapped_trait.
   }
 
-  GRAPH <http://togovar.biosciencedbc.jp/variation>{
+  GRAPH <http://rdf.integbio.jp/dataset/togosite/variation>{
    ?dbsnp ^rdfs:seeAlso/dct:identifier ?tgv_id.
   } 
 }
-{{#if mode}}  
-limit 100
-{{else}}
-ORDER BY DESC(?count)
-{{/if}}
+{{#unless mode}}  
+ORDER BY ?label
+{{/unless}}
 ```
 
 ## `return`
 ```javascript
 ({mode, data})=>{
   const idVarName = "tgv_id";
-  const idPrfix_mondo = "http://purl.obolibrary.org/obo/";
+  const idPrfix_obo = "http://purl.obolibrary.org/obo/";
   const idPrfix_efo = "http://www.ebi.ac.uk/efo/";
   const idPrfix_ordo="http://www.orpha.net/ORDO/";
   const categoryPrefix = "";
@@ -122,18 +120,18 @@ ORDER BY DESC(?count)
     return {
       id: d[idVarName].value, 
       attribute: {
-        categoryId: d.category.value.replace(idPrfix_mondo,"").replace(idPrfix_efo,"").replace(idPrfix_ordo,""),
+        categoryId: d.category.value.replace(idPrfix_obo,"").replace(idPrfix_efo,"").replace(idPrfix_ordo,""),
         uri: d.category.value,
         label : d.label.value.charAt(0).toUpperCase() + d.label.value.slice(1)   // 先頭の１文字だけを大文字にする。
       }
     }
   });
 
-  if (mode == "idList") return Array.from(new Set(data.results.bindings.map(d=>d[idVarName].value.replace(idPrfix_mondo,"").replace(idPrfix_efo,"").replace(idPrfix_ordo,"")))); 
+  if (mode == "idList") return Array.from(new Set(data.results.bindings.map(d=>d[idVarName].value.replace(idPrfix_obo,"").replace(idPrfix_efo,"").replace(idPrfix_ordo,"")))); 
 
   return data.results.bindings.map(d=>{ 
     return {
-      categoryId: d.category.value.replace(idPrfix_mondo,"").replace(idPrfix_efo,"").replace(idPrfix_ordo,""),
+      categoryId: d.category.value.replace(idPrfix_obo,"").replace(idPrfix_efo,"").replace(idPrfix_ordo,""),
       label: d.label.value.charAt(0).toUpperCase() + d.label.value.slice(1),   // 先頭の１文字だけを大文字にする。
       count: Number(d.count.value),
       hasChild: (Number(d.count.value) > 1 ? true : false)  
