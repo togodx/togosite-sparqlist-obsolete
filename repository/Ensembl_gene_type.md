@@ -6,13 +6,14 @@ Forked from `Ensembl transcript description`
 
 - Data sources
     - Ensembl human release 102: [http://nov2020.archive.ensembl.org/Homo_sapiens/Info/Index](http://nov2020.archive.ensembl.org/Homo_sapiens/Info/Index)
-    - Definition of gene biotypes is described [here](http://useast.ensembl.org/info/genome/genebuild/biotypes.html).
-- Query
-    - (More query details go here..)
+- Input/Output
     -  Input
         - Ensembl Gene ID
     - Output
         - Gene type
+ - Supplementary information
+ 	- A gene or transcript classification such as "protein coding" and "lincRNA". Definition of gene biotypes is described [here](http://useast.ensembl.org/info/genome/genebuild/biotypes.html).
+	- protein coding, lncRNA といった遺伝子/転写産物の分類です。遺伝子の分類の定義については [こちらをご覧ください](http://useast.ensembl.org/info/genome/genebuild/biotypes.html)。
 
 ## Endpoint
 
@@ -59,7 +60,7 @@ PREFIX sio: <http://semanticscience.org/resource/>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX identifiers: <http://identifiers.org/>
-PREFIX biohack: <http://biohackathon.org/resource/faldo#>
+PREFIX faldo: <http://biohackathon.org/resource/faldo#>
 PREFIX ensg: <http://rdf.ebi.ac.uk/resource/ensembl/>
 PREFIX enst: <http://rdf.ebi.ac.uk/resource/ensembl.transcript/>
 PREFIX dc: <http://purl.org/dc/elements/1.1/>
@@ -83,12 +84,19 @@ WHERE {
   {{/if}}
   ?ensg a ?type ;
         obo:RO_0002162 taxon:9606 ;
+        faldo:location ?ensg_location ;
         dc:identifier ?id .
   FILTER CONTAINS(STR(?type), "terms/ensembl/")
   {{#if mode}}
     ?ensg rdfs:label ?gene_symbol .
     ?ensg dc:description ?gene_name .
   {{/if}}
+  BIND (strbefore(strafter(str(?ensg_location), "GRCh38/"), ":") AS ?chromosome)
+  VALUES ?chromosome {
+        "1" "2" "3" "4" "5" "6" "7" "8" "9" "10"
+        "11" "12" "13" "14" "15" "16" "17" "18" "19" "20" "21" "22"
+        "X" "Y" "MT"
+  }
   BIND(STRAFTER(STR(?type), "http://rdf.ebi.ac.uk/terms/ensembl/") AS ?description)
   BIND(REPLACE(?description, "_", " ") AS ?description_label)
   {{#if category_list}}
