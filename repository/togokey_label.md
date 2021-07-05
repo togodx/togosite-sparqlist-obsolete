@@ -40,6 +40,7 @@ PREFIX chembl_compound: <http://rdf.ebi.ac.uk/resource/chembl/molecule/>
 PREFIX chebi: <http://purl.obolibrary.org/obo/CHEBI_>
 PREFIX pubchem_compound: <http://rdf.ncbi.nlm.nih.gov/pubchem/compound/CID>
 PREFIX mondo: <http://purl.obolibrary.org/obo/MONDO_>
+PREFIX sio: <http://semanticscience.org/resource/>
 SELECT ?id ?label
 {{#if key.hgnc}}
 FROM <http://rdf.integbio.jp/dataset/togosite/hgnc>
@@ -57,7 +58,6 @@ FROM <http://rdf.integbio.jp/dataset/togosite/chembl>
 FROM <http://rdf.integbio.jp/dataset/togosite/chebi>
 {{/if}}
 {{#if key.pubchem_compound}}
-FROM <http://rdf.integbio.jp/dataset/togosite/chebi>
 FROM <http://rdf.integbio.jp/dataset/togosite/pubchem>
 {{/if}}
 {{#if key.mondo}}
@@ -81,7 +81,10 @@ WHERE {
   ?uri rdfs:label ?label .
   {{/if}}
   {{#if key.pubchem_compound}}
-  ?uri rdf:type/rdfs:label ?label .
+  ?uri sio:has-attribute [
+    a sio:CHEMINF_000382 ;
+    sio:has-value ?label
+  ] .
   {{/if}}
   {{#if key.mondo}}
   ?uri rdfs:label ?label .
