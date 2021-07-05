@@ -15,7 +15,11 @@
 - Supplementary information
 	- The number of exons for each transcript of each gene.
 	- 各遺伝子の転写産物ごとにエクソン数をカウントした結果です。
+<<<<<<< HEAD
 		        
+=======
+        
+>>>>>>> 2707219e39de958a7c32193e92ae2bdde31281ee
 ## Endpoint
 
 https://integbio.jp/togosite/sparql
