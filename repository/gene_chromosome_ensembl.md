@@ -9,6 +9,9 @@
         - Ensembl gene ID
     - Output
         - Chromosome number
+- Supplementary information
+    - The chromosome on which each human gene is located.
+    - ヒトの各遺伝子が位置している染色体の番号を示します。
 
 ## Endpoint
 
