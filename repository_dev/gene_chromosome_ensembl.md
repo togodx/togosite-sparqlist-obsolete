@@ -10,8 +10,8 @@
     - Output
         - Chromosome number
  - Supplementary information
-      - The number of the chromosome on which each human gene is encoded.
-      - ヒトの各遺伝子がコードされている染色体の番号を示します。
+      - The chromosome on which each human gene is located.
+      - ヒトの各遺伝子が位置している染色体の番号を示します。
 
 ## Endpoint
 

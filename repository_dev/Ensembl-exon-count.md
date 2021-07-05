@@ -13,9 +13,9 @@
         - Output2("mode": idList): List of Ensembl Transcription ID
         - Output3("mode": objectList): List of Ensembl Transcription ID and attribute of category
 - Supplementary information
-    - This is the result of counting the number of exons for each transcript of each gene.
-    - 各遺伝子の転写産物ごとにエクソン数をカウントした結果です。
-        
+	- The number of exons for each transcript of each gene.
+	- 各遺伝子の転写産物ごとにエクソン数をカウントした結果です。
+		        
 ## Endpoint
 
 https://integbio.jp/togosite/sparql
