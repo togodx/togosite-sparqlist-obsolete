@@ -12,6 +12,10 @@
         - Output1("mode": none): List of number of exons for each category
         - Output2("mode": idList): List of Ensembl Transcription ID
         - Output3("mode": objectList): List of Ensembl Transcription ID and attribute of category
+- Supplementary information
+	- The number of exons for each transcript of each gene.
+	- 各遺伝子の転写産物ごとにエクソン数をカウントした結果です。
+        
         
 ## Endpoint
 
