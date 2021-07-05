@@ -1,4 +1,4 @@
-# exon数ごとにトランスクリプトーム数をカウント（鈴木・八塚）
+# exon数ごとにトランスクリプト数をカウント（鈴木・八塚）
 
 ## Description
 
@@ -101,28 +101,35 @@ PREFIX obo:<http://purl.obolibrary.org/obo/>
 PREFIX taxon:<http://identifiers.org/taxonomy/>
 PREFIX enst:<http://rdf.ebi.ac.uk/resource/ensembl.transcript/>
 PREFIX terms:<http://rdf.ebi.ac.uk/terms/ensembl/>
+PREFIX faldo: <http://biohackathon.org/resource/faldo#>
 
 {{#if mode}}
-SELECT DISTINCT ?ens_id ?bin_id
+SELECT DISTINCT ?enst_id ?bin_id
 {{else}}
-SELECT ?bin_id (COUNT(DISTINCT ?ens) AS ?count)
+SELECT ?bin_id (COUNT(DISTINCT ?enst) AS ?count)
 {{/if}}       
 WHERE {
   VALUES (?bin_id ?min ?max) { {{#each categoryArray}}("{{this.min}}-{{this.max}}" {{this.min}} {{this.max}}) {{/each}} }
   FILTER(?min <= ?exon_count &&  ?exon_count <= ?max){
-     SELECT ?ens (COUNT(DISTINCT ?exon) AS ?exon_count)
+     SELECT ?enst (COUNT(DISTINCT ?exon) AS ?exon_count)
       WHERE {
         {{#if queryArray}}
-          VALUES ?ens { {{#each queryArray}} enst:{{this}}{{/each}} }
+          VALUES ?enst { {{#each queryArray}} enst:{{this}}{{/each}} }
         {{/if}}
-        VALUES ?func {terms:miRNA terms:lncRNA terms:protein_coding terms:pseudogene}
-        ?ens obo:RO_0002162 taxon:9606;
-              obo:SO_has_part ?exon;
-              a ?func.
-    }GROUP BY ?ens
+        ?enst obo:SO_has_part ?exon;
+              obo:SO_transcribed_from ?ensg .
+        ?ensg obo:RO_0002162 taxon:9606 ; # in taxon
+              faldo:location ?ensg_location .
+        BIND (strbefore(strafter(str(?ensg_location), "GRCh38/"), ":") AS ?chromosome)
+        VALUES ?chromosome {
+          "1" "2" "3" "4" "5" "6" "7" "8" "9" "10"
+          "11" "12" "13" "14" "15" "16" "17" "18" "19" "20" "21" "22"
+          "X" "Y" "MT"
+        }
+    }GROUP BY ?enst
   }
 {{#if mode}}
-  BIND(REPLACE(STR(?ens), "http://rdf.ebi.ac.uk/resource/ensembl.transcript/", "") AS ?ens_id)
+  BIND(REPLACE(STR(?enst), "http://rdf.ebi.ac.uk/resource/ensembl.transcript/", "") AS ?enst_id)
 {{/if}}  
 }
 {{#unless mode}}
@@ -137,13 +144,13 @@ ORDER BY ?bin_id
 ({mode, query})=>{
     if (mode == "idList"){
         return query.results.bindings.map(d=>{
-          return d.ens_id.value;
+          return d.enst_id.value;
         });
     }else if (mode == "objectList"){
       return query.results.bindings.map(d=>{
         var range = d.bin_id.value.split("-");  //
         return {
-          id: d.ens_id.value, 
+          id: d.enst_id.value, 
           attribute: {
             categoryId: d.bin_id.value, 
             label : makeLabel(range[0], range[1])   //d.bin_id.value
