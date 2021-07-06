@@ -67,10 +67,10 @@ WHERE {
     VALUES ?ensg { {{#each input_genes}} ensembl:{{this}} {{/each}} }
     {{/if}}
     ?tf obo:RO_0002428 ?ensg .
-    BIND(STRAFTER(STR(?tf), "http://identifiers.org/ensembl/") AS ?tf_id)
-    BIND(URI(CONCAT("http://rdf.ebi.ac.uk/resource/ensembl/", ?tf_id)) AS ?ebi_tf)
     GRAPH <http://rdf.integbio.jp/dataset/togosite/ensembl> {
-      ?ebi_tf rdfs:label ?tf_label .
+      ?ebi_tf rdfs:label ?tf_label ;
+              rdfs:seeAlso ?tf ;
+              dc:identifier ?tf_id .
     }
   }
   UNION
