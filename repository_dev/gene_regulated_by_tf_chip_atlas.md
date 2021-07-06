@@ -1,25 +1,25 @@
-# Target genes of TFs in ChIP-Atlas （大田・池田・小野・千葉）(mode対応版)
+# Target genes of TFs in ChIP-Atlas （大田・池田・小野・千葉）
 
 ## Description
 
 - Data sources
     - ChIP-Atlas: [http://dbarchive.biosciencedbc.jp/kyushu-u/hg38/target/](http://dbarchive.biosciencedbc.jp/kyushu-u/hg38/target/)
-    - The genes in `<Transcription Factor>.10.tsv` were defined to be "target genes of <Transcription Factor>".
+    - The genes in `<Transcription Factor>.10.tsv` were defined to be target genes of the `<Transcription Factor>`.
 
 - Query
     - Input
-        - Ensembl gene ID
+        - Ensembl gene ID of target genes
     - Output
-        - TF
+        - Ensembl gene ID of TFs
 
 ## Endpoint
 
 https://integbio.jp/togosite/sparql
 
 ## Parameters
-* `categoryIds` (type: ensembl gene ID of TF)
+* `categoryIds` (type: ensembl gene ID (TF))
   * example: ENSG00000275700,ENSG00000101544,ENSG00000048052
-* `queryIds` (type: ensembl gene)
+* `queryIds` (type: ensembl gene ID (target))
   * example: ENSG00000000005,ENSG00000002587,ENSG00000115942
 * `mode` (type: string)
   * example: idList, objectList
@@ -66,7 +66,9 @@ WHERE {
     {{#if input_genes}}
     VALUES ?ensg { {{#each input_genes}} ensembl:{{this}} {{/each}} }
     {{/if}}
-    ?tf obo:RO_0002428 ?ensg .
+    GRAPH <http://rdf.integbio.jp/dataset/togosite/chip_atlas> {
+      ?tf obo:RO_0002428 ?ensg .
+    }
     GRAPH <http://rdf.integbio.jp/dataset/togosite/ensembl> {
       ?ebi_tf rdfs:label ?tf_label ;
               rdfs:seeAlso ?tf ;
@@ -84,20 +86,19 @@ WHERE {
                faldo:location ?ensg_location ;
                dc:identifier ?ensg_id .
       BIND (strbefore(strafter(str(?ensg_location), "GRCh38/"), ":") AS ?chromosome)
-      VALUES ?chromosome {
-        "1" "2" "3" "4" "5" "6" "7" "8" "9" "10"
-        "11" "12" "13" "14" "15" "16" "17" "18" "19" "20" "21" "22"
-        "X" "Y" "MT"
-      }
+      FILTER (?chromosome IN ("1", "2", "3", "4", "5", "6", "7", "8", "9", "10",
+                              "11", "12", "13", "14", "15", "16", "17", "18", "19", "20",
+                              "21", "22", "X", "Y", "MT" ))
       BIND(URI(CONCAT("http://identifiers.org/ensembl/", ?ensg_id)) AS ?ensg)
     }
     FILTER NOT EXISTS {
-      ?tf obo:RO_0002428 ?ensg .
+      GRAPH <http://rdf.integbio.jp/dataset/togosite/chip_atlas> {
+        ?tf obo:RO_0002428 ?ensg .
+      }
     }
     BIND("none" AS ?tf_id)
     BIND("none" AS ?tf_label)
   }
-
 
   {{#if input_categories}}
   VALUES ?tf_id { {{#each input_categories}} "{{this}}" {{/each}} }
