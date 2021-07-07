@@ -14,7 +14,7 @@ on:
       committer:
         description: 'プルリクする人'
         required: true
-        default: 'input your name'
+        default: '${{ github.actor }}'
       comment:
         description: 'コメント'
         required: false
