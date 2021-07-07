@@ -116,19 +116,13 @@ WHERE {
   {{#if input_tissues}}
   VALUES ?tissue_id { {{#each input_tissues}} "{{this}}" {{/each}}  }
   {{/if}}
-  GRAPH <http://rdf.integbio.jp/dataset/togosite/refex_tissue_specific_genes_gtex_v6> {
-    ?ensg refexo:isPositivelySpecificTo ?obo_tissue .
+  GRAPH <http://rdf.integbio.jp/dataset/togosite/refex_tissue_specific_genes_gtex_v6_refexsample> {
+    ?ensg refexo:isPositivelySpecificTo ?tissue .
   }
 
   GRAPH <http://rdf.integbio.jp/dataset/togosite/refexsample_gtex_v8_summary> {
-    VALUES ?sample_type { "tissue" "cell type" }
     ?tissue dcterms:description ?label ;
-            dcterms:identifier ?tissue_id ;
-            schema:additionalProperty [
-              schema:name ?sample_type ;
-              schema:valueReference ?obo_tissue ;
-              a schema:PropertyValue
-            ]
+            dcterms:identifier ?tissue_id .
   }
   {{/if}}
 } ORDER BY ?label
