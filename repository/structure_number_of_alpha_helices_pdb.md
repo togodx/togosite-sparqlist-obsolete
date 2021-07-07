@@ -1,4 +1,4 @@
-# PDBエントリをalpha_helixで分類(ヒトのみ) (フロント開発用)（井手, 守屋）
+# PDBエントリをalpha_helixで分類(ヒトのみ)（井手, 守屋）
 
 ## Description
 
@@ -70,7 +70,7 @@ WHERE{
   {
     SELECT DISTINCT (COUNT(?helix) AS ?target_num) ?PDBentry
     WHERE {
-      {{#if filter_list}}
+      {{#if queryArray}}
       VALUES ?PDBentry { {{#each queryArray}} pdbr:{{this}} {{/each}} }
       {{/if}}
       ?PDBentry  a pdbo:datablock ;
