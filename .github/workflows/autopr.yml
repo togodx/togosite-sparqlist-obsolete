@@ -11,10 +11,6 @@ on:
         description: 'プルリクするファイル名(".md"は省略)を指定'
         required: true
         default: 'ex) atc_classification_haschild'
-      committer:
-        description: 'プルリクする人'
-        required: true
-        default: ${{ github.actor }}
       comment:
         description: 'コメント'
         required: false
@@ -49,4 +45,4 @@ jobs:
         with:
           title: SPARQList Auto PR "${{ github.event.inputs.file_name }}"
           branch-suffix: timestamp
-          body: "[${{ github.event.inputs.committer }}] ${{ github.event.inputs.comment }}"
+          body: "[${{ github.actor }}] ${{ github.event.inputs.comment }}"
