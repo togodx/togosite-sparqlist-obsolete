@@ -11,7 +11,7 @@ on:
         description: 'プルリクするファイル名(".md"は省略)を指定'
         required: true
         default: 'ex) atc_classification_haschild'
-      comitter:
+      committer:
         description: 'プルリクする人'
         required: true
         default: 'input your name'
@@ -46,6 +46,6 @@ jobs:
           
       - uses: peter-evans/create-pull-request@v3
         with:
-          title: SPARQList Auto PR
+          title: SPARQList Auto PR "${{ github.event.inputs.file_name }}"
           branch-suffix: timestamp
-          body: "[${{ github.event.inputs.commiter }}] ${{ github.event.inputs.comment }}"
+          body: "[${{ github.event.inputs.committer }}] ${{ github.event.inputs.comment }}"
