@@ -36,7 +36,7 @@ jobs:
           PROD="repository"
           DEV="repository_dev"
           org=$DEV/${{ github.event.inputs.file_name }}.md
-          if [ -e "${org} ]; then
+          if [ -e "${org}" ]; then
             target=$PROD/${{ github.event.inputs.file_name }}.md
             cp $org $target
           else
