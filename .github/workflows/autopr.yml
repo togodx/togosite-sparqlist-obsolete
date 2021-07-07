@@ -35,12 +35,13 @@ jobs:
         run: |
           PROD="repository"
           DEV="repository_dev"
-          org=$DEV/${{ github.event.inputs.file_name }}.md
+          FILENAME=${{ github.event.inputs.file_name }}
+          org=$DEV/$FILENAME.md
           if [ -e "${org}" ]; then
-            target=$PROD/${{ github.event.inputs.file_name }}.md
+            target=$PROD/$FILENAME.md
             cp $org $target
           else
-            echo "${{ github.event.inputs.file_name }}.md が見つかりません"
+            echo "${FILENAME}.md が見つかりません"
             exit 1
           fi
           
