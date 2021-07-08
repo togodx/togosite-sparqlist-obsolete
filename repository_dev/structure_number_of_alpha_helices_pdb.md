@@ -70,7 +70,7 @@ WHERE{
   {
     SELECT DISTINCT (COUNT(?helix) AS ?target_num) ?PDBentry
     WHERE {
-      {{#if filter_list}}
+      {{#if queryArray}}
       VALUES ?PDBentry { {{#each queryArray}} pdbr:{{this}} {{/each}} }
       {{/if}}
       ?PDBentry  a pdbo:datablock ;
