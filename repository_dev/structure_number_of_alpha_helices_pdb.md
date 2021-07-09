@@ -1,4 +1,4 @@
-# PDBエントリをalpha_helixで分類(ヒトのみ) (フロント開発用)（井手, 守屋）
+# PDBエントリをalpha_helixで分類(ヒトのみ)（井手, 守屋）
 
 ## Description
 
