@@ -1,4 +1,4 @@
-# PDBエントリをbeta_sheetで分類(ヒトのみ) (フロント開発用)（井手, 守屋）
+# PDBエントリをbeta_sheetで分類(ヒトのみ)（井手, 守屋）
 
 ## Description
 
