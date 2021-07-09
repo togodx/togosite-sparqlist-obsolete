@@ -20,7 +20,7 @@
 * `mode` 必須パラメータ。内訳の代わりに該当する ID のリストを返す（デフォルトはオフ）idList: リストだけ、objectList: Attributeの入ったリスト（Attribute は下階層ではなく、categoryid で指定したカテゴリ）
   * example: idList, objectList
 * `endpoint` Endpoint
-  * default: https://test100.biosciencedbc.jp/sparql
+  * default: https://integbio.jp/togosite/sparql
 
 ## testURL
 - [default](https://integbio.jp/togosite_dev/sparqlist/api/variant_gwas_togovar?categoryIds=EFO_0000401&queryIds=&mode=)
@@ -46,7 +46,7 @@
 
 ## Endpoint
 
-https://test100.biosciencedbc.jp/sparql
+https://integbio.jp/togosite/sparql
 
 ## `data`
 
@@ -83,24 +83,24 @@ WHERE {
   {{/if}}
 {{/if}}
 
-  GRAPH <http://rdf.integbio.jp/dataset/togosite/efo>{
+#  GRAPH <http://rdf.integbio.jp/dataset/togosite/efo>{
 {{#unless  mode}}
     ?category rdfs:subClassOf ?parent.
 {{/unless}}
     ?category rdfs:label ?label.
     ?efo rdfs:subClassOf* ?category.
     ?efo rdf:type owl:Class.  # ?efo rdfs:subClassOf* ?category が?efoの値に関係なくtrueになってしまうため追加
-  }
+#  }
 
-  GRAPH <http://rdf.integbio.jp/dataset/togosite/gwas-catalog>{
+#  GRAPH <http://rdf.integbio.jp/dataset/togosite/gwas-catalog>{
     ?assoc terms:mapped_trait_uri ?efo.
     ?assoc terms:dbsnp_url ?dbsnp.
     ?assoc terms:mapped_trait ?mapped_trait.
-  }
+#  }
 
-  GRAPH <http://rdf.integbio.jp/dataset/togosite/variation>{
+#  GRAPH <http://rdf.integbio.jp/dataset/togosite/variation>{
    ?dbsnp ^rdfs:seeAlso/dct:identifier ?tgv_id.
-  } 
+#  } 
 }
 {{#unless mode}}  
 ORDER BY ?label
