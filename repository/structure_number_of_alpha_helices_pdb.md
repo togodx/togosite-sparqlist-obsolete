@@ -1,4 +1,4 @@
-# PDBエントリをalpha_helixで分類(ヒトのみ)（井手, 守屋）
+# PDBエントリをalpha_helixで分類(ヒトのみ) (フロント開発用)（井手, 守屋）
 
 ## Description
 
@@ -117,8 +117,8 @@ WHERE{
   {
     SELECT DISTINCT ?PDBentry ?title 
     WHERE {
-      {{#if filter_list}}
-      VALUES ?PDBentry { {{#each filter_list}} pdbr:{{this}} {{/each}} }
+      {{#if queryArray}}
+      VALUES ?PDBentry { {{#each queryArray}} pdbr:{{this}} {{/each}} }
       {{/if}}
       ?PDBentry  a pdbo:datablock ;
                  dc:title ?title .

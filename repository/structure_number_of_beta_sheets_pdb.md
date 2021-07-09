@@ -122,7 +122,7 @@ WHERE{
       {{/if}}
       ?PDBentry  a pdbo:datablock ;
                  dc:title ?title .
-      MINUS {?PDBentry pdbo:has_struct_confCategory ?sheet . }
+      MINUS {?PDBentry pdbo:has_struct_sheetCategory ?sheet . }
       {
         SELECT DISTINCT ?PDBentry {
           ?PDBentry pdbo:has_entityCategory
