@@ -117,8 +117,8 @@ WHERE{
   {
     SELECT DISTINCT ?PDBentry ?title 
     WHERE {
-      {{#if query_array}}
-      VALUES ?PDBentry { {{#each query_array}} pdbr:{{this}} {{/each}} }
+      {{#if queryArray}}
+      VALUES ?PDBentry { {{#each queryArray}} pdbr:{{this}} {{/each}} }
       {{/if}}
       ?PDBentry  a pdbo:datablock ;
                  dc:title ?title .
