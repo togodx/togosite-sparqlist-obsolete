@@ -33,8 +33,8 @@
     - メリット：カバーできるGWAS Catalogのvariant数(123,485,[検証用SPARQL](https://is.gd/tFovng))が多い。
     - デメリット：疾患を探すのが少し難しい。
   - EFO_0000408の場合：
+    - メリット：疾患の階層がトップに表示される
     - メリット：カバーできるGWAS Catalogのvariant数(27,674,[検証用SPARQL](https://is.gd/QQP2Ri))少ない。
-    - デメリット：疾患の階層がトップに表示される
 
 ## `queryArray`
 ```javascript
