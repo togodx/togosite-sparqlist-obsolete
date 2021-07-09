@@ -1,26 +1,25 @@
-# Genes with hypothetical upstream TFs in ChIP-Atlas（大田・池田・小野・千葉）(mode対応版)
+# Target genes of TFs in ChIP-Atlas （大田・池田・小野・千葉）
 
 ## Description
 
 - Data sources
     - ChIP-Atlas: [http://dbarchive.biosciencedbc.jp/kyushu-u/hg38/target/](http://dbarchive.biosciencedbc.jp/kyushu-u/hg38/target/)
-    - The genes in `<Transcription Factor>.10.tsv` were defined to be "Genes with hypothetical upstream TF".
+    - The genes in `<Transcription Factor>.10.tsv` were defined to be target genes of the `<Transcription Factor>`.
 
 - Query
-    - The output ID 1 and 2 are assigned to "Genes with hypothetical upstream TF" and Genes without hypothetical upstream TF" respectively.
     - Input
-        - Ensembl gene ID
+        - Ensembl gene ID of target genes
     - Output
-        - with or without hypothetical upstream TF
+        - Ensembl gene ID of TFs
 
 ## Endpoint
 
 https://integbio.jp/togosite/sparql
 
 ## Parameters
-* `categoryIds` (type: 1 or 2)
-  * example: 1
-* `queryIds` (type: ensembl gene)
+* `categoryIds` (type: ensembl gene ID (TF))
+  * example: ENSG00000275700,ENSG00000101544,ENSG00000048052
+* `queryIds` (type: ensembl gene ID (target))
   * example: ENSG00000000005,ENSG00000002587,ENSG00000115942
 * `mode` (type: string)
   * example: idList, objectList
@@ -51,7 +50,6 @@ https://integbio.jp/togosite/sparql
 
 ```sparql
 PREFIX obo: <http://purl.obolibrary.org/obo/>
-PREFIX refexo: <http://purl.jp/bio/01/refexo#>
 PREFIX ensembl: <http://identifiers.org/ensembl/>
 PREFIX taxid: <http://identifiers.org/taxonomy/>
 PREFIX faldo: <http://biohackathon.org/resource/faldo#>
@@ -59,17 +57,23 @@ PREFIX dc: <http://purl.org/dc/elements/1.1/>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 
 {{#if mode}}
-SELECT DISTINCT ?id ?ensg
+SELECT DISTINCT ?tf_id ?tf_label ?ensg
 {{else}}
-SELECT ?id (COUNT(DISTINCT ?ensg) AS ?count)
+SELECT ?tf_id ?tf_label (COUNT(DISTINCT ?ensg) AS ?count)
 {{/if}}
 WHERE {
   {
     {{#if input_genes}}
     VALUES ?ensg { {{#each input_genes}} ensembl:{{this}} {{/each}} }
     {{/if}}
-    ?upstream obo:RO_0002428 ?ensg .
-    BIND("1" AS ?id)
+    GRAPH <http://rdf.integbio.jp/dataset/togosite/chip_atlas> {
+      ?tf obo:RO_0002428 ?ensg .
+    }
+    GRAPH <http://rdf.integbio.jp/dataset/togosite/ensembl> {
+      ?ebi_tf rdfs:label ?tf_label ;
+              rdfs:seeAlso ?tf ;
+              dc:identifier ?tf_id .
+    }
   }
   UNION
   {
@@ -82,22 +86,24 @@ WHERE {
                faldo:location ?ensg_location ;
                dc:identifier ?ensg_id .
       BIND (strbefore(strafter(str(?ensg_location), "GRCh38/"), ":") AS ?chromosome)
-      VALUES ?chromosome {
-        "1" "2" "3" "4" "5" "6" "7" "8" "9" "10"
-        "11" "12" "13" "14" "15" "16" "17" "18" "19" "20" "21" "22"
-        "X" "Y" "MT"
-      }
+      FILTER (?chromosome IN ("1", "2", "3", "4", "5", "6", "7", "8", "9", "10",
+                              "11", "12", "13", "14", "15", "16", "17", "18", "19", "20",
+                              "21", "22", "X", "Y", "MT" ))
       BIND(URI(CONCAT("http://identifiers.org/ensembl/", ?ensg_id)) AS ?ensg)
     }
     FILTER NOT EXISTS {
-      ?upstream obo:RO_0002428 ?ensg .
+      GRAPH <http://rdf.integbio.jp/dataset/togosite/chip_atlas> {
+        ?tf obo:RO_0002428 ?ensg .
+      }
     }
-    BIND("2" AS ?id)
+    BIND("none" AS ?tf_id)
+    BIND("none" AS ?tf_label)
   }
+
   {{#if input_categories}}
-  VALUES ?id { {{#each input_categories}} "{{this}}" {{/each}} }
+  VALUES ?tf_id { {{#each input_categories}} "{{this}}" {{/each}} }
   {{/if}}
-}
+} ORDER BY ?tf_label
 ```
 
 ## `return`
@@ -114,25 +120,16 @@ WHERE {
     return main.results.bindings.map((elem) => ({
       id: elem.ensg.value.replace("http://identifiers.org/ensembl/", ""),
       attribute: {
-        categoryId: elem.id.value,
-        label: makeLabel(elem.id.value)
+        categoryId: elem.tf_id.value,
+        label: elem.tf_label.value
       }
     }));
   } else {
     return main.results.bindings.map((elem) => ({
-      categoryId: elem.id.value,
-      label: makeLabel(elem.id.value),
+      categoryId: elem.tf_id.value,
+      label: elem.tf_label.value,
       count: Number(elem.count.value),
     }));
-  }
-
-  function makeLabel(id) {
-    if (id === "1") 
-      return "Genes with hypothetical upstream TF" ;
-    else if (id === "2")
-      return "Genes without hypothetical upstream TF";
-    else
-      return "";
   }
 }
 ```
