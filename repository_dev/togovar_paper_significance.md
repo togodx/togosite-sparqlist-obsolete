@@ -1,4 +1,4 @@
-## variant clinical significance - Togosite用途外のSPARQLet(三橋）
+## togovar_paper_significance - Togosite用途外のSPARQLet(三橋）
 
 ## Description
 
