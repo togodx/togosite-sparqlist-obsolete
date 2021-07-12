@@ -13,7 +13,7 @@
 ## Parameters
 
 * `categoryIds` (type:Clinical significance from ClinVar)
-  * default: pathogenic,pathogenic_association,pathogenic_drug_response_protective_risk factor,pathogeniclikely_pathogenic,pathogenic_or_likely_pathogenic,drug_response,risk_factor,association,affects,protective
+  * default: 
   * example: uncertain_significance,likely_benign,benign,pathogenic,likely_pathogenic,conflicting_interpretations_of_pathogenicity,not_provided,benign_or_likely_benign,pathogenic_or_likely_pathogenic,other,drug_response,risk_factor,association,affects,protective
 * `queryIds` (type:TogoVar)
   * example: tgv48208871,tgv48208872,tgv48208877,tgv48208884,tgv48208888,tgv48208896,tgv48208897,tgv48208898,tgv48208900,tgv48208904,tgv48208906,tgv48208908,tgv48208938,tgv48208939,tgv48208943,tgv48208945,tgv48208947,tgv48208962,tgv48208965,tgv48208967,tgv48208968,tgv48208970,tgv48208971,tgv48208973,tgv48208977
