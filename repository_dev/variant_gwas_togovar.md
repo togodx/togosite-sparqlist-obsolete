@@ -23,10 +23,10 @@
   * default: https://integbio.jp/togosite/sparql
 
 ## testURL
-- [default](https://integbio.jp/togosite_dev/sparqlist/api/variant_gwas_togovar?categoryIds=EFO_0000401&queryIds=&mode=)
-- [queryId+categoryId](https://integbio.jp/togosite_dev/sparqlist/api/variant_gwas_togovar?categoryIds=EFO_0000401&queryIds=tgv704775%2Ctgv704941&mode=)
-- [queryId+categoryId+idList](https://integbio.jp/togosite_dev/sparqlist/api/variant_gwas_togovar?categoryIds=EFO_0000401&queryIds=tgv48208871%2Ctgv48208872%2Ctgv48208877&mode=idList)
-- [queyId+categoryId+objectList](https://integbio.jp/togosite_dev/sparqlist/api/variant_gwas_togovar?categoryIds=EFO_0000401&queryIds=tgv48208871%2Ctgv48208872%2Ctgv48208877&mode=objectList)
+- [default](https://integbio.jp/togosite_dev/sparqlist/api/variant_gwas_togovar?categoryIds=EFO_0000001&queryIds=&mode=)
+- [queryId+categoryId](https://integbio.jp/togosite_dev/sparqlist/api/variant_gwas_togovar?categoryIds=EFO_0000001&queryIds=tgv704775%2Ctgv704941&mode=)
+- [queryId+categoryId+idList](https://integbio.jp/togosite_dev/sparqlist/api/variant_gwas_togovar?categoryIds=EFO_0000001&queryIds=tgv48208871%2Ctgv48208872%2Ctgv48208877&mode=idList)
+- [queyId+categoryId+objectList](https://integbio.jp/togosite_dev/sparqlist/api/variant_gwas_togovar?categoryIds=EFO_0000001&queryIds=tgv48208871%2Ctgv48208872%2Ctgv48208877&mode=objectList)
 
 - categoryIdsのデフォルトをEFO_0000001(EFOのトップ)とEFO_0000408(diseaseのトップ)にするかでメリットデメリットがある。
   - EFO_0000001の場合：
