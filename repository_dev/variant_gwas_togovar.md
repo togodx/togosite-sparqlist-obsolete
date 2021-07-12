@@ -14,7 +14,7 @@
 
 * `categoryIds` (type: Mapped trait represented in Experimental factor ontology (EFO))
   * default: EFO_0000001
-  * example: EFO_0000001,EFO_0000408,MONDO_0020683,Orphanet_68335
+  * example: MONDO_0020683,Orphanet_68335,EFO_0000001,EFO_0000408
 * `queryIds` (type:TogoVar)
   * example: tgv704775,tgv704941,tgv772580,tgv246970,tgv39969772,tgv40054079,tgv42043030
 * `mode` 必須パラメータ。内訳の代わりに該当する ID のリストを返す（デフォルトはオフ）idList: リストだけ、objectList: Attributeの入ったリスト（Attribute は下階層ではなく、categoryid で指定したカテゴリ）
