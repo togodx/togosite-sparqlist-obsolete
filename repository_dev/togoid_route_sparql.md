@@ -77,9 +77,10 @@
   
   // 例外処理
   // mondo - medgen - hp
-  if ((target == "mondo" && source == "hp") 
-      || (source == "mondo" && target == "hp")) {
+  if (source == "mondo" && target == "hp") {
     config.route.disease.disease[0].push("medgen");
+  } else if (target == "mondo" && source == "hp") {
+     config.route.disease.disease[0].unshift("medgen");
   }
   // chembl_compound - mesh
   if ((sourceSubject == "compound" && target == "mesh") 
@@ -100,8 +101,7 @@
         for (let route of config.route[subject_1][subject_2]) {
           routes.push(makeRoute(source, target, route));
         }
-      }
-      if (subject_1 == targetSubject && subject_2 == sourceSubject) {
+      } else if (subject_1 == targetSubject && subject_2 == sourceSubject) {
         for (let route of config.route[subject_1][subject_2]) {
           routes.push(makeRoute(source, target, route.reverse()));
         }
