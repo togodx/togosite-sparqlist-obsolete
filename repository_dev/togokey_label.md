@@ -2,7 +2,7 @@
 
 ## Parameters
 
-* `togoKey` hgnc, ncbigene, ensembl_gene, ensembl_transcript, uniprot, pdb, pubchem_compound, chembl_compound, chebi, mondo, mesh
+* `togoKey` hgnc, ncbigene, ensembl_gene, ensembl_transcript, uniprot, pdb, pubchem_compound, chembl_compound, chebi, mondo, mesh, hp, nando
   * default: hgnc
 * `queryIds`
   * default: ["4942","5344","6148", "6265","6344","6677","6735","10593","10718","10876"]
@@ -46,6 +46,8 @@ PREFIX chebi: <http://purl.obolibrary.org/obo/CHEBI_>
 PREFIX pubchem_compound: <http://rdf.ncbi.nlm.nih.gov/pubchem/compound/CID>
 PREFIX mondo: <http://purl.obolibrary.org/obo/MONDO_>
 PREFIX mesh: <http://id.nlm.nih.gov/mesh/>
+PREFIX hp: <http://purl.obolibrary.org/obo/HP_>
+PREFIX nando: <http://nanbyodata.jp/ontology/nando#>
 SELECT ?id ?label
 {{#if key.hgnc}}
 FROM <http://rdf.integbio.jp/dataset/togosite/hgnc>
@@ -79,6 +81,12 @@ FROM <http://rdf.integbio.jp/dataset/togosite/mondo>
 {{/if}}
 {{#if key.mesh}}
 FROM <http://rdf.integbio.jp/dataset/togosite/mesh>
+{{/if}}
+{{#if key.hp}}
+FROM <http://rdf.integbio.jp/dataset/togosite/hpo>
+{{/if}}
+{{#if key.nanod}}
+FROM <http://rdf.integbio.jp/dataset/togosite/nando>
 {{/if}}
 WHERE {
   VALUES ?uri { {{#each queryArray}} {{../togoKey}}:{{this}} {{/each}} }
@@ -117,6 +125,13 @@ WHERE {
   {{/if}}
   {{#if key.mesh}}
   ?uri rdfs:label ?label .
+  {{/if}}
+  {{#if key.hp}}
+  ?uri rdfs:label ?label .
+  {{/if}}
+  {{#if key.nando}}
+  ?uri rdfs:label ?label .
+  FILTER(LANG(?label) = "en")
   {{/if}}
   BIND(REPLACE(STR(?uri), {{togoKey}}:, "") AS ?id)
 }
