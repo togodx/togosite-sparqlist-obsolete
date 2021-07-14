@@ -2,7 +2,7 @@
 
 ## Parameters
 
-* `togoKey` hgnc, uniprot, pdb, pubchem_compound, mondo, chembl_compound, chebi
+* `togoKey` hgnc, ncbigene, ensembl_gene, ensembl_transcript, uniprot, pdb, pubchem_compound, chembl_compound, chebi, mondo, mesh
   * default: hgnc
 * `queryIds`
   * default: ["4942","5344","6148", "6265","6344","6677","6735","10593","10718","10876"]
@@ -33,17 +33,31 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX core: <http://purl.uniprot.org/core/>
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 PREFIX dc: <http://purl.org/dc/elements/1.1/>
+PREFIX sio: <http://semanticscience.org/resource/>
+PREFIX hop: <http://purl.org/net/orthordf/hOP/ontology#>
 PREFIX hgnc: <http://identifiers.org/hgnc/>
 PREFIX uniprot: <http://purl.uniprot.org/uniprot/>
+PREFIX ncbigene: <http://identifiers.org/ncbigene/>
+PREFIX ensembl_gene: <http://rdf.ebi.ac.uk/resource/ensembl/>
+PREFIX ensembl_transcript: <http://rdf.ebi.ac.uk/resource/ensembl.transcript/>
 PREFIX pdb: <https://rdf.wwpdb.org/pdb/>
 PREFIX chembl_compound: <http://rdf.ebi.ac.uk/resource/chembl/molecule/>
 PREFIX chebi: <http://purl.obolibrary.org/obo/CHEBI_>
 PREFIX pubchem_compound: <http://rdf.ncbi.nlm.nih.gov/pubchem/compound/CID>
 PREFIX mondo: <http://purl.obolibrary.org/obo/MONDO_>
-PREFIX sio: <http://semanticscience.org/resource/>
+PREFIX mesh: <http://id.nlm.nih.gov/mesh/>
 SELECT ?id ?label
 {{#if key.hgnc}}
 FROM <http://rdf.integbio.jp/dataset/togosite/hgnc>
+{{/if}}
+{{#if key.ncbigene}}
+FROM <http://rdf.integbio.jp/dataset/togosite/homo_sapiens_gene_info>
+{{/if}}
+{{#if key.ensembl_gene}}
+FROM <http://rdf.integbio.jp/dataset/togosite/ensembl>
+{{/if}}
+{{#if key.ensembl_transcript}}
+FROM <http://rdf.integbio.jp/dataset/togosite/ensembl>
 {{/if}}
 {{#if key.uniprot}}
 FROM <http://rdf.integbio.jp/dataset/togosite/uniprot>
@@ -63,9 +77,21 @@ FROM <http://rdf.integbio.jp/dataset/togosite/pubchem>
 {{#if key.mondo}}
 FROM <http://rdf.integbio.jp/dataset/togosite/mondo>
 {{/if}}
+{{#if key.mesh}}
+FROM <http://rdf.integbio.jp/dataset/togosite/mesh>
+{{/if}}
 WHERE {
   VALUES ?uri { {{#each queryArray}} {{../togoKey}}:{{this}} {{/each}} }
   {{#if key.hgnc}}
+  ?uri rdfs:label ?label .
+  {{/if}}
+  {{#if key.ncbigene}}
+  ?uri hop:fullName ?label .
+  {{/if}}
+  {{#if key.ensembl_gene}}
+  ?uri rdfs:label ?label .
+  {{/if}}
+  {{#if key.ensembl_transcript}}
   ?uri rdfs:label ?label .
   {{/if}}
   {{#if key.uniprot}}
@@ -87,6 +113,9 @@ WHERE {
   ] .
   {{/if}}
   {{#if key.mondo}}
+  ?uri rdfs:label ?label .
+  {{/if}}
+  {{#if key.mesh}}
   ?uri rdfs:label ?label .
   {{/if}}
   BIND(REPLACE(STR(?uri), {{togoKey}}:, "") AS ?id)
