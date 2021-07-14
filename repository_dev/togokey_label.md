@@ -2,7 +2,7 @@
 
 ## Parameters
 
-* `togoKey` hgnc, uniprot, pdb, pubchem_compound, mondo, (chembl_comppound, chebi)
+* `togoKey` hgnc, uniprot, pdb, pubchem_compound, mondo, chembl_compound, chebi
   * default: hgnc
 * `queryIds`
   * default: ["4942","5344","6148", "6265","6344","6677","6735","10593","10718","10876"]
@@ -58,7 +58,6 @@ FROM <http://rdf.integbio.jp/dataset/togosite/chembl>
 FROM <http://rdf.integbio.jp/dataset/togosite/chebi>
 {{/if}}
 {{#if key.pubchem_compound}}
-FROM <http://rdf.integbio.jp/dataset/togosite/chebi>
 FROM <http://rdf.integbio.jp/dataset/togosite/pubchem>
 {{/if}}
 {{#if key.mondo}}
