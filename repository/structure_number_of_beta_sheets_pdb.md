@@ -1,4 +1,4 @@
-# PDBエントリをbeta_sheetで分類(ヒトのみ) (フロント開発用)（井手, 守屋）
+# PDBエントリをbeta_sheetで分類(ヒトのみ)（井手, 守屋）
 
 ## Description
 
@@ -122,7 +122,7 @@ WHERE{
       {{/if}}
       ?PDBentry  a pdbo:datablock ;
                  dc:title ?title .
-      MINUS {?PDBentry pdbo:has_struct_confCategory ?sheet . }
+      MINUS {?PDBentry pdbo:has_struct_sheetCategory ?sheet . }
       {
         SELECT DISTINCT ?PDBentry {
           ?PDBentry pdbo:has_entityCategory
