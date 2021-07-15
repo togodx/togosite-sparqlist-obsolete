@@ -1,7 +1,6 @@
-# show_graphs グラフ一覧を表示。死活監視ツール（Status cakeとUptimerobot）の監視対象。
+# show_graphs グラフ一覧を表示
 
-Display all graph names in the endopint.
-This sparqlist is monitored by uptime monitoring services, [Status cake](https://www.statuscake.com/) and [Uptimerobot](https://uptimerobot.com/).
+Display all graph names in the endpoint.
 
 - author: Mitsuhashi
 
