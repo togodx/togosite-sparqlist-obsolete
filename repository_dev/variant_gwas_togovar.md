@@ -17,7 +17,7 @@
   * example: MONDO_0020683,Orphanet_68335,EFO_0000001,EFO_0000408
 * `queryIds` (type:TogoVar)
   * example: tgv704775,tgv704941,tgv772580,tgv246970,tgv39969772,tgv40054079,tgv42043030
-* `mode` 必須パラメータ。内訳の代わりに該当する ID のリストを返す（デフォルトはオフ）idList: リストだけ、objectList: Attributeの入ったリスト（Attribute は下階層ではなく、categoryid で指定したカテゴリ）
+* `mode`
   * example: idList, objectList
 * `endpoint` Endpoint
   * default: https://integbio.jp/togosite/sparql
@@ -28,13 +28,16 @@
 - [queryId+categoryId+idList](https://integbio.jp/togosite_dev/sparqlist/api/variant_gwas_togovar?categoryIds=EFO_0000001&queryIds=tgv48208871%2Ctgv48208872%2Ctgv48208877&mode=idList)
 - [queyId+categoryId+objectList](https://integbio.jp/togosite_dev/sparqlist/api/variant_gwas_togovar?categoryIds=EFO_0000001&queryIds=tgv48208871%2Ctgv48208872%2Ctgv48208877&mode=objectList)
 
-- categoryIdsのデフォルトをEFO_0000001(EFOのトップ)とEFO_0000408(diseaseのトップ)にするかでメリットデメリットがある。
+- categoryIdsのデフォルトを[EFO_0000001(EFOのトップ)](https://www.ebi.ac.uk/ols/ontologies/efo/terms?iri=http%3A%2F%2Fwww.ebi.ac.uk%2Fefo%2FEFO_0000001&viewMode=All&siblings=false)と[EFO_0000408(diseaseのトップ)](https://www.ebi.ac.uk/ols/ontologies/efo/terms?iri=http%3A%2F%2Fwww.ebi.ac.uk%2Fefo%2FEFO_0000408)にするかでメリットデメリットがある。
   - EFO_0000001の場合：
     - メリット：カバーできるGWAS Catalogのvariant数(123,485,[検証用SPARQL](https://is.gd/tFovng))が多い。
     - デメリット：疾患を探すのが少し難しい。
   - EFO_0000408の場合：
     - メリット：疾患の階層がトップに表示される
     - メリット：カバーできるGWAS Catalogのvariant数(27,674,[検証用SPARQL](https://is.gd/QQP2Ri))少ない。
+  - 結論：experimental factor (EFO_0000001)をトップとする。
+    - 理由：EFO_0000408(disease)のサブカテゴリでないGWAS catalogに含まれるEFOエントリ（ [SPARQLで検索](https://is.gd/GTHjwB) ）には、
+   　information entity > measurementの下にあるefo:EFO_0009282("sodium measurement"), efo:EFO_0009718("peak expiratory flow")など重要なヒト関連形質が含まれるため。
 
 ## `queryArray`
 ```javascript
