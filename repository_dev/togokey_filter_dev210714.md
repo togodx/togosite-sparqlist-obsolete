@@ -33,7 +33,7 @@ async ({togoKey, properties, inputIds})=>{
 
   const togositeConfig = "https://raw.githubusercontent.com/dbcls/togosite/develop/config/togosite-human/properties.json";
   const sparqlSplitter = "https://integbio.jp/togosite/sparqlist/api/togoid_sparqlist_splitter";
-  const togoidApi = "https://integbio.jp/togosite/sparqlist/api/togoid_route_sparql";
+  const togoidApi = "https://integbio.jp/togosite_dev/sparqlist/api/togoid_route_sparql";
   //const sparqlSplitter = "http://localhost:3000/togosite_dev/sparqlist/api/togoid_sparqlist_splitter";
  // const togoidApi = "http://localhost:3000/togosite/sparqlist_dev/api/togoid_route_sparql";
   const togositeConfigJson = await fetchReq(togositeConfig, {method: "get"});
@@ -47,7 +47,7 @@ async ({togoKey, properties, inputIds})=>{
   //const togoidNotFilter = "http://localhost:3000/togosite_dev/sparqlist/api/togokey_not_filter";
   const togoidNotFilter = "https://integbio.jp/togosite_dev/sparqlist/api/togokey_not_filter";  
   if (queryPropertyIds.length == 0 && (togoKey == "hgnc" || togoKey == "uniprot" || togoKey == "pdb" || togoKey == "mondo")) {
-    if (inputIds) return JSON.parse(inputIds);
+    if (inputIds && JSON.parse(inputIds)[0]) return JSON.parse(inputIds);
     return fetchReq(togoidNotFilter, options, "togoKey=" + togoKey);
   }
   
@@ -99,7 +99,7 @@ async ({togoKey, properties, inputIds})=>{
   } 
 
   let togoId = undefined;
-  if (inputIds) {
+  if (inputIds && JSON.parse(inputIds)[0]) {
     togoId = {};
     for (let id of JSON.parse(inputIds)) {
       togoId[id] = true;

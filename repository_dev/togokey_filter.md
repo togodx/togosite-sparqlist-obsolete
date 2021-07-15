@@ -5,7 +5,7 @@
 * `togoKey`
   * default: hgnc
 * `properties`
-  * default: [{"propertyId": "refex_specific_high_expression", "categoryIds": ["v32_40", "v25_40"]}, {"propertyId": "uniprot_keywords_cellular_component","categoryIds": ["GO_0005886"]}, {"propertyId": "uniprot_pdb_existence", "categoryIds": ["1"]}, {"propertyId": "uniprot_chembl_assay_existence", "categoryIds": ["1"]}]
+  * default: [{"propertyId": "gene_high_level_expression_refex", "categoryIds": ["v32_40", "v25_40"]}, {"propertyId": "protein_cellular_component_uniprot","categoryIds": ["GO_0005886"]}, {"propertyId": "structure_data_existence_uniprot", "categoryIds": ["1"]}, {"propertyId": "interaction_chembl_assay_existence_uniprot", "categoryIds": ["1"]}]
 * `inputIds` Uploaded user IDs
   * example: ["1193","13940","13557","15586","16605","4942","5344","6148", "6265","6344","6677","6735","10593","10718","10876"]
   
@@ -46,7 +46,7 @@ async ({togoKey, properties, inputIds})=>{
   // not filter (togoKey = hgnc, uniprot, pdb, mondo)
   const togoidNotFilter = "http://localhost:3000/togosite/sparqlist/api/togokey_not_filter";  
   if (queryPropertyIds.length == 0 && (togoKey == "hgnc" || togoKey == "uniprot" || togoKey == "pdb" || togoKey == "mondo")) {
-    if (inputIds) return JSON.parse(inputIds);
+    if (inputIds && JSON.parse(inputIds)[0]) return JSON.parse(inputIds);
     return fetchReq(togoidNotFilter, options, "togoKey=" + togoKey);
   }
   
@@ -97,7 +97,7 @@ async ({togoKey, properties, inputIds})=>{
   } 
 
   let togoId = undefined;
-  if (inputIds) {
+  if (inputIds && JSON.parse(inputIds)[0]) {
     togoId = {};
     for (let id of JSON.parse(inputIds)) {
       togoId[id] = true;
