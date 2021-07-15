@@ -31,7 +31,6 @@ async ({togoKey, properties, inputIds})=>{
     }
   }
 
-  if (properties) return await fetch("http://localhost:3000/togosite_dev/sparqlist/", {method: "get"});
   const togositeConfig = "https://raw.githubusercontent.com/dbcls/togosite/develop/config/togosite-human/properties.json";
  // const sparqlSplitter = "https://integbio.jp/togosite/sparqlist/api/togoid_sparqlist_splitter";
  // const togoidApi = "https://integbio.jp/togosite_dev/sparqlist/api/togoid_route_sparql";
