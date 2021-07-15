@@ -22,12 +22,7 @@
 * `endpoint` Endpoint
   * default: https://integbio.jp/togosite/sparql
 
-## testURL
-- [default](https://integbio.jp/togosite_dev/sparqlist/api/variant_gwas_togovar?categoryIds=EFO_0000001&queryIds=&mode=)
-- [queryId+categoryId](https://integbio.jp/togosite_dev/sparqlist/api/variant_gwas_togovar?categoryIds=EFO_0000001&queryIds=tgv704775%2Ctgv704941&mode=)
-- [queryId+categoryId+idList](https://integbio.jp/togosite_dev/sparqlist/api/variant_gwas_togovar?categoryIds=EFO_0000001&queryIds=tgv48208871%2Ctgv48208872%2Ctgv48208877&mode=idList)
-- [queyId+categoryId+objectList](https://integbio.jp/togosite_dev/sparqlist/api/variant_gwas_togovar?categoryIds=EFO_0000001&queryIds=tgv48208871%2Ctgv48208872%2Ctgv48208877&mode=objectList)
-
+## categoryIdsのdefault値の選択について
 - categoryIdsのデフォルトを[EFO_0000001(EFOのトップ)](https://www.ebi.ac.uk/ols/ontologies/efo/terms?iri=http%3A%2F%2Fwww.ebi.ac.uk%2Fefo%2FEFO_0000001&viewMode=All&siblings=false)と[EFO_0000408(diseaseのトップ)](https://www.ebi.ac.uk/ols/ontologies/efo/terms?iri=http%3A%2F%2Fwww.ebi.ac.uk%2Fefo%2FEFO_0000408)にするかでメリットデメリットがある。
   - EFO_0000001の場合：
     - メリット：カバーできるGWAS Catalogのvariant数(123,485,[検証用SPARQL](https://is.gd/tFovng))が多い。
@@ -37,7 +32,7 @@
     - メリット：カバーできるGWAS Catalogのvariant数(27,674,[検証用SPARQL](https://is.gd/QQP2Ri))少ない。
   - 結論：experimental factor (EFO_0000001)をトップとする。
     - 理由：EFO_0000408(disease)のサブカテゴリでないGWAS catalogに含まれるEFOエントリ（ [SPARQLで検索](https://is.gd/GTHjwB) ）には、
-   　information entity > measurementの下にあるefo:EFO_0009282("sodium measurement"), efo:EFO_0009718("peak expiratory flow")など重要なヒト関連形質が含まれるため。
+   　information entity > measurementの下にあるEFO_0009282("sodium measurement"), EFO_0009718("peak expiratory flow")など重要なヒト関連形質が含まれるため。
 
 ## `queryArray`
 ```javascript
