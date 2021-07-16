@@ -9,7 +9,7 @@
 ## Parameters
 
 * `sparqlet`
-  * default: https://integbio.jp/togosite/sparqlist/api/refex_specific_high_expression
+  * default: https://integbio.jp/togosite/sparqlist/api/gene_high_level_expression_refex
 * `primaryKey` databse of SPARQLet
   * default: ncbigene
 * `categoryIds`
@@ -152,6 +152,10 @@ WHERE {
 ## `distribution`
 ```javascript
 async ({sparqlet, categoryIds, userIds, userKey, primaryKey, pValueFlag, population})=>{
+  const dev_stage = await fetch("http://localhost:3000/togosite_dev/sparqlist/api/dev_stage_check").then(res=>res.text());
+  let apiurl = "http://localhost:3000/togosite/sparqlist/api/";
+  if (dev_stage == "true") apiurl = "http://localhost:3000/togosite_dev/sparqlist/api/";
+
   const fetchReq = async (url, body) => {
     let options = {	
       method: 'POST',
@@ -166,16 +170,13 @@ async ({sparqlet, categoryIds, userIds, userKey, primaryKey, pValueFlag, populat
     return await fetch(url, options).then(res=>res.json());
   }
 
- // const togoidSparqlistSplitter = "https://integbio.jp/togosite/sparqlist/api/togoid_sparqlist_splitter";  
- // const sparqlistSplitter = "https://integbio.jp/togosite/sparqlist/api/sparqlist_splitter";
- // const togoidApi = "https://integbio.jp/togosite/sparqlist/api/togoid_route_sparql";
-  const togoidSparqlistSplitter = "http://localhost:3000/togosite/sparqlist/api/togoid_sparqlist_splitter";  
-  const sparqlistSplitter = "http://localhost:3000/togosite/sparqlist/api/sparqlist_splitter";
-  const togoidApi = "http://localhost:3000/togosite/sparqlist/api/togoid_route_sparql";
+  const togoidSparqlistSplitter = apiurl + "togoid_sparqlist_splitter";  
+  const sparqlistSplitter = apiurl + "sparqlist_splitter";
+  const togoidApi = apiurl + "togoid_route_sparql";
   let idLimit = 2000; // split 判定
   if (primaryKey == "chembl_compound") idLimit = 500; // restrict POST response size
-  sparqlet = sparqlet.replace("https://integbio.jp/togosite/sparqlist/", "http://localhost:3000/togosite/sparqlist/");
-  
+  sparqlet = apiurl + sparqlet.split(/\//).slice(-1)[0]; // replace global URL to localhost
+
   // convert user IDs to primary IDs for SPARQLet
   let queryIds = "";
   if (userKey != primaryKey) {
@@ -195,7 +196,6 @@ async ({sparqlet, categoryIds, userIds, userKey, primaryKey, pValueFlag, populat
   if (!queryIds.match(/\w/)) return [];
   
   // get property data
-  sparqlet  = sparqlet.replace("https://integbio.jp/togosite/sparqlist/", "http://localhost:3000/togosite/sparqlist/");
   let distribution = [];
   let body = "queryIds=" + queryIds;
   if (categoryIds) body += "&categoryIds= " + categoryIds;
