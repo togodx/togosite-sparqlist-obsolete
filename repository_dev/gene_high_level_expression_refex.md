@@ -28,7 +28,7 @@
 
 ```javascript
 async ({queryIds, categoryIds, mode})=>{
-  let url = "https://integbio.jp/togosite/sparqlist/api/refex_specific_expression"; // localhost:port を叩けると早い
+  let url = "https://integbio.jp/togosite_dev/sparqlist/api/refex_specific_expression"; // localhost:port を叩けると早い
   let options = {
     method: 'POST',
     body	: "categoryIds=" + categoryIds + "&queryIds=" + encodeURIComponent(queryIds) + "&mode=" + mode,
