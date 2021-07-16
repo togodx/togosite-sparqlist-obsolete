@@ -121,12 +121,16 @@ SELECT ?category ?label (COUNT (DISTINCT ?uniprot) AS ?count)
 FROM <http://rdf.integbio.jp/dataset/togosite/uniprot>
 FROM <http://rdf.integbio.jp/dataset/togosite/go>
 FROM <http://rdf.integbio.jp/dataset/togosite/chip_atlas>
+FROM <http://rdf.integbio.jp/dataset/togosite/togoid/ensembl_gene-uniprot>
 WHERE {
 {{#if categoryArray}}
   {{#if queryArray}}
   VALUES ?uniprot { {{#each queryArray}} uniprot:{{this}} {{/each}} }
   {{else}}
-  ?uniprot obo:RO_0002428 ?target .
+  ?tf_ensg obo:RO_0002428 ?target .
+  GRAPH <http://rdf.integbio.jp/dataset/togosite/togoid/ensembl_gene-uniprot> {
+    ?tf_ensg obo:RO_0002205 ?uniprot .
+  }
   {{/if}}
   VALUES ?category { {{#each targetGoArray}} obo:{{this}} {{/each}} }
   ?uniprot a up:Protein ;
