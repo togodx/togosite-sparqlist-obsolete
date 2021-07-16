@@ -12,15 +12,20 @@
 ## `primaryIds`
 ```javascript
 async ({togoKey, properties, inputIds})=>{
+
+  const dev_stage = await fetch("http://localhost:3000/togosite_dev/sparqlist/api/dev_stage_check").then(res=>res.text());
+  let apiurl = "http://localhost:3000/togosite/sparqlist/api/";
+  if (dev_stage == "true") apiurl = "http://localhost:3000/togosite_dev/sparqlist/api/";
+
   const fetchReq = async (url, options, body) => {
     if (body) options.body = body;
-    //==== debug code
+    /* //==== debug code
     let res = await fetch(url, options);
     console.log(res.status);
     console.log(url + "?" + body);
     return res.json();
-    //====
-    // return await fetch(url, options).then(res=>res.json());
+    //==== */
+    return await fetch(url, options).then(res=>res.json());
   }
 
   let options = {
@@ -30,12 +35,10 @@ async ({togoKey, properties, inputIds})=>{
       'Content-Type': 'application/x-www-form-urlencoded'
     }
   }
-
+  
   const togositeConfig = "https://raw.githubusercontent.com/dbcls/togosite/develop/config/togosite-human/properties.json";
-  //const sparqlSplitter = "https://integbio.jp/togosite/sparqlist/api/togoid_sparqlist_splitter";
-  //const togoidApi = "https://integbio.jp/togosite/sparqlist/api/togoid_route_sparql";
-  const sparqlSplitter = "http://localhost:3000/togosite/sparqlist/api/togoid_sparqlist_splitter";
-  const togoidApi = "http://localhost:3000/togosite/sparqlist/api/togoid_route_sparql";
+  const sparqlSplitter = apiurl + "togoid_sparqlist_splitter";
+  const togoidApi = apiurl + "togoid_route_sparql";
   const togositeConfigJson = await fetchReq(togositeConfig, {method: "get"});
   const queryProperties = JSON.parse(properties);
   const queryPropertyIds = queryProperties.map(d => d.propertyId);
@@ -44,14 +47,14 @@ async ({togoKey, properties, inputIds})=>{
   const start = Date.now(); // debug
 
   // not filter (togoKey = hgnc, uniprot, pdb, mondo)
-  const togoidNotFilter = "http://localhost:3000/togosite/sparqlist/api/togokey_not_filter";  
+  const togoidNotFilter = apiurl + "togokey_not_filter"; 
   if (queryPropertyIds.length == 0 && (togoKey == "hgnc" || togoKey == "uniprot" || togoKey == "pdb" || togoKey == "mondo")) {
     if (inputIds && JSON.parse(inputIds)[0]) return JSON.parse(inputIds);
     return fetchReq(togoidNotFilter, options, "togoKey=" + togoKey);
   }
   
   const getIdPair = async (configProperty) => {
-     const t1 = Date.now() - start; // debug
+     //const t1 = Date.now() - start; // debug
     
     // get 'primatyKey' ID list by category filtering
     let queryCategoryIds = "";
@@ -61,9 +64,9 @@ async ({togoKey, properties, inputIds})=>{
         break;
       }
     }
-    configProperty.data = configProperty.data.replace("https://integbio.jp/togosite/sparqlist/", "http://localhost:3000/togosite/sparqlist/");
+    configProperty.data = apiurl + configProperty.data.split(/\//).slice(-1)[0]; // replace global URL to localhost
     let primaryIds = await fetchReq(configProperty.data, options, "mode=idList&categoryIds=" + queryCategoryIds);
-    const t2 = Date.now() - start; // debug
+    //const t2 = Date.now() - start; // debug
     
     // get 'primalyKey' ID - togoKey' ID list via togoID API
     let idPair = [];
@@ -78,8 +81,8 @@ async ({togoKey, properties, inputIds})=>{
     } else {
       idPair = primaryIds.map(d => {return {source_id: d, target_id: d} });
     }
-    const t3 = Date.now() - start; // debug
-    console.log(configProperty.propertyId + ": start " + t1 + ",mid " + t2 + ",fin " + t3);
+    //const t3 = Date.now() - start; // debug
+    //console.log(configProperty.propertyId + ": start " + t1 + ",mid " + t2 + ",fin " + t3);
     
     return idPair;
   }
