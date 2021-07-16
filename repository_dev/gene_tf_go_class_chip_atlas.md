@@ -1,4 +1,4 @@
-# ChIP-Atlas の転写因子を GO MF で分類
+# ChIP-Atlas の転写因子を GO MF で分類(池田)
 
 uniprot GO 共有 SPARQLet を流用
 
@@ -120,10 +120,13 @@ SELECT ?category ?label (COUNT (DISTINCT ?uniprot) AS ?count)
 {{/if}}
 FROM <http://rdf.integbio.jp/dataset/togosite/uniprot>
 FROM <http://rdf.integbio.jp/dataset/togosite/go>
+FROM <http://rdf.integbio.jp/dataset/togosite/chip_atlas>
 WHERE {
 {{#if categoryArray}}
   {{#if queryArray}}
   VALUES ?uniprot { {{#each queryArray}} uniprot:{{this}} {{/each}} }
+  {{else}}
+  ?uniprot obo:RO_0002428 ?target .
   {{/if}}
   VALUES ?category { {{#each targetGoArray}} obo:{{this}} {{/each}} }
   ?uniprot a up:Protein ;
