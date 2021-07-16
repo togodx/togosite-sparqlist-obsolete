@@ -3,8 +3,8 @@
 ## Description
 
 - Data sources
-    - Ensembl Human
-- Query
+    - Ensembl human release 102: [http://nov2020.archive.ensembl.org/Homo_sapiens/Info/Index](http://nov2020.archive.ensembl.org/Homo_sapiens/Info/Index)
+- Input/Output
     -  Input
         - Ensembl gene ID
     - Output
@@ -101,7 +101,7 @@ WHERE {
           attribute: {
             categoryId: d.chromosome.value,
             uri: "",
-            label: d.chromosome.value
+            label: "chr" + d.chromosome.value
           }
         };
       });
@@ -113,22 +113,31 @@ WHERE {
       return results.map(d => {
         return {
           categoryId: d.chromosome.value,
-          label: d.chromosome.value,
+          label: chrNameToLabel(d.chromosome.value),
           count: Number(d.count.value)
         };
-      }).sort((a, b) => chrNameToNumber(a.label) < chrNameToNumber(b.label) ? -1 : 1);
+      }).sort((a, b) => chrLabelToNumber(a.label) < chrLabelToNumber(b.label) ? -1 : 1);
   };
-  function chrNameToNumber(chr) {
-    var chrNumber = Number(chr)
+
+  function chrNameToLabel(chr) {
+    if(chr === "MT") {
+      return "chrM";
+    } else {
+      return "chr" + chr;
+    }
+  };
+
+  function chrLabelToNumber(chr) {
+    var chrNumber = Number(chr.replace("chr", ""))
     if(chrNumber){
       return chrNumber;
     } else {
       switch(chr){
-        case "X":
+        case "chrX":
           return 23;
-        case "Y":
+        case "chrY":
           return 24;
-        case "MT":
+        case "chrM":
           return 25;
       }
     }
