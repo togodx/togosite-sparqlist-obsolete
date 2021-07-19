@@ -198,7 +198,7 @@ async ({sparqlet, categoryIds, userIds, userKey, primaryKey, pValueFlag, populat
   // get property data
   let distribution = [];
   let body = "queryIds=" + queryIds;
-  if (categoryIds) body += "&categoryIds= " + categoryIds;
+  if (categoryIds) body += "&categoryIds=" + categoryIds;
   if (queryIds.split(/,/).length <= idLimit) distribution = await fetchReq(sparqlet, body);
   body += "&sparqlet=" + encodeURIComponent(sparqlet) + "&limit=" + idLimit;
   distribution = await fetchReq(sparqlistSplitter, body);
@@ -260,7 +260,7 @@ async ({sparqlet, categoryIds, userIds, userKey, primaryKey, pValueFlag, populat
   
   // category count
   body = false;
-  if (categoryIds) body = "categoryIds= " + categoryIds;
+  if (categoryIds) body = "categoryIds=" + categoryIds;
   let categoryTotal = {};
   let res = await fetchReq(sparqlet, body);
   for (let d of res) {

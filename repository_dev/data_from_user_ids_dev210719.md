@@ -148,14 +148,13 @@ WHERE {
 {{/if}}  
 ```
 
-
 ## `distribution`
 ```javascript
 async ({sparqlet, categoryIds, userIds, userKey, primaryKey, pValueFlag, population})=>{
   const dev_stage = await fetch("http://localhost:3000/togosite_dev/sparqlist/api/dev_stage_check").then(res=>res.text());
   let apiurl = "http://localhost:3000/togosite/sparqlist/api/";
   if (dev_stage == "true") apiurl = "http://localhost:3000/togosite_dev/sparqlist/api/";
-apiurl = "https://integbio.jp/togosite_dev/sparqlist/api/";
+
   const fetchReq = async (url, body) => {
     let options = {	
       method: 'POST',
@@ -198,7 +197,7 @@ apiurl = "https://integbio.jp/togosite_dev/sparqlist/api/";
   // get property data
   let distribution = [];
   let body = "queryIds=" + queryIds;
-  if (categoryIds) body += "&categoryIds= " + categoryIds;
+  if (categoryIds) body += "&categoryIds=" + categoryIds;
   if (queryIds.split(/,/).length <= idLimit) distribution = await fetchReq(sparqlet, body);
   body += "&sparqlet=" + encodeURIComponent(sparqlet) + "&limit=" + idLimit;
   distribution = await fetchReq(sparqlistSplitter, body);
@@ -209,10 +208,9 @@ apiurl = "https://integbio.jp/togosite_dev/sparqlist/api/";
   
   // get unfiltered data
   body = false;
-  if (categoryIds) body = "categoryIds= " + categoryIds;
+  if (categoryIds) body = "categoryIds=" + categoryIds;
   let originalDistribution = await fetchReq(sparqlet, body);
   for (let i = 0; i < originalDistribution.length; i++) {
-    console.log(originalDistribution[i].categoryId);
     let hit_tmp = 0;
     if (hit[originalDistribution[i].categoryId]) hit_tmp = hit[originalDistribution[i].categoryId];
     originalDistribution[i].hit_count = hit_tmp;
