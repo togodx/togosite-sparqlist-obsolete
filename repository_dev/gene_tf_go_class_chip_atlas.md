@@ -114,9 +114,9 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX obo: <http://purl.obolibrary.org/obo/>
 PREFIX uniprot: <http://purl.uniprot.org/uniprot/>
 {{#if mode}}
-SELECT DISTINCT ?uniprot ?category ?label
+SELECT DISTINCT ?tf_ensg ?category ?label
 {{else}}
-SELECT ?category ?label (COUNT (DISTINCT ?uniprot) AS ?count)
+SELECT ?category ?label (COUNT (DISTINCT ?tf_ensg) AS ?count)
 {{/if}}
 FROM <http://rdf.integbio.jp/dataset/togosite/uniprot>
 FROM <http://rdf.integbio.jp/dataset/togosite/go>
