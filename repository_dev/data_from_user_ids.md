@@ -148,7 +148,6 @@ WHERE {
 {{/if}}  
 ```
 
-
 ## `distribution`
 ```javascript
 async ({sparqlet, categoryIds, userIds, userKey, primaryKey, pValueFlag, population})=>{
@@ -202,10 +201,23 @@ async ({sparqlet, categoryIds, userIds, userKey, primaryKey, pValueFlag, populat
   if (queryIds.split(/,/).length <= idLimit) distribution = await fetchReq(sparqlet, body);
   body += "&sparqlet=" + encodeURIComponent(sparqlet) + "&limit=" + idLimit;
   distribution = await fetchReq(sparqlistSplitter, body);
+  let hit = {};
+  for (let d of distribution) {
+    hit[d.categoryId] = Number(d.count);
+  }
+  
+  // get unfiltered data
+  body = false;
+  if (categoryIds) body = "categoryIds=" + categoryIds;
+  let originalDistribution = await fetchReq(sparqlet, body);
+  for (let i = 0; i < originalDistribution.length; i++) {
+    let hit_tmp = 0;
+    if (hit[originalDistribution[i].categoryId]) hit_tmp = hit[originalDistribution[i].categoryId];
+    originalDistribution[i].hit_count = hit_tmp;
+  }
 
   // without p-value
-  console.log(pValueFlag);
-  if (pValueFlag.nonPValue) return distribution;
+  if (pValueFlag.nonPValue) return originalDistribution;
 
   // with pvalue (gene, protein)
   let calcPvalue = (a, b, c, d) => {
@@ -258,21 +270,11 @@ async ({sparqlet, categoryIds, userIds, userKey, primaryKey, pValueFlag, populat
   population = Number(population.results.bindings[0].total_count.value);
   let queries = queryIds.split(/,/).length;
   
-  // category count
-  body = false;
-  if (categoryIds) body = "categoryIds=" + categoryIds;
-  let categoryTotal = {};
-  let res = await fetchReq(sparqlet, body);
-  for (let d of res) {
-    categoryTotal[d.categoryId] = d.count;
+  for (let i = 0; i < originalDistribution.length; i++) {
+    if (originalDistribution[i].git_count == 0) continue;
+    if (originalDistribution[i].hit_count == 1) originalDistribution[i].pValue = 1;
+    else originalDistribution[i].pValue = calcPvalue(originalDistribution[i].hit_count - 1, queries - (originalDistribution[i].hit_count - 1), originalDistribution[i].count - (originalDistribution[i].hit_count - 1), population - originalDistribution[i].count - queries);
   }
-  console.log(res);
-  
-  for (let i = 0; i < distribution.length; i++) {
-    if (distribution[i].count == 1) distribution[i].pValue = 1;
-    else distribution[i].pValue = calcPvalue(distribution[i].count - 1, queries - (distribution[i].count - 1), categoryTotal[distribution[i].categoryId] - (distribution[i].count - 1), population - categoryTotal[distribution[i].categoryId] - queries);
-    distribution[i].total = categoryTotal[res[i].categoryId];
-  }
-  return distribution;
+  return originalDistribution;
 }
 ```
