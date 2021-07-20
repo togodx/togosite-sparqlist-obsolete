@@ -271,8 +271,8 @@ async ({sparqlet, categoryIds, userIds, userKey, primaryKey, pValueFlag, populat
   let queries = queryIds.split(/,/).length;
   
   for (let i = 0; i < originalDistribution.length; i++) {
-    if (originalDistribution[i].count == 0) continue;
-    if (originalDistribution[i].count == 1) originalDistribution[i].pValue = 1;
+    if (originalDistribution[i].git_count == 0) continue;
+    if (originalDistribution[i].hit_count == 1) originalDistribution[i].pValue = 1;
     else originalDistribution[i].pValue = calcPvalue(originalDistribution[i].hit_count - 1, queries - (originalDistribution[i].hit_count - 1), originalDistribution[i].count - (originalDistribution[i].hit_count - 1), population - originalDistribution[i].count - queries);
   }
   return originalDistribution;
