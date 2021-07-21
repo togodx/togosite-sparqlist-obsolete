@@ -23,7 +23,8 @@ WHERE
       ontology:doseLevel ?dose_level
     ]]].
    ?compound  a ontology:ChemicalCompound .
-  filter(LANG(?grade_label) = 'ja')
+  #filter(LANG(?grade_label) = 'ja')
+  filter(LANG(?grade_label) = 'en')
   BIND (concat(STR(?dose_level) , "_", STR(?grade_label)) as ?dose_grade)
 }
 ORDER by desc (?dose_grade)
