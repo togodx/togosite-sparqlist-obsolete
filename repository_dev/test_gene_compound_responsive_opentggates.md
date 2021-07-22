@@ -14,9 +14,9 @@
 ## Parameters
 
 * `categoryIds` (type: Pubchem)
-  * example: 178,1983,5897
+  * example: 178, 1983, 5897
 * `queryIds` (type: Affy)
-  * example: 1552414_at,1552767_a_at,1557712_x_at
+  * example: 1552414_at, 1552767_a_at, 1557712_x_at
 * `mode` 
   * example: idList, objectList
 
@@ -53,7 +53,7 @@ PREFIX dcterms: <http://purl.org/dc/terms/>
 PREFIX sio:     <http://semanticscience.org/resource/>
 PREFIX taxon:   <http://identifiers.org/taxonomy/>
 PREFIX pubchem: <http://identifiers.org/pubchem.compound/>
-PREFIX probe:   <http://purl.jp/bio/101/opentggates/probe/>
+PREFIX probe:   <http://purl.jp/bio/101/opentggates/Probe/>
 
 {{#if mode}}
 SELECT DISTINCT ?compound_label ?pubchem ?gene_symbol ?probe_id
