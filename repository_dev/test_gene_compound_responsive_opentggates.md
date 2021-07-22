@@ -73,8 +73,13 @@ WHERE {
     a tgo:PValue ;
     sio:SIO_000300 ?pvalue ;
     tgo:probe ?probe
+  ] , [
+    a tgo:Log2Ratio ;
+    sio:SIO_000300 ?ratio ;
+    tgo:probe ?probe
   ] .
   FILTER(?pvalue < 0.01) # FDR would be better
+  FILTER(?ratio > 0)
   ?unitset tgo:hasTestSample 
            / tgo:experimentalCondition
            / tgo:exposedCompound ?compound .
