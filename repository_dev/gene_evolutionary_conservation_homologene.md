@@ -1,4 +1,4 @@
-# Evolutionary conservation of human genes（千葉・池田）(mode対応版)
+# ヒト遺伝子が保存されている最も遠縁の生物（千葉・池田）
 
 ## Description
 - Data sources

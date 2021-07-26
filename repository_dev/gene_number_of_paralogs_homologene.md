@@ -1,4 +1,4 @@
-# Number of human genes in each ortholog group（千葉）(mode対応版)
+# Number of human genes in each ortholog group（千葉）
 
 ## Description
 - Data sources
