@@ -54,7 +54,7 @@ https://integbio.jp/togosite/sparql
 
 ```sparql
 PREFIX dc: <http://purl.org/dc/elements/1.1/>
-PREFIX rdfs: <https://www.w3.org/2000/01/rdf-schema#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX pdbo: <https://rdf.wwpdb.org/schema/pdbx-v50.owl#>
 PREFIX pdbr: <https://rdf.wwpdb.org/pdb/>
 

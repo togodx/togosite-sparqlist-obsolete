@@ -48,7 +48,7 @@ https://integbio.jp/togosite/sparql
 
 ## `main`
 ```sparql
-PREFIX rdfs: <https://www.w3.org/2000/01/rdf-schema#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX taxid: <https://identifiers.org/taxonomy/>
 PREFIX pdbo: <https://rdf.wwpdb.org/schema/pdbx-v50.owl#>
 PREFIX pdb: <https://rdf.wwpdb.org/pdb/>
@@ -79,8 +79,8 @@ LIMIT 100
 
 ## `total_count`
 ```sparql
-PREFIX rdfs: <https://www.w3.org/2000/01/rdf-schema#>
-PREFIX taxid: <https://identifiers.org/taxonomy/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX taxid: <http://identifiers.org/taxonomy/>
 PREFIX pdbo: <https://rdf.wwpdb.org/schema/pdbx-v50.owl#>
 PREFIX pdb: <https://rdf.wwpdb.org/pdb/>
 
