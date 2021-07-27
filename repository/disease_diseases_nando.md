@@ -11,14 +11,13 @@
 ## Description
 
 - Data sources
-    - NANDOは日本国内の認定された希少性難病疾患をまとめた語彙集で、厚労省認定の難病疾患と、小児慢性疾患の二つに大きくカテゴライズされている。
-    - Nanbyo Disease Ontology ver0.4.3: http://nanbyodata.jp/ontology/nando
-- Query
-    -  NANDOの階層を辿るクエリー。
-    -  Input
-        - NANDO id
+    - Nanbyo Disease Ontology (NANDO):[http://nanbyodata.jp/ontology/nando](http://nanbyodata.jp/ontology/nando)
+- Input/Output
+     -  Input
+        - NANDO ID
     - Output
         - NANDO category
+- Supplementary information
 
 ## Parameters
 
@@ -62,7 +61,7 @@ https://integbio.jp/togosite/sparql
 - queryIds があった場合に絞り込み
 ```sparql
 
-PREFIX nando: <http://nanbyodata.jp/ontology/nando#>
+PREFIX nando: <http://nanbyodata.jp/ontology/NANDO_>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 
 {{#if mode}}
@@ -104,14 +103,14 @@ WHERE {
   if (mode === "idList") {
     return Array.from(new Set(
       data.results.bindings.map((d) =>
-        d.nando.value.replace("http://nanbyodata.jp/ontology/nando#", "")
+        d.nando.value.replace("http://nanbyodata.jp/ontology/NANDO_", "")
       )
     ));
   } else if (mode === "objectList") {
     return data.results.bindings.map((d) => ({
-      id: d.nando.value.replace("http://nanbyodata.jp/ontology/nando#", ""),
+      id: d.nando.value.replace("http://nanbyodata.jp/ontology/NANDO_", ""),
       attribute: {
-        categoryId: d.category.value.replace("http://nanbyodata.jp/ontology/nando#", ""),
+        categoryId: d.category.value.replace("http://nanbyodata.jp/ontology/NANDO_", ""),
         uri: d.category.value,
       label: d.nando_label.value
       }
@@ -119,7 +118,7 @@ WHERE {
   } else {
     return data.results.bindings.map((d) => ({
       categoryId: d.category.value
-        .replace("http://nanbyodata.jp/ontology/nando#", ""),
+        .replace("http://nanbyodata.jp/ontology/NANDO_", ""),
       label: d.nando_label.value,
       count: Number(d.count.value),
       hasChild: Boolean(d.child)
