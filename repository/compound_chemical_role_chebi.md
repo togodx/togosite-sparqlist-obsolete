@@ -8,7 +8,7 @@
     - Input
         - ChEBI id (number)
     - Output
-        -  [Chemical Role (CHEBI:51086)](https://www.ebi.ac.uk/chebi/searchId.do?chebiId=CHEBI:51086) and its subcategories of Mondo
+        -  [Chemical Role (CHEBI:51086)](https://www.ebi.ac.uk/chebi/searchId.do?chebiId=CHEBI:51086) and its subcategories
 
 ## Parameters
 
@@ -92,8 +92,9 @@ WHERE
     owl:someValuesFrom ?role .
   ?role rdfs:subClassOf* ?chemical_role .
   ?chemical_role rdfs:label ?chemical_role_label .
-
-  ?x rdfs:subClassOf ?chemical_role .
+  optional {
+    ?x rdfs:subClassOf ?chemical_role .
+  }
 }
 {{#unless mode}}
 
