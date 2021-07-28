@@ -1,4 +1,4 @@
-# Genes specifically expressed in tissues (HPA)（小野・池田・千葉）(mode対応版)
+# Genes specifically expressed in tissues (HPA)（小野・池田・千葉）
 This query allows **multiple tissue flags** for each gene.
 
 ## Endpoint
