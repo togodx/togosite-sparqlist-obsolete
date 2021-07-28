@@ -16,7 +16,7 @@ https://integbio.jp/togosite/sparql
 
 ```javascript
 async ({queryIds, categoryIds, mode})=>{
-  let url = "https://integbio.jp/togosite_dev/sparqlist/api/test_gene_expression_level_in_tissues_hpa"; // localhost:port を叩けると早い
+  let url = "https://integbio.jp/togosite_dev/sparqlist/api/gene_expression_level_in_tissues_hpa"; // localhost:port を叩けると早い
   let options = {
     method: 'POST',
     body	: "level=Low&categoryIds=" + categoryIds + "&queryIds=" + encodeURIComponent(queryIds) + "&mode=" + mode,

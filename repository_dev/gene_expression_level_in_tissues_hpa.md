@@ -120,8 +120,8 @@ WHERE {
       label: labelMap.get(elem.tissue.value
                           .replace("http://www.proteinatlas.org/", "http://purl.obolibrary.org/obo/caloha.obo#")),
       count: Number(elem.count.value)
-    })).sort((a, b) => a.count < b.count ? -1 : 1);
-    //})).sort((a, b) => a.label.toLowerCase() < b.label.toLowerCase() ? -1 : 1);
+    })).sort((a, b) => a.label.toLowerCase() < b.label.toLowerCase() ? -1 : 1);
+    //})).sort((a, b) => a.count < b.count ? -1 : 1);
   }
 };
 ```
