@@ -1,5 +1,4 @@
 # Genes highly expressed in tissues (HPA)（小野・池田・千葉）
-This query allows **multiple tissue flags** for each gene.
 
 ## Endpoint
 
