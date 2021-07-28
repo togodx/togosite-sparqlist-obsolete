@@ -121,6 +121,7 @@ WHERE {
       id: elem.ensg.value.replace("http://identifiers.org/ensembl/", ""),
       attribute: {
         categoryId: elem.tf_id.value,
+        uri: "http://identifiers.org/ensembl/" + elem.tf_id.value,
         label: elem.tf_label.value
       }
     }));
