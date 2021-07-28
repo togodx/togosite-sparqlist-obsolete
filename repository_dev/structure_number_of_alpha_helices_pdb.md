@@ -127,7 +127,7 @@ WHERE{
         SELECT DISTINCT ?PDBentry {
           ?PDBentry pdbo:has_entityCategory
                   / pdbo:has_entity
-                  / rdfs:seeAlso <https://identifier.org/taxonomy/9606> .
+                  / rdfs:seeAlso <http://identifiers.org/taxonomy/9606> .
         }
       }
     }
