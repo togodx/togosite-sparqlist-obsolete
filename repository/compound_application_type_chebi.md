@@ -6,10 +6,12 @@
     -  [Chemical Entities of Biological Interest (ChEBI) ](https://www.ebi.ac.uk/chebi/) 
 - Query
     - Input
-        - ChEBI id (number)
+        - ChEBI id (number) for chemical compound(s)
     - Output
-        -  [Application (CHEBI:33232)](https://www.ebi.ac.uk/chebi/searchId.do?chebiId=CHEBI:33232) and its subcategories of Mondo
-
+        -  ChEBI id (number) for application type(s) (subcategories of [Application (CHEBI:33232)](https://www.ebi.ac.uk/chebi/searchId.do?chebiId=CHEBI:33232) ) corresponding to the compound(s)
+- Supplementary Information
+	-  The classification of compounds according to their application, defined in ChEBI ontology.
+	- ChEBI Ontologyに定義された用途による、	化合物の分類です。
 ## Parameters
 
 * `categoryIds` Application（CHEBI:33232）の下位階層のID（数字のみ）またはIDのリスト
@@ -92,8 +94,9 @@ WHERE
     owl:someValuesFrom ?role .
   ?role rdfs:subClassOf* ?application .
   ?application rdfs:label ?application_label .
-
-  ?x rdfs:subClassOf ?application.
+  optional{
+  	?x rdfs:subClassOf ?application.
+  }
 }
 {{#unless mode}}
 
