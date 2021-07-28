@@ -65,6 +65,7 @@ WHERE {
 ```
 
 ## `tissueLabel`
+ラベル取得も一つの SPARQL で行おうとするとなぜか遅いので分割した
 ```sparql
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX tissue: <http://purl.obolibrary.org/obo/caloha.obo#>
@@ -80,9 +81,10 @@ WHERE {
 ## `labelMap`
 ```javascript
 ({tissueLabel}) => {
-  var labelMap = tissueLabel.result.bindings.map((elem) => ([
-    elem.tissue.value, elem.label.value
-  ]));
+  var m = new Map(tissueLabel.results.bindings.map((elem) => ([ elem.tissue.value, elem.label.value ])));
+  return m;
+  //return new Map(tissueLabel.results.bindings.map((elem) => ([ elem.tissue.value, elem.label.value ])));
+  //return tissueLabel.results.bindings.map((elem) => ([ elem.tissue.value, elem.label.value ]));
 }
 
 ```
@@ -90,7 +92,7 @@ WHERE {
 ## `return`
 
 ```javascript
-({ main, mode }) => {
+({ main, mode, labelMap }) => {
   if (mode === "idList") {
     return Array.from(new Set(
       main.results.bindings.map((elem) =>
@@ -102,16 +104,18 @@ WHERE {
       id: elem.ensg.value.replace("http://identifiers.org/ensembl/", ""),
       attribute: {
         categoryId: elem.tissue.value
-          .replace("http://purl.obolibrary.org/obo/caloha.obo#", ""),
+          .replace("http://www.proteinatlas.org/", ""),
         uri: elem.tissue.value,
-        label: elem.label.value
+        label: labelMap.get(elem.tissue.value
+                            .replace("http://www.proteinatlas.org/", "http://purl.obolibrary.org/obo/caloha.obo#"))
       }
     }));
   } else {
     return main.results.bindings.map((elem) => ({
       categoryId: elem.tissue.value
-        .replace("http://purl.obolibrary.org/obo/caloha.obo#", ""),
-      label: elem.label.value,
+        .replace("http://www.proteinatlas.org/", ""),
+      label: labelMap.get(elem.tissue.value
+                          .replace("http://www.proteinatlas.org/", "http://purl.obolibrary.org/obo/caloha.obo#")),
       count: Number(elem.count.value)
     })).sort((a, b) => a.label.toLowerCase() < b.label.toLowerCase() ? -1 : 1);
   }
