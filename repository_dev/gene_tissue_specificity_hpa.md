@@ -1,4 +1,4 @@
-# Genes expressed in tissues (HPA)（小野・池田・千葉）(mode対応版)
+# Genes specifically expressed in tissues (HPA)（小野・池田・千葉）(mode対応版)
 This query allows **multiple tissue flags** for each gene.
 
 ## Endpoint
@@ -29,15 +29,6 @@ https://integbio.jp/togosite/sparql
   categoryIds = categoryIds.replace(/,/g, " ");
   if (categoryIds.match(/\S/)) {
     return categoryIds.split(/\s+/);
-  }
-};
-```
-
-## `input_tissues_uberon`
-```javascript
-({ input_tissues }) => {
-  if (input_tissues) {
-    return input_tissues.filter((x) => x.match(/^UBERON/));
   }
 };
 ```
@@ -88,36 +79,16 @@ WHERE {
         categoryId: elem.tissue.value
           .replace("http://purl.obolibrary.org/obo/caloha.obo#", ""),
         uri: elem.tissue.value,
-        label: modifyLabel(elem.label.value)
+        label: elem.label.value
       }
     }));
   } else {
     return main.results.bindings.map((elem) => ({
       categoryId: elem.tissue.value
         .replace("http://purl.obolibrary.org/obo/caloha.obo#", ""),
-      label: modifyLabel(elem.label.value),
+      label: elem.label.value,
       count: Number(elem.count.value)
     })).sort((a, b) => a.label.toLowerCase() < b.label.toLowerCase() ? -1 : 1);
-  }
-
-  function modifyLabel(label) {
-    const map = new Map([
-      ["breast epithelium", "breast"],
-      ["right lobe of liver", "liver"],
-      ["upper lobe of left lung", "lung"],
-      ["anterior lingual gland", "minor salivary gland"],
-      ["gastrocnemius medialis", "skeletal muscle"],
-      ["body of pancreas", "pancreas"],
-      ["Peyer's patch", "small intestine"],
-      ["venous blood", "blood"],
-      ["skin of body", "skin"],
-    ]);
-
-    if (map.has(label)) {
-      return map.get(label);
-    } else {
-      return label;
-    }
   }
 };
 ```
