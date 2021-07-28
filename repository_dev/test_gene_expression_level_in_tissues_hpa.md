@@ -12,8 +12,9 @@ https://integbio.jp/togosite/sparql
   * example: ENSG00000000005,ENSG00000002587,ENSG00000003989
 * `mode`
   * example: idList, objectList
-* `level`
+* `level` (required)
   * example: Not_detected, Low, Medium, High
+  * default: High
 
 ## `input_genes`
 ```javascript
@@ -47,10 +48,20 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 PREFIX wp: <http://vocabularies.wikipathways.org/wp#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 
+{{#if mode}}
+SELECT DISTINCT ?tissue ?gene
+{{else}}
 SELECT DISTINCT ?tissue (COUNT(DISTINCT ?gene) as ?count)
+{{/if}}
 FROM <http://rdf.integbio.jp/dataset/togosite/protein-atlas>
 FROM <http://rdf.integbio.jp/dataset/togosite/caloha>
 WHERE {
+  {{#if input_genes}}
+  VALUES ?gene { {{#each input_genes}} hpa:{{this}} {{/each}} }
+  {{/if}}
+  {{#if input_tissues}}
+  VALUES ?tissue { {{#each input_tissues}} hpa:{{this}} {{/each}}  }
+  {{/if}}
   ?gene a wp:GeneProduct .
   GRAPH ?g {
     ?gene obo:BFO_0000066 ?tissue ; # Occurs in
@@ -88,12 +99,12 @@ WHERE {
   if (mode === "idList") {
     return Array.from(new Set(
       main.results.bindings.map((elem) =>
-        elem.ensg.value.replace("http://identifiers.org/ensembl/", "")
+        elem.gene.value.replace("http://www.proteinatlas.org/", "")
       )
     ));
   } else if (mode === "objectList") {
     return main.results.bindings.map((elem) => ({
-      id: elem.ensg.value.replace("http://identifiers.org/ensembl/", ""),
+      id: elem.gene.value.replace("http://www.proteinatlas.org/", ""),
       attribute: {
         categoryId: elem.tissue.value
           .replace("http://www.proteinatlas.org/", ""),
@@ -109,7 +120,8 @@ WHERE {
       label: labelMap.get(elem.tissue.value
                           .replace("http://www.proteinatlas.org/", "http://purl.obolibrary.org/obo/caloha.obo#")),
       count: Number(elem.count.value)
-    })).sort((a, b) => a.label.toLowerCase() < b.label.toLowerCase() ? -1 : 1);
+    })).sort((a, b) => a.count < b.count ? -1 : 1);
+    //})).sort((a, b) => a.label.toLowerCase() < b.label.toLowerCase() ? -1 : 1);
   }
 };
 ```
