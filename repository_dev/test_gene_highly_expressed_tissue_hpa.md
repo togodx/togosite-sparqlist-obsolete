@@ -77,6 +77,16 @@ WHERE {
 } ORDER BY ?label
 ```
 
+## `labelMap`
+```javascript
+({tissueLabel}) => {
+  var labelMap = tissueLabel.result.bindings.map((elem) => ([
+    elem.tissue.value, elem.label.value
+  ]));
+}
+
+```
+
 ## `return`
 
 ```javascript
