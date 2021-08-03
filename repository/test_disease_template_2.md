@@ -68,7 +68,7 @@ PREFIX hp: <http://identifiers.org/HP/>
 PREFIX mesh: <http://id.nlm.nih.gov/mesh/>
 PREFIX meshv: <http://id.nlm.nih.gov/mesh/vocab#>
 PREFIX mondo: <http://purl.obolibrary.org/obo/MONDO_>
-PREFIX nando: <http://nanbyodata.jp/ontology/nando#>
+PREFIX nando: <http://nanbyodata.jp/ontology/NANDO_>
 PREFIX obo: <http://purl.obolibrary.org/obo/>
 PREFIX oboinowl: <http://www.geneontology.org/formats/oboInOwl#>
 PREFIX owl: <http://www.w3.org/2002/07/owl#>
@@ -151,7 +151,7 @@ WHERE {
                     (GROUP_CONCAT(?nando_mondo_s, ",") AS ?nando_mondo)
                     
     WHERE { 
-     VALUES ?nando { <http://nanbyodata.jp/ontology/nando#{{idDict.nando}}> }
+     VALUES ?nando { <http://nanbyodata.jp/ontology/NANDO_{{idDict.nando}}> }
      GRAPH <http://rdf.integbio.jp/dataset/togosite/nando> {
       ?nando dcterms:identifier ?nando_id;
              rdfs:label ?nando_label.
