@@ -69,9 +69,8 @@ SELECT DISTINCT ?category ?label (COUNT (DISTINCT ?uniprot) AS ?count) (SAMPLE(?
 {{/if}}
 FROM <http://rdf.integbio.jp/dataset/togosite/reactome>
 WHERE {
-  VALUES ?reaction_type { biopax:BiochemicalReaction biopax:TemplateReaction biopax:Degradation }
-  VALUES ?child_type { biopax:Pathway biopax:BiochemicalReaction biopax:TemplateReaction biopax:Degradation }
-  VALUES ?has_component { biopax:left biopax:right biopax:product }
+  VALUES ?control_type { biopax:Catalysis biopax:Control }
+  VALUES ?child_type { biopax:Pathway biopax:BiochemicalReaction }
 {{#if queryArray}}
   VALUES ?uniprot { {{#each queryArray}} "{{this}}"^^xsd:string {{/each}} }
 {{/if}}
@@ -91,9 +90,11 @@ WHERE {
           biopax:db "Reactome"^^xsd:string ;
           biopax:id ?category ;
         ] ;
-        biopax:pathwayComponent* ?react .
-  ?react a ?reaction_type ;
-         ?has_component ?component .
+        biopax:pathwayComponent* ?reaction .
+  ?reaction a biopax:BiochemicalReaction .
+  ?control biopax:controlled ?reaction ;
+           a ?control_type ;
+           biopax:controller ?component .
   ?component biopax:component*/biopax:entityReference/biopax:xref [
     biopax:db "UniProt"^^xsd:string ;
     biopax:id ?uniprot
