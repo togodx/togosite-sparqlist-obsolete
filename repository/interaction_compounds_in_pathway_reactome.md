@@ -1,7 +1,10 @@
-# uniprot reactome pathway（守屋）
+# chembl reactome pathway（守屋）
 
 - ChEBML の Reactome パスウェイの内訳
-
+ - 産物と制御
+   - reaction ^biopax:controlled/biopax:controller control-component
+   - reaction biopax:left|biopax:right|biopax:product product-component
+   
 ## Description
 
 - Data sources
@@ -71,9 +74,7 @@ SELECT DISTINCT ?category ?label (COUNT (DISTINCT ?chebi) AS ?count) (SAMPLE(?ch
 {{/if}}
 FROM <http://rdf.integbio.jp/dataset/togosite/reactome>
 WHERE {
-  VALUES ?reaction_type { biopax:BiochemicalReaction biopax:TemplateReaction biopax:Degradation }
-  VALUES ?child_type { biopax:Pathway biopax:BiochemicalReaction biopax:TemplateReaction biopax:Degradation }
-  VALUES ?has_component { biopax:left biopax:right biopax:product }
+  VALUES ?child_path_type { biopax:Pathway biopax:BiochemicalReaction }
 {{#if queryArray}}
   VALUES ?chebi { {{#each queryArray}} "CHEBI:{{this}}"^^xsd:string {{/each}} }
 {{/if}}
@@ -87,22 +88,22 @@ WHERE {
 {{else}}
   VALUES ?category { {{#each rootArray}} "{{this}}"^^xsd:string {{/each}} }
 {{/if}}
-  ?target_path a ?child_type ;
+  ?target_path a ?child_path_type ;
         biopax:displayName ?label ;
         biopax:xref [
           biopax:db "Reactome"^^xsd:string ;
           biopax:id ?category ;
         ] ;
-        biopax:pathwayComponent* ?react .
-  ?react a ?reaction_type ;
-         ?has_component ?component .
+        biopax:pathwayComponent* ?reaction .
+  ?reaction a biopax:BiochemicalReaction .
+  ?reaction biopax:left|biopax:right|biopax:product|^biopax:controlled/biopax:controller ?component .
   ?component biopax:component*/biopax:entityReference/biopax:xref [
     biopax:db "ChEBI"^^xsd:string ;
     biopax:id ?chebi
   ] .
   OPTIONAL {
     ?target_path biopax:pathwayComponent ?child_path .
-    ?child_path a ?child_type .
+    ?child_path a ?child_path_type .
   }
 }
 {{#unless mode}}
