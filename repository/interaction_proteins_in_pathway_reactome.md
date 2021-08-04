@@ -1,6 +1,8 @@
 # uniprot reactome pathway（守屋）
      - UniProt の Reactome パスウェイの内訳
-     - すでに最下層で、下層が無い場合は空配列を返す
+     - 産物と制御
+       - reaction ^biopax:controlled/biopax:controller control-component
+       - reaction biopax:left|biopax:right|biopax:product product-component
      
 ## Description
 
@@ -69,9 +71,7 @@ SELECT DISTINCT ?category ?label (COUNT (DISTINCT ?uniprot) AS ?count) (SAMPLE(?
 {{/if}}
 FROM <http://rdf.integbio.jp/dataset/togosite/reactome>
 WHERE {
-  VALUES ?reaction_type { biopax:BiochemicalReaction biopax:TemplateReaction biopax:Degradation }
-  VALUES ?child_type { biopax:Pathway biopax:BiochemicalReaction biopax:TemplateReaction biopax:Degradation }
-  VALUES ?has_component { biopax:left biopax:right biopax:product }
+  VALUES ?child_path_type { biopax:Pathway biopax:BiochemicalReaction }
 {{#if queryArray}}
   VALUES ?uniprot { {{#each queryArray}} "{{this}}"^^xsd:string {{/each}} }
 {{/if}}
@@ -91,16 +91,16 @@ WHERE {
           biopax:db "Reactome"^^xsd:string ;
           biopax:id ?category ;
         ] ;
-        biopax:pathwayComponent* ?react .
-  ?react a ?reaction_type ;
-         ?has_component ?component .
+        biopax:pathwayComponent* ?reaction .
+  ?reaction a biopax:BiochemicalReaction .
+  ?reaction biopax:left|biopax:right|biopax:product|^biopax:controlled/biopax:controller ?component .
   ?component biopax:component*/biopax:entityReference/biopax:xref [
     biopax:db "UniProt"^^xsd:string ;
     biopax:id ?uniprot
   ] .
   OPTIONAL {
     ?target_path biopax:pathwayComponent ?child_path .
-    ?child_path a ?child_type .
+    ?child_path a ?child_path_type .
   }
 }
 {{#unless mode}}
