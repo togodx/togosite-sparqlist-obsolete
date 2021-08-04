@@ -88,7 +88,7 @@ WHERE {
 {{else}}
   VALUES ?category { {{#each rootArray}} "{{this}}"^^xsd:string {{/each}} }
 {{/if}}
-  ?target_path a ?child_type ;
+  ?target_path a ?child_path_type ;
         biopax:displayName ?label ;
         biopax:xref [
           biopax:db "Reactome"^^xsd:string ;
