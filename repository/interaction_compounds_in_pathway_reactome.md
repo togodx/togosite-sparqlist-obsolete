@@ -1,6 +1,6 @@
-# chembl reactome pathway（守屋）
+# chebi reactome pathway（守屋）
 
-- ChEBML の Reactome パスウェイの内訳
+- ChEBI の Reactome パスウェイの内訳
  - 産物と制御
    - reaction ^biopax:controlled/biopax:controller control-component
    - reaction biopax:left|biopax:right|biopax:product product-component
