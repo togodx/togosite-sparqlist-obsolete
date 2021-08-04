@@ -94,10 +94,22 @@ WHERE {
         biopax:pathwayComponent* ?reaction .
   ?reaction a biopax:BiochemicalReaction .
   ?reaction biopax:left|biopax:right|biopax:product|^biopax:controlled/biopax:controller ?component .
-  ?component biopax:component*/biopax:entityReference/biopax:xref [
-    biopax:db "UniProt"^^xsd:string ;
-    biopax:id ?uniprot
-  ] .
+  # virtuoso bug ?
+  #?component biopax:memberPhysicalEntity*/biopax:component*/biopax:entityReference/biopax:xref [
+  #  biopax:db "UniProt"^^xsd:string ;
+  #  biopax:id ?uniprot
+  #] .
+  {
+    ?component biopax:component*/biopax:entityReference/biopax:xref [
+      biopax:db "UniProt"^^xsd:string ;
+      biopax:id ?uniprot
+    ] .
+  } UNION {
+    ?component biopax:memberPhysicalEntity/biopax:component*/biopax:entityReference/biopax:xref [
+      biopax:db "UniProt"^^xsd:string ;
+      biopax:id ?uniprot
+    ] .
+  }
   OPTIONAL {
     ?target_path biopax:pathwayComponent ?child_path .
     ?child_path a ?child_path_type .

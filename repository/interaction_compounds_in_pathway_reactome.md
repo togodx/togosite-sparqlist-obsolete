@@ -1,6 +1,6 @@
-# chembl reactome pathway（守屋）
+# chebi reactome pathway（守屋）
 
-- ChEBML の Reactome パスウェイの内訳
+- ChEBI の Reactome パスウェイの内訳
  - 産物と制御
    - reaction ^biopax:controlled/biopax:controller control-component
    - reaction biopax:left|biopax:right|biopax:product product-component
@@ -97,10 +97,22 @@ WHERE {
         biopax:pathwayComponent* ?reaction .
   ?reaction a biopax:BiochemicalReaction .
   ?reaction biopax:left|biopax:right|biopax:product|^biopax:controlled/biopax:controller ?component .
-  ?component biopax:component*/biopax:entityReference/biopax:xref [
-    biopax:db "ChEBI"^^xsd:string ;
-    biopax:id ?chebi
-  ] .
+  # virtuoso bug?
+  #?component biopax:memberPhysicalEntity*/biopax:component*/biopax:entityReference/biopax:xref [
+  #  biopax:db "ChEBI"^^xsd:string ;
+  #  biopax:id ?chebi
+  #] .
+  {
+    ?component biopax:component*/biopax:entityReference/biopax:xref [
+      biopax:db "ChEBI"^^xsd:string ;
+      biopax:id ?chebi
+    ] .
+  } UNION {
+    ?component biopax:memberPhysicalEntity/biopax:component*/biopax:entityReference/biopax:xref [
+      biopax:db "ChEBI"^^xsd:string ;
+      biopax:id ?chebi
+    ] .
+  }
   OPTIONAL {
     ?target_path biopax:pathwayComponent ?child_path .
     ?child_path a ?child_path_type .
