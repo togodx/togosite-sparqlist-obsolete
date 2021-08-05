@@ -1,10 +1,5 @@
-# chebi reactome pathway（守屋）
+# ChEBI IDs in Reactome pathway（守屋）
 
-- ChEBI の Reactome パスウェイの内訳
- - 産物と制御
-   - reaction ^biopax:controlled/biopax:controller control-component
-   - reaction biopax:left|biopax:right|biopax:product product-component
-   
 ## Description
 
 - Data sources
@@ -18,8 +13,6 @@
         - The number of ChEBI entries included in each pathways in Reactome
         - If a ChEBI id is entered, it returns the pathway to which the chemical compound belongs
 
-
-
 ## Parameters
 
 * `categoryIds` (type: reactome)
@@ -30,7 +23,6 @@
   * example: idList, objectList
 
 ## `queryArray`
-- Query UniProt ID を配列に
 ```javascript
 ({queryIds}) => {
   queryIds = queryIds.replace(/,/g," ")
@@ -40,7 +32,6 @@
 ```
 
 ## `categoryArray`
-- UniProt keyword ID を配列に
 ```javascript
 ({categoryIds})=>{
   categoryIds = categoryIds.replace(/,/g, " ");
@@ -62,8 +53,9 @@ https://integbio.jp/togosite/sparql
 
 ## `data`
 - メイン SPARQL
-  - 内訳返す場合と遺伝子リスト返す場合を handlebars で条件分岐
-  - パスウェイ、ChEMBLリストでのフィルタリング
+  - 産物と制御
+    - 制御: reaction ^biopax:controlled/biopax:controller control-component
+    - 産物: reaction biopax:left|biopax:right|biopax:product product-component
 ```sparql
 PREFIX biopax: <http://www.biopax.org/release/biopax-level3.owl#>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
@@ -97,22 +89,10 @@ WHERE {
         biopax:pathwayComponent* ?reaction .
   ?reaction a biopax:BiochemicalReaction .
   ?reaction biopax:left|biopax:right|biopax:product|^biopax:controlled/biopax:controller ?component .
-  # virtuoso bug?
-  #?component biopax:memberPhysicalEntity*/biopax:component*/biopax:entityReference/biopax:xref [
-  #  biopax:db "ChEBI"^^xsd:string ;
-  #  biopax:id ?chebi
-  #] .
-  {
-    ?component biopax:component*/biopax:entityReference/biopax:xref [
-      biopax:db "ChEBI"^^xsd:string ;
-      biopax:id ?chebi
-    ] .
-  } UNION {
-    ?component biopax:memberPhysicalEntity/biopax:component*/biopax:entityReference/biopax:xref [
-      biopax:db "ChEBI"^^xsd:string ;
-      biopax:id ?chebi
-    ] .
-  }
+  ?component (biopax:memberPhysicalEntity|biopax:component)*/biopax:entityReference/biopax:xref [
+    biopax:db "ChEBI"^^xsd:string ;
+    biopax:id ?chebi
+  ] .
   OPTIONAL {
     ?target_path biopax:pathwayComponent ?child_path .
     ?child_path a ?child_path_type .
