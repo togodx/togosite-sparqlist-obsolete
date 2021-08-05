@@ -1,9 +1,5 @@
-# uniprot reactome pathway（守屋）
-     - UniProt の Reactome パスウェイの内訳
-     - 産物と制御
-       - reaction ^biopax:controlled/biopax:controller control-component
-       - reaction biopax:left|biopax:right|biopax:product product-component
-     
+# UniProt IDs in Reactome pathway（守屋）
+
 ## Description
 
 - Data sources
@@ -27,7 +23,6 @@
   * example: idList, objectList
 
 ## `queryArray`
-- Query UniProt ID を配列に
 ```javascript
 ({queryIds}) => {
   queryIds = queryIds.replace(/,/g," ")
@@ -37,7 +32,6 @@
 ```
 
 ## `categoryArray`
-- UniProt keyword ID を配列に
 ```javascript
 ({categoryIds})=>{
   categoryIds = categoryIds.replace(/,/g, " ");
@@ -59,8 +53,9 @@ https://integbio.jp/togosite/sparql
 
 ## `data`
 - メイン SPARQL
-  - 内訳返す場合と遺伝子リスト返す場合を handlebars で条件分岐
-  - パスウェイ、タンパク質リストでのフィルタリング
+  - 産物と制御
+    - 制御: reaction ^biopax:controlled/biopax:controller control-component
+    - 産物: reaction biopax:left|biopax:right|biopax:product product-component
 ```sparql
 PREFIX biopax: <http://www.biopax.org/release/biopax-level3.owl#>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
@@ -94,7 +89,7 @@ WHERE {
         biopax:pathwayComponent* ?reaction .
   ?reaction a biopax:BiochemicalReaction .
   ?reaction biopax:left|biopax:right|biopax:product|^biopax:controlled/biopax:controller ?component .
-  ?component biopax:component*/biopax:entityReference/biopax:xref [
+  ?component (biopax:memberPhysicalEntity|biopax:component)*/biopax:entityReference/biopax:xref [
     biopax:db "UniProt"^^xsd:string ;
     biopax:id ?uniprot
   ] .
