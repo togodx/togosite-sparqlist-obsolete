@@ -1,9 +1,8 @@
 # chebi reactome pathway（守屋）
 
-- ChEBI の Reactome パスウェイの内訳
- - 産物と制御
-   - reaction ^biopax:controlled/biopax:controller control-component
-   - reaction biopax:left|biopax:right|biopax:product product-component
+- 産物と制御
+  - reaction ^biopax:controlled/biopax:controller control-component
+  - reaction biopax:left|biopax:right|biopax:product product-component
    
 ## Description
 
@@ -30,7 +29,6 @@
   * example: idList, objectList
 
 ## `queryArray`
-- Query UniProt ID を配列に
 ```javascript
 ({queryIds}) => {
   queryIds = queryIds.replace(/,/g," ")
@@ -40,7 +38,6 @@
 ```
 
 ## `categoryArray`
-- UniProt keyword ID を配列に
 ```javascript
 ({categoryIds})=>{
   categoryIds = categoryIds.replace(/,/g, " ");
@@ -62,8 +59,6 @@ https://integbio.jp/togosite/sparql
 
 ## `data`
 - メイン SPARQL
-  - 内訳返す場合と遺伝子リスト返す場合を handlebars で条件分岐
-  - パスウェイ、ChEMBLリストでのフィルタリング
 ```sparql
 PREFIX biopax: <http://www.biopax.org/release/biopax-level3.owl#>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
