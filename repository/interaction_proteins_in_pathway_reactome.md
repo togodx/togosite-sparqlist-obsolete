@@ -1,8 +1,5 @@
-# uniprot reactome pathway（守屋）
-     - 産物と制御
-       - reaction ^biopax:controlled/biopax:controller control-component
-       - reaction biopax:left|biopax:right|biopax:product product-component
-     
+# UniProt IDs in Reactome pathway（守屋）
+
 ## Description
 
 - Data sources
@@ -56,6 +53,9 @@ https://integbio.jp/togosite/sparql
 
 ## `data`
 - メイン SPARQL
+  - 産物と制御
+    - 制御: reaction ^biopax:controlled/biopax:controller control-component
+    - 産物: reaction biopax:left|biopax:right|biopax:product product-component
 ```sparql
 PREFIX biopax: <http://www.biopax.org/release/biopax-level3.owl#>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
