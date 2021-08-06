@@ -224,7 +224,12 @@ async ({sparqlet, categoryIds, userIds, userKey, primaryKey, pValueFlag, populat
     // console.log([a,b,c,d].join(","));
     if (a < 0 || b < 0 || c < 0 || d < 0) return false;
     if (a > maxLimit || b > maxLimit || c > maxLimit || d > maxLimit) return false;
-    
+    if (a > d) {
+      let tmp = a;
+      a = d;
+      d = tmp;
+    }
+ 
     let sigDigi = (num, exp) => {
       while (num > 10) {
         num /= 10;
