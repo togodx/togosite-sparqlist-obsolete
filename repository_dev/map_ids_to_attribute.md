@@ -151,10 +151,6 @@ WHERE {
 ## `distribution`
 ```javascript
 async ({sparqlet, categoryIds, userIds, userKey, primaryKey, pValueFlag, population})=>{
-  const dev_stage = await fetch("http://localhost:3000/togosite_dev/sparqlist/api/dev_stage_check").then(res=>res.text());
-  let apiurl = "http://localhost:3000/togosite/sparqlist/api/";
-  if (dev_stage == "true") apiurl = "http://localhost:3000/togosite_dev/sparqlist/api/";
-
   const fetchReq = async (url, body) => {
     let options = {	
       method: 'POST',
@@ -169,12 +165,12 @@ async ({sparqlet, categoryIds, userIds, userKey, primaryKey, pValueFlag, populat
     return await fetch(url, options).then(res=>res.json());
   }
 
-  const togoidSparqlistSplitter = apiurl + "togoid_sparqlist_splitter";  
-  const sparqlistSplitter = apiurl + "sparqlist_splitter";
-  const togoidApi = apiurl + "togoid_route_sparql";
+  const togoidSparqlistSplitter = "togoid_sparqlist_splitter"; // nested SPARQLet relative path
+  const sparqlistSplitter = "sparqlist_splitter"; // nested SPARQLet relative path
+  const togoidApi = "togoid_route_sparql"; // nested SPARQLet relative path
   let idLimit = 2000; // split 判定
   if (primaryKey == "chembl_compound") idLimit = 500; // restrict POST response size
-  sparqlet = apiurl + sparqlet.split(/\//).slice(-1)[0]; // replace global URL to localhost
+  sparqlet = sparqlet.split(/\//).slice(-1)[0];  // nested SPARQLet relative path
 
   // convert user IDs to primary IDs for SPARQLet
   let queryIds = "";
