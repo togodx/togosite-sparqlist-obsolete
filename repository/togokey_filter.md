@@ -5,7 +5,7 @@
 * `togoKey`
   * default: hgnc
 * `properties`
-  * default: [{"propertyId": "refex_specific_high_expression", "categoryIds": ["v32_40", "v25_40"]}, {"propertyId": "uniprot_keywords_cellular_component","categoryIds": ["GO_0005886"]}, {"propertyId": "uniprot_pdb_existence", "categoryIds": ["1"]}, {"propertyId": "uniprot_chembl_assay_existence", "categoryIds": ["1"]}]
+  * default: [{"propertyId": "gene_high_level_expression_refex", "categoryIds": ["v32_40", "v25_40"]}, {"propertyId": "protein_cellular_component_uniprot","categoryIds": ["GO_0005886"]}, {"propertyId": "structure_data_existence_uniprot", "categoryIds": ["1"]}, {"propertyId": "interaction_chembl_assay_existence_uniprot", "categoryIds": ["1"]}]
 * `inputIds` Uploaded user IDs
   * example: ["1193","13940","13557","15586","16605","4942","5344","6148", "6265","6344","6677","6735","10593","10718","10876"]
   
@@ -14,13 +14,13 @@
 async ({togoKey, properties, inputIds})=>{
   const fetchReq = async (url, options, body) => {
     if (body) options.body = body;
-    //==== debug code
+    /* //==== debug code
     let res = await fetch(url, options);
     console.log(res.status);
     console.log(url + "?" + body);
     return res.json();
-    //====
-    // return await fetch(url, options).then(res=>res.json());
+    //==== */
+    return await fetch(url, options).then(res=>res.json());
   }
 
   let options = {
@@ -30,12 +30,10 @@ async ({togoKey, properties, inputIds})=>{
       'Content-Type': 'application/x-www-form-urlencoded'
     }
   }
-
+  
   const togositeConfig = "https://raw.githubusercontent.com/dbcls/togosite/develop/config/togosite-human/properties.json";
-  //const sparqlSplitter = "https://integbio.jp/togosite/sparqlist/api/togoid_sparqlist_splitter";
-  //const togoidApi = "https://integbio.jp/togosite/sparqlist/api/togoid_route_sparql";
-  const sparqlSplitter = "http://localhost:3000/togosite/sparqlist/api/togoid_sparqlist_splitter";
-  const togoidApi = "http://localhost:3000/togosite/sparqlist/api/togoid_route_sparql";
+  const sparqlSplitter = "togoid_sparqlist_splitter";  // nested SPARQLet relative path
+  const togoidApi = "togoid_route_sparql";  // nested SPARQLet relative path
   const togositeConfigJson = await fetchReq(togositeConfig, {method: "get"});
   const queryProperties = JSON.parse(properties);
   const queryPropertyIds = queryProperties.map(d => d.propertyId);
@@ -44,14 +42,14 @@ async ({togoKey, properties, inputIds})=>{
   const start = Date.now(); // debug
 
   // not filter (togoKey = hgnc, uniprot, pdb, mondo)
-  const togoidNotFilter = "http://localhost:3000/togosite/sparqlist/api/togokey_not_filter";  
+  const togoidNotFilter = "togokey_not_filter"; // nested SPARQLet relative path
   if (queryPropertyIds.length == 0 && (togoKey == "hgnc" || togoKey == "uniprot" || togoKey == "pdb" || togoKey == "mondo")) {
     if (inputIds && JSON.parse(inputIds)[0]) return JSON.parse(inputIds);
     return fetchReq(togoidNotFilter, options, "togoKey=" + togoKey);
   }
   
   const getIdPair = async (configProperty) => {
-     const t1 = Date.now() - start; // debug
+     //const t1 = Date.now() - start; // debug
     
     // get 'primatyKey' ID list by category filtering
     let queryCategoryIds = "";
@@ -61,9 +59,9 @@ async ({togoKey, properties, inputIds})=>{
         break;
       }
     }
-    configProperty.data = configProperty.data.replace("https://integbio.jp/togosite/sparqlist/", "http://localhost:3000/togosite/sparqlist/");
+    configProperty.data = configProperty.data.split(/\//).slice(-1)[0];  // nested SPARQLet relative path
     let primaryIds = await fetchReq(configProperty.data, options, "mode=idList&categoryIds=" + queryCategoryIds);
-    const t2 = Date.now() - start; // debug
+    //const t2 = Date.now() - start; // debug
     
     // get 'primalyKey' ID - togoKey' ID list via togoID API
     let idPair = [];
@@ -78,8 +76,8 @@ async ({togoKey, properties, inputIds})=>{
     } else {
       idPair = primaryIds.map(d => {return {source_id: d, target_id: d} });
     }
-    const t3 = Date.now() - start; // debug
-    console.log(configProperty.propertyId + ": start " + t1 + ",mid " + t2 + ",fin " + t3);
+    //const t3 = Date.now() - start; // debug
+    //console.log(configProperty.propertyId + ": start " + t1 + ",mid " + t2 + ",fin " + t3);
     
     return idPair;
   }

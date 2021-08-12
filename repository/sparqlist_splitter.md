@@ -8,7 +8,7 @@
 ## Parameters
 
 * `sparqlet`
-  * example: https://integbio.jp/togosite/sparqlist/api/uniprot_keywords
+  * example: uniprot_keywords (SPARQLet name (= relative path))
 * `categoryIds`
   * example: 9992
 * `queryIds`
@@ -35,7 +35,7 @@ async ({sparqlet, queryIds, categoryIds, mode, limit})=>{
     return await fetch(url, options).then(res=>res.json());
   }
   
-  sparqlet = sparqlet.replace("https://integbio.jp/togosite/sparqlist/", "http://localhost:3000/togosite/sparqlist/");
+  sparqlet = sparqlet.split(/\//).slice(-1)[0]; // nested SPARQLet relative path (full path to relative path)
   queryIds = queryIds.replace(/,/g, " ");
   if (queryIds.match(/[^\s]/)) {
     limit = Number(limit);

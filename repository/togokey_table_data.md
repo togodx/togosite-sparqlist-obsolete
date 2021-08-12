@@ -5,7 +5,7 @@
 * `togoKey`
   * default: hgnc
 * `properties`
-  * default: [{"propertyId": "refex_specific_high_expression", "categoryIds": ["v32_40", "v25_40"]}, {"propertyId": "uniprot_keywords_cellular_component","categoryIds": ["472"]}, {"propertyId": "uniprot_pdb_existence", "categoryIds": ["1"]}, {"propertyId": "uniprot_chembl_assay_existence", "categoryIds": ["1"]},{"propertyId": "refex_specific_low_expression"}, {"propertyId": "uniprot_phospho_site"}, {"propertyId": "uniprot_keywords_biological_process"}]
+  * default: [{"propertyId": "gene_high_level_expression_refex", "categoryIds": ["v32_40", "v25_40"]}, {"propertyId": "protein_cellular_component_uniprot","categoryIds": ["GO_0005886"]}, {"propertyId": "structure_data_existence_uniprot", "categoryIds": ["1"]}, {"propertyId": "interaction_chembl_assay_existence_uniprot", "categoryIds": ["1"]},{"propertyId": "gene_low_level_expression_refex"}, {"propertyId": "protein_number_of_phosphorylation_sites_uniprot"}, {"propertyId": "protein_biological_process_uniprot"}]
 * `queryIds` togoKey 100個程度ずつ
   * default: ["4942","5344","6148", "6265","6344","6677","6735","10593","10718","10876"]
 
@@ -27,12 +27,9 @@ async ({togoKey, properties, queryIds})=>{
   }
   
   const togositeConfig = "https://raw.githubusercontent.com/dbcls/togosite/develop/config/togosite-human/properties.json";
-  //const sparqlSplitter = "https://integbio.jp/togosite/sparqlist/api/sparqlist_splitter";
-  //const togoidApi = "https://integbio.jp/togosite/sparqlist/api/togoid_route_sparql";
-  //const labelApi = "https://integbio.jp/togosite/sparqlist/api/togokey_label"; 
-  const sparqlSplitter = "http://localhost:3000/togosite/sparqlist/api/sparqlist_splitter";
-  const togoidApi = "http://localhost:3000/togosite/sparqlist/api/togoid_route_sparql";
-  const labelApi = "http://localhost:3000/togosite/sparqlist/api/togokey_label"; 
+  const sparqlSplitter = "sparqlist_splitter"; // nested SPARQLet relative path
+  const togoidApi = "togoid_route_sparql";  // nested SPARQLet relative path
+  const labelApi = "togokey_label";  // nested SPARQLet relative path
   const togositeConfigJson = await fetchReq(togositeConfig, {method: "get"});
   const idLimit = 2000; // split 判定
   const queryProperties = JSON.parse(properties);
@@ -41,7 +38,8 @@ async ({togoKey, properties, queryIds})=>{
   const start = Date.now(); // debug
   
   const getAttributeData = async (configProperty) => {
-    const t1 = Date.now() - start; // debug
+    configProperty.data = configProperty.data.split(/\//).slice(-1)[0]; // nested SPARQLet relative path
+    //const t1 = Date.now() - start; // debug
     
     // get 'togoKey' ID - 'primalyKey' ID list via TogoID API
     let idPair = [];
@@ -52,7 +50,7 @@ async ({togoKey, properties, queryIds})=>{
       if (!togo2primary[d.source_id]) togo2primary[d.source_id] = [];
       togo2primary[d.source_id].push(d.target_id);
     }
-    const t2 = Date.now() - start; // debug
+    //const t2 = Date.now() - start; // debug
     
     // get attributes of 'primaryKey' Ids
     let primaryIds = Array.from(new Set(idPair.map(d=>d.target_id))).join(",");
@@ -65,15 +63,14 @@ async ({togoKey, properties, queryIds})=>{
     }
     let body = "mode=objectList&queryIds=" + encodeURIComponent(primaryIds) + categoryIdsParam;
     let objectList = [];
-    configProperty.data = configProperty.data.replace("https://integbio.jp/togosite/sparqlist/", "http://localhost:3000/togosite/sparqlist/");
     if (primaryIds.length <= idLimit) {
       objectList = await fetchReq(configProperty.data, options, body);
     } else {
       body += "&sparqlet=" + encodeURIComponent(configProperty.data) + "&limit=" + idLimit;
       objectList =  await fetchReq(sparqlSplitter, options, body);
     }  
-    const t3 = Date.now() - start; // debug
-    console.log(configProperty.propertyId + ": start " + t1 + ",mid " + t2 + ",fin " + t3);
+    //const t3 = Date.now() - start; // debug
+    //console.log(configProperty.propertyId + ": start " + t1 + ",mid " + t2 + ",fin " + t3);
     
     return {"pair": togo2primary, "list": objectList};
   }
