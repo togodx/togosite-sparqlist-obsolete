@@ -12,11 +12,6 @@
 ## `primaryIds`
 ```javascript
 async ({togoKey, properties, inputIds})=>{
-
-  const dev_stage = await fetch("http://localhost:3000/togosite_dev/sparqlist/api/dev_stage_check").then(res=>res.text());
-  let apiurl = "http://localhost:3000/togosite/sparqlist/api/";
-  if (dev_stage == "true") apiurl = "http://localhost:3000/togosite_dev/sparqlist/api/";
-
   const fetchReq = async (url, options, body) => {
     if (body) options.body = body;
     /* //==== debug code
@@ -37,8 +32,8 @@ async ({togoKey, properties, inputIds})=>{
   }
   
   const togositeConfig = "https://raw.githubusercontent.com/dbcls/togosite/develop/config/togosite-human/properties.json";
-  const sparqlSplitter = apiurl + "togoid_sparqlist_splitter";
-  const togoidApi = apiurl + "togoid_route_sparql";
+  const sparqlSplitter = "togoid_sparqlist_splitter";  // nested SPARQLet relative path
+  const togoidApi = "togoid_route_sparql";  // nested SPARQLet relative path
   const togositeConfigJson = await fetchReq(togositeConfig, {method: "get"});
   const queryProperties = JSON.parse(properties);
   const queryPropertyIds = queryProperties.map(d => d.propertyId);
@@ -47,7 +42,7 @@ async ({togoKey, properties, inputIds})=>{
   const start = Date.now(); // debug
 
   // not filter (togoKey = hgnc, uniprot, pdb, mondo)
-  const togoidNotFilter = apiurl + "togokey_not_filter"; 
+  const togoidNotFilter = "togokey_not_filter"; // nested SPARQLet relative path
   if (queryPropertyIds.length == 0 && (togoKey == "hgnc" || togoKey == "uniprot" || togoKey == "pdb" || togoKey == "mondo")) {
     if (inputIds && JSON.parse(inputIds)[0]) return JSON.parse(inputIds);
     return fetchReq(togoidNotFilter, options, "togoKey=" + togoKey);
@@ -64,7 +59,7 @@ async ({togoKey, properties, inputIds})=>{
         break;
       }
     }
-    configProperty.data = apiurl + configProperty.data.split(/\//).slice(-1)[0]; // replace global URL to localhost
+    configProperty.data = configProperty.data.split(/\//).slice(-1)[0];  // nested SPARQLet relative path
     let primaryIds = await fetchReq(configProperty.data, options, "mode=idList&categoryIds=" + queryCategoryIds);
     //const t2 = Date.now() - start; // debug
     

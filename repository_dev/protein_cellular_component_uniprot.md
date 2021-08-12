@@ -26,7 +26,7 @@
 
 ```javascript
 async ({queryIds, categoryIds, mode})=>{
-  let url = "https://integbio.jp/togosite_dev/sparqlist/api/uniprot_go"; // localhost:port を叩けると早い
+  let url = "uniprot_go"; // parent SPARQLet relative path
   let body = "categoryIds=" + categoryIds;
   if (queryIds) body += "&queryIds=" + encodeURIComponent(queryIds);
   if (mode ) body += "&mode=" + mode;

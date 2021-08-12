@@ -12,10 +12,6 @@
 ## `primaryIds`
 ```javascript
 async ({togoKey, properties, queryIds})=>{
-  const dev_stage = await fetch("http://localhost:3000/togosite_dev/sparqlist/api/dev_stage_check").then(res=>res.text());
-  let apiurl = "http://localhost:3000/togosite/sparqlist/api/";
-  if (dev_stage == "true") apiurl = "http://localhost:3000/togosite_dev/sparqlist/api/";
-  
   const fetchReq = async (url, options, body) => {
     console.log(url + " " + body);  // debug
     if (body) options.body = body;
@@ -31,9 +27,9 @@ async ({togoKey, properties, queryIds})=>{
   }
   
   const togositeConfig = "https://raw.githubusercontent.com/dbcls/togosite/develop/config/togosite-human/properties.json";
-  const sparqlSplitter = apiurl + "sparqlist_splitter";
-  const togoidApi = apiurl + "togoid_route_sparql";
-  const labelApi = apiurl + "togokey_label"; 
+  const sparqlSplitter = "sparqlist_splitter"; // nested SPARQLet relative path
+  const togoidApi = "togoid_route_sparql";  // nested SPARQLet relative path
+  const labelApi = "togokey_label";  // nested SPARQLet relative path
   const togositeConfigJson = await fetchReq(togositeConfig, {method: "get"});
   const idLimit = 2000; // split 判定
   const queryProperties = JSON.parse(properties);
@@ -42,7 +38,7 @@ async ({togoKey, properties, queryIds})=>{
   const start = Date.now(); // debug
   
   const getAttributeData = async (configProperty) => {
-    configProperty.data = apiurl + configProperty.data.split(/\//).slice(-1)[0]; // replace global URL to localhost
+    configProperty.data = configProperty.data.split(/\//).slice(-1)[0]; // nested SPARQLet relative path
     //const t1 = Date.now() - start; // debug
     
     // get 'togoKey' ID - 'primalyKey' ID list via TogoID API
