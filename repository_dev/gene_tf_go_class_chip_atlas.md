@@ -16,7 +16,7 @@ uniprot GO 共有 SPARQLet を流用
   * example: idList, objectList
 
 ## `queryArray`
-- Query UniProt ID を配列に
+- Query Ensembl Gene ID を配列に
 ```javascript
 ({queryIds}) => {
   queryIds = queryIds.replace(/,/g," ")
@@ -104,16 +104,16 @@ WHERE
 ## `targetTf`
 ```sparql
 PREFIX obo: <http://purl.obolibrary.org/obo/>
+PREFIX ensg: <http://identifiers.org/ensembl/>
 
-SELECT DISTINCT ?tf_ensg ?uniprot
+SELECT DISTINCT ?tf_ensg
 FROM <http://rdf.integbio.jp/dataset/togosite/chip_atlas>
-FROM <http://rdf.integbio.jp/dataset/togosite/togoid/ensembl_gene-uniprot>
 WHERE {
+  {{#if queryArray}}
+  VALUES ?tf_ensg { {{#each queryArray}} ensg:{{this}} {{/each}} }
+  {{/if}}
   GRAPH <http://rdf.integbio.jp/dataset/togosite/chip_atlas> {
     ?tf_ensg obo:RO_0002428 ?target .
-  }
-  GRAPH <http://rdf.integbio.jp/dataset/togosite/togoid/ensembl_gene-uniprot> {
-    ?tf_ensg obo:RO_0002205 ?uniprot .
   }
 }
 ```
@@ -124,8 +124,7 @@ WHERE {
 ```javascript
 ({targetTf}) => {
  //return targetTf.results.bindings.map(d => d.uniprot.value.replace("http://purl.uniprot.org/uniprot/", ""));
-  return Array.from(new Set(
-    targetTf.results.bindings.map(d => d.tf_ensg.value.replace("http://identifiers.org/ensembl/", ""))));
+  return targetTf.results.bindings.map(d => d.tf_ensg.value.replace("http://identifiers.org/ensembl/", ""));
 }
 ```
 
@@ -153,15 +152,11 @@ FROM <http://rdf.integbio.jp/dataset/togosite/uniprot>
 FROM <http://rdf.integbio.jp/dataset/togosite/go>
 WHERE {
 {{#if categoryArray}}
-  {{#if queryArray}}
-  VALUES ?uniprot { {{#each queryArray}} uniprot:{{this}} {{/each}} }
-  {{else}}
   #?tf_ensg obo:RO_0002428 ?target .
   #GRAPH <http://rdf.integbio.jp/dataset/togosite/togoid/ensembl_gene-uniprot> {
   #  ?tf_ensg obo:RO_0002205 ?uniprot .
   #}
   VALUES ?tf_ensg { {{#each targetTfArray}} ensg:{{this}} {{/each}} }
-  {{/if}}
   VALUES ?category { {{#each targetGoArray}} obo:{{this}} {{/each}} }
   ?uniprot a up:Protein ;
            up:organism taxon:9606 ;
@@ -180,21 +175,23 @@ ORDER BY DESC(?count)
 - あるGOカテゴリを持たないUniProtを１つのSPARQLで取ろうとするとメモリオーバーするので変則的
 
 ## `allUniProt`
-- UniProts without GO annotation 
 ```sparql
 PREFIX up: <http://purl.uniprot.org/core/>
 PREFIX taxon: <http://purl.uniprot.org/taxonomy/>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX obo: <http://purl.obolibrary.org/obo/>
 PREFIX uniprot: <http://purl.uniprot.org/uniprot/>
-SELECT DISTINCT ?uniprot
+PREFIX ensg: <http://purl.uniprot.org/bgee/>
+SELECT DISTINCT ?tf_ensg
 FROM <http://rdf.integbio.jp/dataset/togosite/uniprot>
 FROM <http://rdf.integbio.jp/dataset/togosite/go>
 WHERE {
 {{#if withoutId}}
+  VALUES ?tf_ensg { {{#each targetTfArray}} ensg:{{this}} {{/each}} }
   ?uniprot a up:Protein ;
            up:organism taxon:9606 ;
-           up:proteome ?proteome .
+           up:proteome ?proteome ;
+           rdfs:seeAlso ?tf_ensg .
   FILTER(REGEX(STR(?proteome), "UP000005640"))
 {{/if}}
 }
@@ -208,7 +205,9 @@ PREFIX taxon: <http://purl.uniprot.org/taxonomy/>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX obo: <http://purl.obolibrary.org/obo/>
 PREFIX uniprot: <http://purl.uniprot.org/uniprot/>
-SELECT DISTINCT ?uniprot
+PREFIX ensg: <http://purl.uniprot.org/bgee/>
+
+SELECT DISTINCT ?tf_ensg
 FROM <http://rdf.integbio.jp/dataset/togosite/uniprot>
 WHERE {
 {{#if withoutId}}
@@ -219,9 +218,11 @@ WHERE {
       ?go rdfs:subClassOf+ obo:{{withoutId}} .
     }
   }
+  VALUES ?tf_ensg { {{#each targetTfArray}} ensg:{{this}} {{/each}} }
   ?uniprot a up:Protein ;
            up:organism taxon:9606 ;
-           up:proteome ?proteome .
+           up:proteome ?proteome ;
+           rdfs:seeAlso ?tf_ensg .
   FILTER(REGEX(STR(?proteome), "UP000005640"))
   ?uniprot up:classifiedWith ?go .
 {{/if}}
@@ -234,20 +235,20 @@ WHERE {
   if (!withoutId) return {results: {bindings: []}};
   let withGo = {};
   for (let d of withGoUniProt.results.bindings) {
-    withGo[d.uniprot.value] = true;
+    withGo[d.tf_ensg.value] = true;
   }
   let query = {};
   if (queryArray) {
     for (let d of queryArray) {
-      query["http://purl.uniprot.org/uniprot/" + d] = true;
+      query["http://identifiers.org/ensembl/" + d] = true;
     }
   }
   let bindings = [];
   if (mode == "objectList") {
     for (let d of allUniProt.results.bindings) {
-      if (!withGo[d.uniprot.value] && (!queryArray || (queryArray && query[d.uniprot.value]))) {
+      if (!withGo[d.tf_ensg.value] && (!queryArray || (queryArray && query[d.tf_ensg.value]))) {
         bindings.push({
-          uniprot: {value: d.uniprot.value},
+          ensg: {value: d.tf_ensg.value},
           category: {value: "wo_" + withoutId},
           label: {value: "without annotation"}
         });
@@ -256,8 +257,8 @@ WHERE {
     return {results: {bindings: bindings}};
   }
   for (let d of allUniProt.results.bindings) {
-    if (!withGo[d.uniprot.value] && (!queryArray || (queryArray && query[d.uniprot.value]))) {
-      bindings.push({uniprot: {value: d.uniprot.value}})
+    if (!withGo[d.tf_ensg.value] && (!queryArray || (queryArray && query[d.tf_ensg.value]))) {
+      bindings.push({ensg: {value: d.tf_ensg.value}})
     }
   }
   if (mode == "idList") return {results: {bindings: bindings}};
@@ -276,14 +277,14 @@ WHERE {
 ```javascript
 ({mode, categoryArray, withoutId, withAnnotation, withoutAnnotation, targetGo}) => {
   const idVar = "uniprot";
-  const idPrfix = "http://purl.uniprot.org/uniprot/";
+  const idPrefix = "http://identifiers.org/ensembl/";
   const categoryPrefix = "http://purl.obolibrary.org/obo/";
   let data = [];
   if (categoryArray) data = withAnnotation.results.bindings;
   if (withoutId) data = data.concat(withoutAnnotation.results.bindings);
   if (mode == "objectList") return data.map(d => {
     return {
-      id: d[idVar].value.replace(idPrfix, ""), 
+      id: d[idVar].value.replace(idPrefix, ""), 
       attribute: {
         categoryId: d.category.value.replace(categoryPrefix, ""), 
         uri: d.category.value,
@@ -291,7 +292,7 @@ WHERE {
       }
     }
   });
-  if (mode == "idList") return data.map(d => d[idVar].value.replace(idPrfix, ""));
+  if (mode == "idList") return data.map(d => d[idVar].value.replace(idPrefix, ""));
   let hasChild = {};
   for (let d of targetGo.results.bindings) {
     if (d.child) hasChild[d.go.value] = true;
