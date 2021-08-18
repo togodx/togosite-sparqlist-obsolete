@@ -209,6 +209,7 @@ PREFIX ensg: <http://purl.uniprot.org/bgee/>
 
 SELECT DISTINCT ?tf_ensg
 FROM <http://rdf.integbio.jp/dataset/togosite/uniprot>
+FROM <http://rdf.integbio.jp/dataset/togosite/go>
 WHERE {
 {{#if withoutId}}
   {
