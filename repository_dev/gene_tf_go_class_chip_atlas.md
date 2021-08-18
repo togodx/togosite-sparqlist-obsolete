@@ -132,8 +132,6 @@ WHERE {
 https://integbio.jp/togosite/sparql
  
 ## `withAnnotation`
-- メイン SPARQL
-  - 内訳返す場合とタンパク質リスト返す場合を handlebars で条件分岐
 ```sparql
 PREFIX up: <http://purl.uniprot.org/core/>
 PREFIX taxon: <http://purl.uniprot.org/taxonomy/>
@@ -151,7 +149,6 @@ SELECT ?category ?label (COUNT (DISTINCT ?tf_ensg) AS ?count)
 FROM <http://rdf.integbio.jp/dataset/togosite/uniprot>
 FROM <http://rdf.integbio.jp/dataset/togosite/go>
 WHERE {
-{{#if categoryArray}}
   #?tf_ensg obo:RO_0002428 ?target .
   #GRAPH <http://rdf.integbio.jp/dataset/togosite/togoid/ensembl_gene-uniprot> {
   #  ?tf_ensg obo:RO_0002205 ?uniprot .
@@ -165,7 +162,6 @@ WHERE {
   ?uniprot up:classifiedWith/rdfs:subClassOf* ?category ;
            rdfs:seeAlso ?tf_ensg .
   ?category rdfs:label ?label .
-{{/if}}
 }
 {{#unless mode}}
 ORDER BY DESC(?count)
@@ -173,29 +169,6 @@ ORDER BY DESC(?count)
 ```
 
 - あるGOカテゴリを持たないUniProtを１つのSPARQLで取ろうとするとメモリオーバーするので変則的
-
-## `allUniProt`
-```sparql
-PREFIX up: <http://purl.uniprot.org/core/>
-PREFIX taxon: <http://purl.uniprot.org/taxonomy/>
-PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-PREFIX obo: <http://purl.obolibrary.org/obo/>
-PREFIX uniprot: <http://purl.uniprot.org/uniprot/>
-PREFIX ensg: <http://purl.uniprot.org/bgee/>
-SELECT DISTINCT ?tf_ensg
-FROM <http://rdf.integbio.jp/dataset/togosite/uniprot>
-FROM <http://rdf.integbio.jp/dataset/togosite/go>
-WHERE {
-{{#if withoutId}}
-  VALUES ?tf_ensg { {{#each targetTfArray}} ensg:{{this}} {{/each}} }
-  ?uniprot a up:Protein ;
-           up:organism taxon:9606 ;
-           up:proteome ?proteome ;
-           rdfs:seeAlso ?tf_ensg .
-  FILTER(REGEX(STR(?proteome), "UP000005640"))
-{{/if}}
-}
-```
 
 ## `withGoUniProt`
 - UniProts without GO annotation 
@@ -211,45 +184,33 @@ SELECT DISTINCT ?tf_ensg
 FROM <http://rdf.integbio.jp/dataset/togosite/uniprot>
 FROM <http://rdf.integbio.jp/dataset/togosite/go>
 WHERE {
-{{#if withoutId}}
-  {
-    SELECT DISTINCT ?go
-    FROM <http://rdf.integbio.jp/dataset/togosite/go>
-    WHERE {
-      ?go rdfs:subClassOf+ obo:{{withoutId}} .
-    }
-  }
   VALUES ?tf_ensg { {{#each targetTfArray}} ensg:{{this}} {{/each}} }
+  VALUES ?category { {{#each targetGoArray}} obo:{{this}} {{/each}} }
   ?uniprot a up:Protein ;
            up:organism taxon:9606 ;
-           up:proteome ?proteome ;
-           rdfs:seeAlso ?tf_ensg .
+           up:proteome ?proteome .
   FILTER(REGEX(STR(?proteome), "UP000005640"))
-  ?uniprot up:classifiedWith ?go .
-{{/if}}
+  ?uniprot up:classifiedWith/rdfs:subClassOf* ?category ;
+           rdfs:seeAlso ?tf_ensg .
+  ?category rdfs:label ?label .
 }
 ```
 
 ## `withoutAnnotation`
 ```javascript
-({mode, queryArray, allUniProt, withGoUniProt, withoutId}) => {
+({mode, targetTfArray, withGoUniProt, withoutId}) => {
   if (!withoutId) return {results: {bindings: []}};
   let withGo = {};
   for (let d of withGoUniProt.results.bindings) {
-    withGo[d.tf_ensg.value] = true;
-  }
-  let query = {};
-  if (queryArray) {
-    for (let d of queryArray) {
-      query["http://identifiers.org/ensembl/" + d] = true;
-    }
+    withGo[d.tf_ensg.value.replace("http://purl.uniprot.org/bgee/", "")] = true;
   }
   let bindings = [];
   if (mode == "objectList") {
-    for (let d of allUniProt.results.bindings) {
-      if (!withGo[d.tf_ensg.value] && (!queryArray || (queryArray && query[d.tf_ensg.value]))) {
+    for (let d of targetTfArray) {
+      //if (!withGo[d.tf_ensg.value] && (!queryArray || (queryArray && query[d.tf_ensg.value]))) {
+      if (!withGo[d]) {
         bindings.push({
-          ensg: {value: d.tf_ensg.value},
+          ensg: {value: "http://identifiers.org/ensembl/" + d},
           category: {value: "wo_" + withoutId},
           label: {value: "without annotation"}
         });
@@ -257,9 +218,9 @@ WHERE {
     }
     return {results: {bindings: bindings}};
   }
-  for (let d of allUniProt.results.bindings) {
-    if (!withGo[d.tf_ensg.value] && (!queryArray || (queryArray && query[d.tf_ensg.value]))) {
-      bindings.push({ensg: {value: d.tf_ensg.value}})
+  for (let d of targetTfArray) {
+    if (!withGo[d]) {
+      bindings.push({ensg: {value: "http://identifiers.org/ensembl/" + d}})
     }
   }
   if (mode == "idList") return {results: {bindings: bindings}};
