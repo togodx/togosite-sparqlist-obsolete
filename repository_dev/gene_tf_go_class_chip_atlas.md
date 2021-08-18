@@ -101,6 +101,32 @@ WHERE
 }
 ```
 
+## `targetTf`
+```sparql
+PREFIX obo: <http://purl.obolibrary.org/obo/>
+
+SELECT DISTINCT ?tf_ensg ?uniprot
+FROM <http://rdf.integbio.jp/dataset/togosite/chip_atlas>
+FROM <http://rdf.integbio.jp/dataset/togosite/togoid/ensembl_gene-uniprot>
+WHERE {
+  GRAPH <http://rdf.integbio.jp/dataset/togosite/chip_atlas> {
+    ?tf_ensg obo:RO_0002428 ?target .
+  }
+  GRAPH <http://rdf.integbio.jp/dataset/togosite/togoid/ensembl_gene-uniprot> {
+    ?tf_ensg obo:RO_0002205 ?uniprot .
+  }
+}
+```
+
+## `targetTfArray`
+- 単純な配列に
+
+```javascript
+({targetTf}) => {
+ return targetTf.results.bindings.map(d => d.uniprot.value.replace("http://purl.uniprot.org/uniprot/", ""));
+}
+```
+
 ## Endpoint
 https://integbio.jp/togosite/sparql
  
@@ -114,9 +140,11 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX obo: <http://purl.obolibrary.org/obo/>
 PREFIX uniprot: <http://purl.uniprot.org/uniprot/>
 {{#if mode}}
-SELECT DISTINCT ?tf_ensg ?category ?label
+#SELECT DISTINCT ?tf_ensg ?category ?label
+SELECT DISTINCT ?uniprot ?category ?label
 {{else}}
-SELECT ?category ?label (COUNT (DISTINCT ?tf_ensg) AS ?count)
+#SELECT ?category ?label (COUNT (DISTINCT ?tf_ensg) AS ?count)
+SELECT ?category ?label (COUNT (DISTINCT ?uniprot) AS ?count)
 {{/if}}
 FROM <http://rdf.integbio.jp/dataset/togosite/uniprot>
 FROM <http://rdf.integbio.jp/dataset/togosite/go>
@@ -127,16 +155,17 @@ WHERE {
   {{#if queryArray}}
   VALUES ?uniprot { {{#each queryArray}} uniprot:{{this}} {{/each}} }
   {{else}}
-  ?tf_ensg obo:RO_0002428 ?target .
-  GRAPH <http://rdf.integbio.jp/dataset/togosite/togoid/ensembl_gene-uniprot> {
-    ?tf_ensg obo:RO_0002205 ?uniprot .
-  }
+  #?tf_ensg obo:RO_0002428 ?target .
+  #GRAPH <http://rdf.integbio.jp/dataset/togosite/togoid/ensembl_gene-uniprot> {
+  #  ?tf_ensg obo:RO_0002205 ?uniprot .
+  #}
+  VALUES ?uniprot { {{#each targetTfArray}} uniprot:{{this}} {{/each}} }
   {{/if}}
   VALUES ?category { {{#each targetGoArray}} obo:{{this}} {{/each}} }
-  ?uniprot a up:Protein ;
-           up:organism taxon:9606 ;
-           up:proteome ?proteome .
-  FILTER(REGEX(STR(?proteome), "UP000005640"))
+  #?uniprot a up:Protein ;
+  #         up:organism taxon:9606 ;
+  #         up:proteome ?proteome .
+  #FILTER(REGEX(STR(?proteome), "UP000005640"))
   ?uniprot up:classifiedWith/rdfs:subClassOf* ?category .
   ?category rdfs:label ?label .
 {{/if}}
