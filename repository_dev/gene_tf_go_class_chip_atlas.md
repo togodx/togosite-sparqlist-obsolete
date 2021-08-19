@@ -175,15 +175,21 @@ FROM <http://rdf.integbio.jp/dataset/togosite/uniprot>
 FROM <http://rdf.integbio.jp/dataset/togosite/go>
 WHERE {
 {{#if withoutId}}
-  {
-    SELECT DISTINCT ?go
-    FROM <http://rdf.integbio.jp/dataset/togosite/go>
-    WHERE {
-      ?go rdfs:subClassOf+ obo:{{withoutId}} .
-    }
-  }
+  #{
+  #  SELECT DISTINCT ?go
+  #  FROM <http://rdf.integbio.jp/dataset/togosite/go>
+  #  WHERE {
+  #    ?go rdfs:subClassOf+ obo:{{withoutId}} .
+  #  }
+  #}
   #VALUES ?tf_ensg { {{#each targetTfArray}} ensg:{{this}} {{/each}} } # ここでやるとメモリオーバー
-  ?uniprot up:classifiedWith ?go ;
+  #?uniprot # up:classifiedWith ?go ;
+  #         up:classifiedWith/rdfs:subClassOf* obo:{{withoutId}} ;
+  #         rdfs:seeAlso ?tf_ensg .
+  VALUES ?tf_ensg { {{#each targetTfArray}} ensg:{{this}} {{/each}} }
+  VALUES ?category { {{#each targetGoArray}} obo:{{this}} {{/each}} }
+  ?uniprot a up:Protein .
+  ?uniprot up:classifiedWith/rdfs:subClassOf* ?category ;
            rdfs:seeAlso ?tf_ensg .
 {{/if}}
 }
@@ -193,6 +199,7 @@ WHERE {
 ```javascript
 ({targetTfArray, withGoUniProtAll, withoutId}) => {
   if (!withoutId) return {results: {bindings: []}};
+  let isTarget = {};
   for (let d of targetTfArray) {
     isTarget[d.tf_ensg.value] = true;
   }
