@@ -119,8 +119,6 @@ WHERE {
 ```
 
 ## `targetTfArray`
-- 単純な配列に
-
 ```javascript
 ({targetTf}) => {
  //return targetTf.results.bindings.map(d => d.uniprot.value.replace("http://purl.uniprot.org/uniprot/", ""));
@@ -162,7 +160,29 @@ ORDER BY DESC(?count)
 
 - あるGOカテゴリを持たないUniProtを１つのSPARQLで取ろうとするとメモリオーバーするので変則的
 
-## `withGoUniProtAll`
+## `withoutGo`
+```sparql
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX obo: <http://purl.obolibrary.org/obo/>
+SELECT DISTINCT ?go
+FROM <http://rdf.integbio.jp/dataset/togosite/go>
+WHERE
+{
+{{#if withoutId}}
+  ?go rdfs:subClassOf obo:{{withoutId}} .
+{{/if}}
+}
+```
+
+## `withoutGoArray`
+```javascript
+({withoutGo}) => {
+ //return targetTf.results.bindings.map(d => d.uniprot.value.replace("http://purl.uniprot.org/uniprot/", ""));
+  return withoutGo.results.bindings.map(d => d.go.value.replace("http://purl.obolibrary.org/obo/", ""));
+}
+```
+
+## `withGoUniProt`
 - UniProts with GO annotation 
 ```sparql
 PREFIX up: <http://purl.uniprot.org/core/>
@@ -175,43 +195,12 @@ FROM <http://rdf.integbio.jp/dataset/togosite/uniprot>
 FROM <http://rdf.integbio.jp/dataset/togosite/go>
 WHERE {
 {{#if withoutId}}
-  #{
-  #  SELECT DISTINCT ?go
-  #  FROM <http://rdf.integbio.jp/dataset/togosite/go>
-  #  WHERE {
-  #    ?go rdfs:subClassOf+ obo:{{withoutId}} .
-  #  }
-  #}
-  #VALUES ?tf_ensg { {{#each targetTfArray}} ensg:{{this}} {{/each}} } # ここでやるとメモリオーバー
-  #?uniprot # up:classifiedWith ?go ;
-  #         up:classifiedWith/rdfs:subClassOf* obo:{{withoutId}} ;
-  #         rdfs:seeAlso ?tf_ensg .
   VALUES ?tf_ensg { {{#each targetTfArray}} ensg:{{this}} {{/each}} }
-  VALUES ?category { {{#each targetGoArray}} obo:{{this}} {{/each}} }
+  VALUES ?category { {{#each withoutGoArray}} obo:{{this}} {{/each}} }
   ?uniprot a up:Protein .
   ?uniprot up:classifiedWith/rdfs:subClassOf* ?category ;
            rdfs:seeAlso ?tf_ensg .
 {{/if}}
-}
-```
-
-## `withGoUniProt`
-```javascript
-({targetTfArray, withGoUniProtAll, withoutId}) => {
-  if (!withoutId) return {results: {bindings: []}};
-  let isTarget = {};
-  for (let d of targetTfArray) {
-    isTarget[d.tf_ensg.value] = true;
-  }
-  let bindings = [];
-  for (let d of withGoUniProtAll.results.bindings) {
-    if(isTarget[d.tf_ensg.value]) {
-      bindings.push({
-        tf_ensg: {value: d.tf_ensg.value}
-      });
-    }
-  }
-  return {results: {bindings: bindings}};
 }
 ```
 
@@ -229,7 +218,7 @@ WHERE {
       //if (!withGo[d.tf_ensg.value] && (!queryArray || (queryArray && query[d.tf_ensg.value]))) {
       if (!withGo[d]) {
         bindings.push({
-          ensg: {value: "http://identifiers.org/ensembl/" + d},
+          tf_ensg: {value: "http://identifiers.org/ensembl/" + d},
           category: {value: "wo_" + withoutId},
           label: {value: "without annotation"}
         });
@@ -239,7 +228,7 @@ WHERE {
   }
   for (let d of targetTfArray) {
     if (!withGo[d]) {
-      bindings.push({ensg: {value: "http://identifiers.org/ensembl/" + d}})
+      bindings.push({tf_ensg: {value: "http://identifiers.org/ensembl/" + d}})
     }
   }
   if (mode == "idList") return {results: {bindings: bindings}};
@@ -257,7 +246,7 @@ WHERE {
 - 存在レベル、タンパク質リストでのフィルタリング
 ```javascript
 ({mode, categoryArray, withoutId, withAnnotation, withoutAnnotation, targetGo}) => {
-  const idVar = "uniprot";
+  const idVar = "tf_ensg";
   const idPrefix = "http://identifiers.org/ensembl/";
   const categoryPrefix = "http://purl.obolibrary.org/obo/";
   let data = [];
