@@ -101,6 +101,13 @@ WHERE
 }
 ```
 
+## `existTargetGo`
+```javascript
+({targetGoArray}) => {
+  return targetGoArray.length > 0;
+}
+```
+
 ## `targetTf`
 ```sparql
 PREFIX obo: <http://purl.obolibrary.org/obo/>
@@ -121,7 +128,6 @@ WHERE {
 ## `targetTfArray`
 ```javascript
 ({targetTf}) => {
- //return targetTf.results.bindings.map(d => d.uniprot.value.replace("http://purl.uniprot.org/uniprot/", ""));
   return targetTf.results.bindings.map(d => d.tf_ensg.value.replace("http://identifiers.org/ensembl/", ""));
 }
 ```
@@ -168,16 +174,18 @@ SELECT DISTINCT ?go
 FROM <http://rdf.integbio.jp/dataset/togosite/go>
 WHERE
 {
+{{#unless existTargetGo}}
 {{#if withoutId}}
   ?go rdfs:subClassOf obo:{{withoutId}} .
 {{/if}}
+{{/unless}}
 }
 ```
 
 ## `withoutGoArray`
 ```javascript
-({withoutGo}) => {
- //return targetTf.results.bindings.map(d => d.uniprot.value.replace("http://purl.uniprot.org/uniprot/", ""));
+({existTargetGo, withoutGo, targetTfArray}) => {
+  if(existTargetGo) return targetTfArray;
   return withoutGo.results.bindings.map(d => d.go.value.replace("http://purl.obolibrary.org/obo/", ""));
 }
 ```
