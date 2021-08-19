@@ -17,8 +17,8 @@ This query allows **multiple tissue flags** for each gene.
 https://integbio.jp/togosite/sparql
 
 ## Parameters
-* `categoryIds` (type: UBERON or EFO)
-  * example: UBERON_0010414,UBERON_0002369,UBERON_0001496,EFO_0000572,low_specificity
+* `categoryIds` (type: RefEx Sample ID)
+  * example: RES00003651,RES00003652,RES00003653,RES00003654,low_specificity
 * `queryIds` (type: ensembl_gene)
   * example: ENSG00000000005,ENSG00000002587,ENSG00000003989,ENSG00000049883
 * `mode`
