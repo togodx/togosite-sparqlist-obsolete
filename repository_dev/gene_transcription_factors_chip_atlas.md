@@ -1,136 +1,288 @@
-# Target genes of TFs in ChIP-Atlas （大田・池田・小野・千葉）
+# ChIP-Atlas の転写因子を GO BP で分類(池田)
 
-## Description
+uniprot GO 共有 SPARQLet を流用
 
-- Data sources
-    - ChIP-Atlas: [http://dbarchive.biosciencedbc.jp/kyushu-u/hg38/target/](http://dbarchive.biosciencedbc.jp/kyushu-u/hg38/target/)
-    - The genes in `<Transcription Factor>.10.tsv` were defined to be target genes of the `<Transcription Factor>`.
-
-- Query
-    - Input
-        - Ensembl gene ID of target genes
-    - Output
-        - Ensembl gene ID of TFs
-
-## Endpoint
-
-https://integbio.jp/togosite/sparql
+- 指定 GO の1階層下の内訳
+  - すでに最下層で、下層が無い場合は空配列を返す
 
 ## Parameters
-* `categoryIds` (type: ensembl gene ID (TF))
-  * example: ENSG00000275700,ENSG00000101544,ENSG00000048052
-* `queryIds` (type: ensembl gene ID (target))
-  * example: ENSG00000000005,ENSG00000002587,ENSG00000115942
-* `mode` (type: string)
+
+* `categoryIds` (type: go) (Req.)
+  * default: GO_0008150
+  * example: GO_0008150 (biological process), GO_0005575 (cellular component), GO_0003674 (molecular function), ... 
+* `queryIds` (type: ENSG ID of TF)
+  * example: ENSG00000065978, ENSG00000070495, ENSG00000072501, ENSG00000079246, ENSG00000099381, ENSG00000102974, ENSG00000104856
+* `mode`
   * example: idList, objectList
 
-## `input_genes`
+## `queryArray`
+- Query Ensembl Gene ID を配列に
 ```javascript
-({ queryIds }) => {
-  queryIds = queryIds.replace(/,/g, " ");
-  if (queryIds.match(/[^\s]/)) {
-    return queryIds.split(/\s+/);
-  } else {
-    return false;
-  }
-};
+({queryIds}) => {
+  queryIds = queryIds.replace(/,/g," ")
+  if (queryIds.match(/[^\s]/)) return queryIds.split(/\s+/);
+  return false;
+}
 ```
 
-## `input_categories`
+## `categoryArray`
+- UniProt keyword ID を配列に
 ```javascript
-({ categoryIds }) => {
+({categoryIds})=>{
   categoryIds = categoryIds.replace(/,/g, " ");
-  if (categoryIds.match(/\S/)) {
-    return categoryIds.split(/\s+/);
-  }
-};
+  if (categoryIds.match(/[^\s]/)) {
+    let array = categoryIds.split(/\s+/);
+    let categoryArray = [];
+    for (let id of array) {
+      if (!id.match(/^wo_GO_\d+/)) categoryArray.push(id);
+    }
+    if (categoryArray.length == 0) return false;
+    return categoryArray;
+  } 
+  return false;
+}
 ```
 
-## `main`
+## `withoutId`
+```javascript
+({categoryIds})=>{
+  if (categoryIds == "GO_0008150" || categoryIds == "GO_0005575" || categoryIds == "GO_0003674" ) return categoryIds;
+  if (categoryIds.match(/wo_GO_\d+/)) return categoryIds.match(/wo_(GO_\d+)/)[1];
+  return false;
+}
+```
 
+## `category_top_flag`
+```javascript
+({categoryIds})=>{
+  if (categoryIds == "GO_0008150" || categoryIds == "GO_0005575" || categoryIds == "GO_0003674") return true;
+  return false;
+}
+```
+
+## Endpoint
+https://integbio.jp/togosite/sparql
+
+## `targetGo`
+- 欲しい GO の階層を取る
+  - UniProt エンドポイントのGO階層が展開されてしまってるため
+  
+```sparql
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX obo: <http://purl.obolibrary.org/obo/>
+SELECT DISTINCT ?go (SAMPLE(?child_category) AS ?child)
+FROM <http://rdf.integbio.jp/dataset/togosite/go>
+WHERE
+{
+{{#if mode}}
+  {{#if category_top_flag}}
+  VALUES ?go_list { {{#each categoryArray}} obo:{{this}} {{/each}} }
+  ?go rdfs:subClassOf ?go_list .
+  {{else}}
+  VALUES ?go { {{#each categoryArray}} obo:{{this}} {{/each}} }
+  {{/if}}
+{{else}}
+  VALUES ?go_list { {{#each categoryArray}} obo:{{this}} {{/each}} }
+  ?go rdfs:subClassOf ?go_list .
+{{/if}}
+  OPTIONAL {
+    ?child_category rdfs:subClassOf ?go .
+    # taxon:9606 ^up:organism/up:classifiedWith/rdfs:subClassOf ?child_category . # 重い
+  }
+}
+```
+
+## `targetGoArray`
+- 単純な配列に
+
+```javascript
+({targetGo}) => {
+  return targetGo.results.bindings.map(d => d.go.value.replace("http://purl.obolibrary.org/obo/", ""));
+}
+```
+
+## `existTargetGo`
+```javascript
+({targetGoArray}) => {
+  return targetGoArray.length > 0;
+}
+```
+
+## `targetTf`
 ```sparql
 PREFIX obo: <http://purl.obolibrary.org/obo/>
-PREFIX ensembl: <http://identifiers.org/ensembl/>
-PREFIX taxid: <http://identifiers.org/taxonomy/>
-PREFIX faldo: <http://biohackathon.org/resource/faldo#>
-PREFIX dc: <http://purl.org/dc/elements/1.1/>
+PREFIX ensg: <http://identifiers.org/ensembl/>
+
+SELECT DISTINCT ?tf_ensg
+FROM <http://rdf.integbio.jp/dataset/togosite/chip_atlas>
+WHERE {
+  {{#if queryArray}}
+  VALUES ?tf_ensg { {{#each queryArray}} ensg:{{this}} {{/each}} }
+  {{/if}}
+  GRAPH <http://rdf.integbio.jp/dataset/togosite/chip_atlas> {
+    ?tf_ensg obo:RO_0002428 ?target .
+  }
+}
+```
+
+## `targetTfArray`
+```javascript
+({targetTf}) => {
+  return targetTf.results.bindings.map(d => d.tf_ensg.value.replace("http://identifiers.org/ensembl/", ""));
+}
+```
+
+## Endpoint
+https://integbio.jp/togosite/sparql
+ 
+## `withAnnotation`
+```sparql
+PREFIX up: <http://purl.uniprot.org/core/>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX obo: <http://purl.obolibrary.org/obo/>
+PREFIX ensg: <http://purl.uniprot.org/bgee/>
 
 {{#if mode}}
-SELECT DISTINCT ?tf_id ?tf_label ?ensg
+SELECT DISTINCT ?uniprot ?category ?label
 {{else}}
-SELECT ?tf_id ?tf_label (COUNT(DISTINCT ?ensg) AS ?count)
+SELECT ?category ?label (COUNT (DISTINCT ?tf_ensg) AS ?count)
 {{/if}}
+FROM <http://rdf.integbio.jp/dataset/togosite/uniprot>
+FROM <http://rdf.integbio.jp/dataset/togosite/go>
 WHERE {
-  {
-    {{#if input_genes}}
-    VALUES ?ensg { {{#each input_genes}} ensembl:{{this}} {{/each}} }
-    {{/if}}
-    GRAPH <http://rdf.integbio.jp/dataset/togosite/chip_atlas> {
-      ?tf obo:RO_0002428 ?ensg .
-    }
-    GRAPH <http://rdf.integbio.jp/dataset/togosite/ensembl> {
-      ?ebi_tf rdfs:label ?tf_label ;
-              rdfs:seeAlso ?tf ;
-              dc:identifier ?tf_id .
-    }
+{{#if categoryArray}}
+  VALUES ?tf_ensg { {{#each targetTfArray}} ensg:{{this}} {{/each}} }
+  VALUES ?category { {{#each targetGoArray}} obo:{{this}} {{/each}} }
+  ?uniprot a up:Protein ;
+           up:classifiedWith/rdfs:subClassOf* ?category ;
+           rdfs:seeAlso ?tf_ensg .
+  ?category rdfs:label ?label .
+{{/if}}
+}
+{{#unless mode}}
+ORDER BY DESC(?count)
+{{/unless}}
+```
+
+- あるGOカテゴリを持たないUniProtを１つのSPARQLで取ろうとするとメモリオーバーするので変則的
+
+## `withoutGo`
+```sparql
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX obo: <http://purl.obolibrary.org/obo/>
+SELECT DISTINCT ?go
+FROM <http://rdf.integbio.jp/dataset/togosite/go>
+WHERE
+{
+{{#unless existTargetGo}}
+{{#if withoutId}}
+  ?go rdfs:subClassOf obo:{{withoutId}} .
+{{/if}}
+{{/unless}}
+}
+```
+
+## `withoutGoArray`
+```javascript
+({existTargetGo, withoutGo, targetGoArray}) => {
+  if(existTargetGo) return targetGoArray;
+  return withoutGo.results.bindings.map(d => d.go.value.replace("http://purl.obolibrary.org/obo/", ""));
+}
+```
+
+## `withGoUniProt`
+- UniProts with GO annotation 
+```sparql
+PREFIX up: <http://purl.uniprot.org/core/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX obo: <http://purl.obolibrary.org/obo/>
+PREFIX ensg: <http://purl.uniprot.org/bgee/>
+
+SELECT DISTINCT ?tf_ensg
+FROM <http://rdf.integbio.jp/dataset/togosite/uniprot>
+FROM <http://rdf.integbio.jp/dataset/togosite/go>
+WHERE {
+{{#if withoutId}}
+  VALUES ?tf_ensg { {{#each targetTfArray}} ensg:{{this}} {{/each}} }
+  VALUES ?category { {{#each withoutGoArray}} obo:{{this}} {{/each}} }
+  ?uniprot a up:Protein .
+  ?uniprot up:classifiedWith/rdfs:subClassOf* ?category ;
+           rdfs:seeAlso ?tf_ensg .
+{{/if}}
+}
+```
+
+## `withoutAnnotation`
+```javascript
+({mode, targetTfArray, withGoUniProt, withoutId}) => {
+  if (!withoutId) return {results: {bindings: []}};
+  let withGo = {};
+  for (let d of withGoUniProt.results.bindings) {
+    withGo[d.tf_ensg.value.replace("http://purl.uniprot.org/bgee/", "")] = true;
   }
-  UNION
-  {
-    {{#if input_genes}}
-    VALUES ?ensg { {{#each input_genes}} ensembl:{{this}} {{/each}} }
-    {{/if}}
-    GRAPH <http://rdf.integbio.jp/dataset/togosite/ensembl> {
-      ?enst obo:SO_transcribed_from ?ebiensg .
-      ?ebiensg obo:RO_0002162 taxid:9606 ; # in taxon
-               faldo:location ?ensg_location ;
-               dc:identifier ?ensg_id .
-      BIND (strbefore(strafter(str(?ensg_location), "GRCh38/"), ":") AS ?chromosome)
-      FILTER (?chromosome IN ("1", "2", "3", "4", "5", "6", "7", "8", "9", "10",
-                              "11", "12", "13", "14", "15", "16", "17", "18", "19", "20",
-                              "21", "22", "X", "Y", "MT" ))
-      BIND(URI(CONCAT("http://identifiers.org/ensembl/", ?ensg_id)) AS ?ensg)
-    }
-    FILTER NOT EXISTS {
-      GRAPH <http://rdf.integbio.jp/dataset/togosite/chip_atlas> {
-        ?tf obo:RO_0002428 ?ensg .
+  let bindings = [];
+  if (mode == "objectList") {
+    for (let d of targetTfArray) {
+      //if (!withGo[d.tf_ensg.value] && (!queryArray || (queryArray && query[d.tf_ensg.value]))) {
+      if (!withGo[d]) {
+        bindings.push({
+          tf_ensg: {value: "http://identifiers.org/ensembl/" + d},
+          category: {value: "wo_" + withoutId},
+          label: {value: "without annotation"}
+        });
       }
     }
-    BIND("none" AS ?tf_id)
-    BIND("none" AS ?tf_label)
+    return {results: {bindings: bindings}};
   }
-
-  {{#if input_categories}}
-  VALUES ?tf_id { {{#each input_categories}} "{{this}}" {{/each}} }
-  {{/if}}
-} ORDER BY ?tf_label
+  for (let d of targetTfArray) {
+    if (!withGo[d]) {
+      bindings.push({tf_ensg: {value: "http://identifiers.org/ensembl/" + d}})
+    }
+  }
+  if (mode == "idList") return {results: {bindings: bindings}};
+  let count = bindings.length;
+  bindings = [{
+          count: {value: count},
+          category: {value: "wo_" + withoutId},
+          label: {value: "without annotation"}
+        }];
+  return {results: {bindings: bindings}};
+}
 ```
 
 ## `return`
-
+- 存在レベル、タンパク質リストでのフィルタリング
 ```javascript
-({ main, mode }) => {
-  if (mode === "idList") {
-    return Array.from(new Set(
-      main.results.bindings.map((elem) =>
-        elem.ensg.value.replace("http://identifiers.org/ensembl/", "")
-      )
-    ));
-  } else if (mode === "objectList") {
-    return main.results.bindings.map((elem) => ({
-      id: elem.ensg.value.replace("http://identifiers.org/ensembl/", ""),
+({mode, categoryArray, withoutId, withAnnotation, withoutAnnotation, targetGo}) => {
+  const idVar = "tf_ensg";
+  const idPrefix = "http://identifiers.org/ensembl/";
+  const categoryPrefix = "http://purl.obolibrary.org/obo/";
+  let data = [];
+  if (categoryArray) data = withAnnotation.results.bindings;
+  if (withoutId) data = data.concat(withoutAnnotation.results.bindings);
+  if (mode == "objectList") return data.map(d => {
+    return {
+      id: d[idVar].value.replace(idPrefix, ""), 
       attribute: {
-        categoryId: elem.tf_id.value,
-        uri: "http://identifiers.org/ensembl/" + elem.tf_id.value,
-        label: elem.tf_label.value
+        categoryId: d.category.value.replace(categoryPrefix, ""), 
+        uri: d.category.value,
+        label : d.label.value
       }
-    }));
-  } else {
-    return main.results.bindings.map((elem) => ({
-      categoryId: elem.tf_id.value,
-      label: elem.tf_label.value,
-      count: Number(elem.count.value),
-    }));
+    }
+  });
+  if (mode == "idList") return data.map(d => d[idVar].value.replace(idPrefix, ""));
+  let hasChild = {};
+  for (let d of targetGo.results.bindings) {
+    if (d.child) hasChild[d.go.value] = true;
   }
+  return data.map(d => { 
+    let obj = {
+      categoryId: d.category.value.replace(categoryPrefix, ""), 
+      label: d.label.value,
+      count: Number(d.count.value)
+    }
+    if (hasChild[d.category.value]) obj.hasChild = true;
+    return obj;
+  });	
 }
 ```

@@ -8,7 +8,7 @@ uniprot GO 共有 SPARQLet を流用
 ## Parameters
 
 * `categoryIds` (type: go) (Req.)
-  * default: GO_0008150
+  * default: GO_0003674
   * example: GO_0008150 (biological process), GO_0005575 (cellular component), GO_0003674 (molecular function), ... 
 * `queryIds` (type: ENSG ID of TF)
   * example: ENSG00000065978, ENSG00000070495, ENSG00000072501, ENSG00000079246, ENSG00000099381, ENSG00000102974, ENSG00000104856
