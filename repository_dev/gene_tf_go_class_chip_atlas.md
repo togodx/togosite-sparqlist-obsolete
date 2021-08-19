@@ -231,10 +231,13 @@ ORDER BY DESC(?count)
       if (hasChild[d.category.value]) obj.hasChild = true;
       countData.push(obj);
     }
-    //return [countData, d.category.value, goInDataIndex[d.category.value]];
     countData[goInDataIndex[d.category.value]].count++;
   }
-  let sortedData = countData.sort((a, b) => a.count > b.count ? -1 : 1);
+  let sortedData = countData.sort((a, b) => {
+    if (a.label === "without annotation" || b.label === "without annotation") return 1;
+    if (a.count > b.count) return -1;
+    return 1;
+  });
   return sortedData;
 }
 ```
