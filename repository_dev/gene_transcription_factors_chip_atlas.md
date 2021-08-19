@@ -109,6 +109,9 @@ WHERE
 ```
 
 ## `targetTf`
+- ChIP-Atlas で扱っている転写因子の ENSG ID を取る
+  - メインの SPARQL で一緒に取るほうが合理的だが、実用的な速さにならないのでここで予め取得しておく
+
 ```sparql
 PREFIX obo: <http://purl.obolibrary.org/obo/>
 PREFIX ensg: <http://identifiers.org/ensembl/>
@@ -126,6 +129,8 @@ WHERE {
 ```
 
 ## `targetTfArray`
+- 単純な配列に
+
 ```javascript
 ({targetTf}) => {
   return targetTf.results.bindings.map(d => d.tf_ensg.value.replace("http://identifiers.org/ensembl/", ""));
@@ -143,7 +148,7 @@ PREFIX obo: <http://purl.obolibrary.org/obo/>
 PREFIX ensg: <http://purl.uniprot.org/bgee/>
 
 {{#if mode}}
-SELECT DISTINCT ?uniprot ?category ?label
+SELECT DISTINCT ?tf_ensg ?category ?label
 {{else}}
 SELECT ?category ?label (COUNT (DISTINCT ?tf_ensg) AS ?count)
 {{/if}}
@@ -172,8 +177,7 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX obo: <http://purl.obolibrary.org/obo/>
 SELECT DISTINCT ?go
 FROM <http://rdf.integbio.jp/dataset/togosite/go>
-WHERE
-{
+WHERE {
 {{#unless existTargetGo}}
 {{#if withoutId}}
   ?go rdfs:subClassOf obo:{{withoutId}} .
