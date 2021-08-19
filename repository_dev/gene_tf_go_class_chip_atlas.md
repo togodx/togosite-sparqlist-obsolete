@@ -184,8 +184,8 @@ WHERE
 
 ## `withoutGoArray`
 ```javascript
-({existTargetGo, withoutGo, targetTfArray}) => {
-  if(existTargetGo) return targetTfArray;
+({existTargetGo, withoutGo, targetGoArray}) => {
+  if(existTargetGo) return targetGoArray;
   return withoutGo.results.bindings.map(d => d.go.value.replace("http://purl.obolibrary.org/obo/", ""));
 }
 ```
