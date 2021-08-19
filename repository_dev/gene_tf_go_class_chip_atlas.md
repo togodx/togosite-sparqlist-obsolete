@@ -10,8 +10,8 @@ uniprot GO 共有 SPARQLet を流用
 * `categoryIds` (type: go) (Req.)
   * default: GO_0008150
   * example: GO_0008150 (biological process), GO_0005575 (cellular component), GO_0003674 (molecular function), ... 
-* `queryIds` (type: uniprot)
-  * example: Q9NYF8,Q4V339,A6NCE7,A7E2F4,P69849,A6NN73,Q92928,Q5T1J5,P0C7P4,Q6DN03,P09874,Q08211,Q5T4S7,P12270,Q9UPN3,P07814,P53621,P49321,P0C629,Q9BZK8,Q9BY65
+* `queryIds` (type: ENSG ID of TF)
+  * example: ENSG00000065978, ENSG00000070495, ENSG00000072501, ENSG00000079246, ENSG00000099381, ENSG00000102974, ENSG00000104856
 * `mode`
   * example: idList, objectList
 
@@ -134,34 +134,26 @@ https://integbio.jp/togosite/sparql
 ## `withAnnotation`
 ```sparql
 PREFIX up: <http://purl.uniprot.org/core/>
-PREFIX taxon: <http://purl.uniprot.org/taxonomy/>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX obo: <http://purl.obolibrary.org/obo/>
-PREFIX uniprot: <http://purl.uniprot.org/uniprot/>
 PREFIX ensg: <http://purl.uniprot.org/bgee/>
+
 {{#if mode}}
-#SELECT DISTINCT ?tf_ensg ?category ?label
 SELECT DISTINCT ?uniprot ?category ?label
 {{else}}
 SELECT ?category ?label (COUNT (DISTINCT ?tf_ensg) AS ?count)
-#SELECT ?category ?label (COUNT (DISTINCT ?uniprot) AS ?count)
 {{/if}}
 FROM <http://rdf.integbio.jp/dataset/togosite/uniprot>
 FROM <http://rdf.integbio.jp/dataset/togosite/go>
 WHERE {
-  #?tf_ensg obo:RO_0002428 ?target .
-  #GRAPH <http://rdf.integbio.jp/dataset/togosite/togoid/ensembl_gene-uniprot> {
-  #  ?tf_ensg obo:RO_0002205 ?uniprot .
-  #}
+{{#if categoryArray}}
   VALUES ?tf_ensg { {{#each targetTfArray}} ensg:{{this}} {{/each}} }
   VALUES ?category { {{#each targetGoArray}} obo:{{this}} {{/each}} }
   ?uniprot a up:Protein ;
-           up:organism taxon:9606 ;
-           up:proteome ?proteome .
-  #FILTER(REGEX(STR(?proteome), "UP000005640"))
-  ?uniprot up:classifiedWith/rdfs:subClassOf* ?category ;
+           up:classifiedWith/rdfs:subClassOf* ?category ;
            rdfs:seeAlso ?tf_ensg .
   ?category rdfs:label ?label .
+{{/if}}
 }
 {{#unless mode}}
 ORDER BY DESC(?count)
@@ -171,28 +163,24 @@ ORDER BY DESC(?count)
 - あるGOカテゴリを持たないUniProtを１つのSPARQLで取ろうとするとメモリオーバーするので変則的
 
 ## `withGoUniProt`
-- UniProts without GO annotation 
+- UniProts with GO annotation 
 ```sparql
 PREFIX up: <http://purl.uniprot.org/core/>
-PREFIX taxon: <http://purl.uniprot.org/taxonomy/>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX obo: <http://purl.obolibrary.org/obo/>
-PREFIX uniprot: <http://purl.uniprot.org/uniprot/>
 PREFIX ensg: <http://purl.uniprot.org/bgee/>
 
 SELECT DISTINCT ?tf_ensg
 FROM <http://rdf.integbio.jp/dataset/togosite/uniprot>
 FROM <http://rdf.integbio.jp/dataset/togosite/go>
 WHERE {
+{{#if withoutId}}
   VALUES ?tf_ensg { {{#each targetTfArray}} ensg:{{this}} {{/each}} }
   VALUES ?category { {{#each targetGoArray}} obo:{{this}} {{/each}} }
   ?uniprot a up:Protein ;
-           up:organism taxon:9606 ;
-           up:proteome ?proteome .
-  FILTER(REGEX(STR(?proteome), "UP000005640"))
-  ?uniprot up:classifiedWith/rdfs:subClassOf* ?category ;
+           up:classifiedWith/rdfs:subClassOf* ?category ;
            rdfs:seeAlso ?tf_ensg .
-  ?category rdfs:label ?label .
+{{/if}}
 }
 ```
 
