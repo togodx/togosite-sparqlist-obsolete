@@ -97,7 +97,7 @@ WHERE
 
 ```javascript
 ({targetGo}) => {
- return targetGo.results.bindings.map(d => d.go.value.replace("http://purl.obolibrary.org/obo/", ""));
+  return targetGo.results.bindings.map(d => d.go.value.replace("http://purl.obolibrary.org/obo/", ""));
 }
 ```
 
@@ -162,7 +162,7 @@ ORDER BY DESC(?count)
 
 - あるGOカテゴリを持たないUniProtを１つのSPARQLで取ろうとするとメモリオーバーするので変則的
 
-## `withGoUniProt`
+## `withGoUniProtAll`
 - UniProts with GO annotation 
 ```sparql
 PREFIX up: <http://purl.uniprot.org/core/>
@@ -175,12 +175,36 @@ FROM <http://rdf.integbio.jp/dataset/togosite/uniprot>
 FROM <http://rdf.integbio.jp/dataset/togosite/go>
 WHERE {
 {{#if withoutId}}
-  VALUES ?tf_ensg { {{#each targetTfArray}} ensg:{{this}} {{/each}} }
-  VALUES ?category { {{#each targetGoArray}} obo:{{this}} {{/each}} }
-  ?uniprot a up:Protein ;
-           up:classifiedWith/rdfs:subClassOf* ?category ;
+  {
+    SELECT DISTINCT ?go
+    FROM <http://rdf.integbio.jp/dataset/togosite/go>
+    WHERE {
+      ?go rdfs:subClassOf+ obo:{{withoutId}} .
+    }
+  }
+  #VALUES ?tf_ensg { {{#each targetTfArray}} ensg:{{this}} {{/each}} } # ここでやるとメモリオーバー
+  ?uniprot up:classifiedWith ?go ;
            rdfs:seeAlso ?tf_ensg .
 {{/if}}
+}
+```
+
+## `withGoUniProt`
+```javascript
+({targetTfArray, withGoUniProtAll, withoutId}) => {
+  if (!withoutId) return {results: {bindings: []}};
+  for (let d of targetTfArray) {
+    isTarget[d.tf_ensg.value] = true;
+  }
+  let bindings = [];
+  for (let d of withGoUniProtAll.results.bindings) {
+    if(isTarget[d.tf_ensg.value]) {
+      bindings.push({
+        tf_ensg: {value: d.tf_ensg.value}
+      });
+    }
+  }
+  return {results: {bindings: bindings}};
 }
 ```
 
