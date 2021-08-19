@@ -35,6 +35,7 @@ uniprot GO 共有 SPARQLet を流用
     let categoryArray = [];
     for (let id of array) {
       if (!id.match(/^wo_GO_\d+/)) categoryArray.push(id);
+      else categoryArray.push(id.match(/wo_(GO_\d+)/)[1]);
     }
     if (categoryArray.length == 0) return false;
     return categoryArray;
@@ -146,14 +147,12 @@ SELECT DISTINCT ?tf_ensg ?category ?label
 FROM <http://rdf.integbio.jp/dataset/togosite/uniprot>
 FROM <http://rdf.integbio.jp/dataset/togosite/go>
 WHERE {
-{{#if categoryArray}}
   VALUES ?tf_ensg { {{#each targetTfArray}} ensg:{{this}} {{/each}} }
   VALUES ?category { {{#each targetGoArray}} obo:{{this}} {{/each}} }
   ?uniprot a up:Protein ;
            up:classifiedWith/rdfs:subClassOf* ?category ;
            rdfs:seeAlso ?tf_ensg .
   ?category rdfs:label ?label .
-{{/if}}
 }
 ```
 
@@ -191,13 +190,18 @@ WHERE {
 ## `return`
 - 存在レベル、タンパク質リストでのフィルタリング
 ```javascript
-({mode, categoryArray, withoutId, withAnnotation, withoutAnnotation, targetGo}) => {
+({mode, category_top_flag, categoryArray, withoutId, withAnnotation, withoutAnnotation, targetGo}) => {
   const idVar = "tf_ensg";
-  const idPrefix = "http://identifiers.org/ensembl/";
+  const idPrefix = "http://purl.uniprot.org/bgee/";
   const categoryPrefix = "http://purl.obolibrary.org/obo/";
   let data = [];
   if (categoryArray) data = withAnnotation.results.bindings;
-  if (withoutId) data = data.concat(withoutAnnotation.results.bindings);
+  if (withoutId) {
+    if (category_top_flag)
+      data = data.concat(withoutAnnotation.results.bindings);
+    else
+      data = withoutAnnotation.results.bindings;
+  }
   if (mode == "objectList") return data.map(d => {
     return {
       id: d[idVar].value.replace(idPrefix, ""), 
