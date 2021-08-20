@@ -110,7 +110,7 @@ WHERE
 PREFIX obo: <http://purl.obolibrary.org/obo/>
 PREFIX ensg: <http://identifiers.org/ensembl/>
 
-SELECT DISTINCT ?tf_ensg
+SELECT DISTINCT ?tf_ensg ?target
 FROM <http://rdf.integbio.jp/dataset/togosite/chip_atlas>
 WHERE {
   {{#if queryArray}}
@@ -127,7 +127,7 @@ WHERE {
 
 ```javascript
 ({targetTf}) => {
-  return targetTf.results.bindings.map(d => d.tf_ensg.value.replace("http://identifiers.org/ensembl/", ""));
+  return  Array.from(new Set(targetTf.results.bindings.map(d => d.tf_ensg.value.replace("http://identifiers.org/ensembl/", ""))));
 }
 ```
 
@@ -148,11 +148,96 @@ FROM <http://rdf.integbio.jp/dataset/togosite/uniprot>
 FROM <http://rdf.integbio.jp/dataset/togosite/go>
 WHERE {
   VALUES ?tf_ensg { {{#each targetTfArray}} ensg:{{this}} {{/each}} }
-  VALUES ?parent_category { {{#each targetGoArray}} obo:{{this}} {{/each}} }
+  VALUES ?category { {{#each targetGoArray}} obo:{{this}} {{/each}} }
   ?uniprot a up:Protein ;
-           up:classifiedWith ?category ;
+           up:classifiedWith/rdfs:subClassOf* ?category ;
            rdfs:seeAlso ?tf_ensg .
-  ?category rdfs:label ?label ;
-            rdfs:subClassOf* ?parent_category .
+  ?category rdfs:label ?label .
+}
+```
+
+- あるGOカテゴリを持たないUniProtを１つのSPARQLで取ろうとするとメモリオーバーするので変則的
+
+## `withoutAnnotation`
+- withAnnotation に出現しないが targetTfArray に出現するもの
+```javascript
+({mode, queryArray, targetTfArray, withAnnotation, withoutId}) => {
+  if (!withoutId) return {results: {bindings: []}};
+  let query = {};
+  if (queryArray) {
+    for (let d of queryArray) {
+      query[d] = true;
+    }
+  }
+  let withGo = {};
+  for (let d of withAnnotation.results.bindings) {
+    withGo[d.tf_ensg.value.replace("http://purl.uniprot.org/bgee/", "")] = true;
+  }
+  let bindings = [];
+  for (let d of targetTfArray) {
+    if (!withGo[d] && (!queryArray || (queryArray && query[d]))) {
+      bindings.push({
+        tf_ensg: {value: "http://purl.uniprot.org/bgee/" + d},
+        category: {value: "wo_" + withoutId},
+        label: {value: "without annotation"}
+      });
+    }
+  }
+  return {results: {bindings: bindings}};
+}
+```
+
+## `return`
+- 存在レベル、タンパク質リストでのフィルタリング
+```javascript
+({mode, category_top_flag, categoryArray, withoutId, withAnnotation, withoutAnnotation, targetGo}) => {
+  const idVar = "tf_ensg";
+  const idPrefix = "http://purl.uniprot.org/bgee/";
+  const categoryPrefix = "http://purl.obolibrary.org/obo/";
+  let data = [];
+  if (categoryArray) data = withAnnotation.results.bindings;
+  if (withoutId) {
+    if (category_top_flag)
+      data = data.concat(withoutAnnotation.results.bindings);
+    else
+      data = withoutAnnotation.results.bindings;
+  }
+  if (mode == "objectList") return data.map(d => {
+    return {
+      id: d[idVar].value.replace(idPrefix, ""), 
+      attribute: {
+        categoryId: d.category.value.replace(categoryPrefix, ""), 
+        uri: d.category.value,
+        label : d.label.value
+      }
+    }
+  });
+  if (mode == "idList") return data.map(d => d[idVar].value.replace(idPrefix, ""));
+
+  let hasChild = {};
+  for (let d of targetGo.results.bindings) {
+    if (d.child) hasChild[d.go.value] = true;
+  }
+  let countData = [];
+  let goInDataIndex = {};
+  let n = 0;
+  for (d of data) {
+    if (!Number.isInteger(goInDataIndex[d.category.value])) {
+      goInDataIndex[d.category.value] = n++;
+      let obj = {
+        categoryId: d.category.value.replace(categoryPrefix, ""), 
+        label: d.label.value,
+        count: 0
+      }
+      if (hasChild[d.category.value]) obj.hasChild = true;
+      countData.push(obj);
+    }
+    countData[goInDataIndex[d.category.value]].count++;
+  }
+  return countData.sort((a, b) => {
+    if (a.label === "without annotation" || b.label === "without annotation") return 1;
+    if (a.count > b.count) return -1;
+    return 1;
+  });
 }
 ```
