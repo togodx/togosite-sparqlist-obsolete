@@ -8,7 +8,7 @@ uniprot GO 共有 SPARQLet を流用
 ## Parameters
 
 * `categoryIds` (type: go) (Req.)
-  * default: GO_0008150
+  * default: GO_0003674
   * example: GO_0008150 (biological process), GO_0005575 (cellular component), GO_0003674 (molecular function), ... 
 * `queryIds` (type: ENSG ID of TF)
   * example: ENSG00000065978, ENSG00000070495, ENSG00000072501, ENSG00000079246, ENSG00000099381, ENSG00000102974, ENSG00000104856
@@ -35,6 +35,7 @@ uniprot GO 共有 SPARQLet を流用
     let categoryArray = [];
     for (let id of array) {
       if (!id.match(/^wo_GO_\d+/)) categoryArray.push(id);
+      else categoryArray.push(id.match(/wo_(GO_\d+)/)[1]);
     }
     if (categoryArray.length == 0) return false;
     return categoryArray;
@@ -134,7 +135,7 @@ WHERE {
 https://integbio.jp/togosite/sparql
  
 ## `withAnnotation`
-- mode が指定されていないときのカウントは後でやる。それほど多くないので大丈夫なはず
+- mode が指定されていないときのカウントは後で javascript 内でやる。それほど多くないので大丈夫
 
 ```sparql
 PREFIX up: <http://purl.uniprot.org/core/>
@@ -146,18 +147,13 @@ SELECT DISTINCT ?tf_ensg ?category ?label
 FROM <http://rdf.integbio.jp/dataset/togosite/uniprot>
 FROM <http://rdf.integbio.jp/dataset/togosite/go>
 WHERE {
-{{#if categoryArray}}
   VALUES ?tf_ensg { {{#each targetTfArray}} ensg:{{this}} {{/each}} }
   VALUES ?category { {{#each targetGoArray}} obo:{{this}} {{/each}} }
   ?uniprot a up:Protein ;
            up:classifiedWith/rdfs:subClassOf* ?category ;
            rdfs:seeAlso ?tf_ensg .
   ?category rdfs:label ?label .
-{{/if}}
 }
-{{#unless mode}}
-ORDER BY DESC(?count)
-{{/unless}}
 ```
 
 - あるGOカテゴリを持たないUniProtを１つのSPARQLで取ろうとするとメモリオーバーするので変則的
@@ -194,13 +190,18 @@ ORDER BY DESC(?count)
 ## `return`
 - 存在レベル、タンパク質リストでのフィルタリング
 ```javascript
-({mode, categoryArray, withoutId, withAnnotation, withoutAnnotation, targetGo}) => {
+({mode, category_top_flag, categoryArray, withoutId, withAnnotation, withoutAnnotation, targetGo}) => {
   const idVar = "tf_ensg";
-  const idPrefix = "http://identifiers.org/ensembl/";
+  const idPrefix = "http://purl.uniprot.org/bgee/";
   const categoryPrefix = "http://purl.obolibrary.org/obo/";
   let data = [];
   if (categoryArray) data = withAnnotation.results.bindings;
-  if (withoutId) data = data.concat(withoutAnnotation.results.bindings);
+  if (withoutId) {
+    if (category_top_flag)
+      data = data.concat(withoutAnnotation.results.bindings);
+    else
+      data = withoutAnnotation.results.bindings;
+  }
   if (mode == "objectList") return data.map(d => {
     return {
       id: d[idVar].value.replace(idPrefix, ""), 
@@ -233,11 +234,10 @@ ORDER BY DESC(?count)
     }
     countData[goInDataIndex[d.category.value]].count++;
   }
-  let sortedData = countData.sort((a, b) => {
+  return countData.sort((a, b) => {
     if (a.label === "without annotation" || b.label === "without annotation") return 1;
     if (a.count > b.count) return -1;
     return 1;
   });
-  return sortedData;
 }
 ```
