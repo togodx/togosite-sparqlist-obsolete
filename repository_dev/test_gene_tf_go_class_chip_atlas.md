@@ -110,7 +110,7 @@ WHERE
 PREFIX obo: <http://purl.obolibrary.org/obo/>
 PREFIX ensg: <http://identifiers.org/ensembl/>
 
-SELECT DISTINCT ?tf_ensg ?target
+SELECT DISTINCT ?tf_ensg #?target
 FROM <http://rdf.integbio.jp/dataset/togosite/chip_atlas>
 WHERE {
   {{#if queryArray}}
