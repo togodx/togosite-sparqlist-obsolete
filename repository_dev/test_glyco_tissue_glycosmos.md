@@ -17,7 +17,7 @@ https://ts.glycosmos.org/sparql
 
 ## Parameters
 * `categoryIds` (type: UBERON ID)
-  * example: UBERON_0001155, UBERON_0002107
+  * example: UBERON_0001155, UBERON_0002107, UBERON_0001264
 * `queryIds` (type: GlyTouCan ID)
   * example: 
 * `mode` (type: string)
