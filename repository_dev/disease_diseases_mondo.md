@@ -60,7 +60,8 @@ PREFIX mondo: <http://purl.obolibrary.org/obo/>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX owl: <http://www.w3.org/2002/07/owl#>
 {{#if mode}}
-SELECT DISTINCT ?mondo ?category ?label
+#SELECT DISTINCT ?mondo ?category ?label
+SELECT DISTINCT ?mondo ?category ?mondo_label
 {{else}}
 SELECT ?category ?label (COUNT (DISTINCT ?mondo) AS ?count) 
 {{/if}}
@@ -82,6 +83,7 @@ WHERE {
   ?category rdfs:label ?label.
   ?mondo rdfs:subClassOf* ?category.
   ?mondo rdf:type owl:Class.  # ?hp rdfs:subClassOf* ?category が?mondoの値に関係なく、trueになってしまうため追加。次のOPTIONALも同じ意図だがこちらの方が軽いはず。
+  ?mondo rdfs:label ?mondo_label.
 } 
 {{#unless mode}}  
 ORDER BY DESC(?count)
@@ -101,7 +103,8 @@ ORDER BY DESC(?count)
       attribute: {
         categoryId: d.category.value.replace(categoryPrefix, ""), 
         uri: d.category.value,
-        label : d.label.value
+//        label : d.label.value
+        label : d.mondo_label.value
       }
     }
   });
