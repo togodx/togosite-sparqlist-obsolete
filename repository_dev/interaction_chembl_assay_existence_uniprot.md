@@ -1,5 +1,5 @@
 # UniProt におけるAssayの有無の内訳を返す（守屋）
-#2021/0826 信定追記・改変
+#2021/08/26 信定：hasAssayにconfidence score=9の条件を追加
 
 ## Description
  
