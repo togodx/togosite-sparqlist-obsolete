@@ -1,4 +1,5 @@
 # UniProt におけるAssayの有無の内訳を返す（守屋）
+#2021/0826 信定追記・改変
 
 ## Description
  
