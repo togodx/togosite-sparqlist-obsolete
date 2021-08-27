@@ -158,6 +158,34 @@ WHERE {
 
 - あるGOカテゴリを持たないUniProtを１つのSPARQLで取ろうとするとメモリオーバーするので変則的
 
+## `tfWithTargetGoArray`
+```javascript
+({withAnnotation}) => {
+  const idVar = "tf_ensg";
+  const idPrefix = "http://purl.uniprot.org/bgee/";
+
+  return withAnnotation.results.bindings.map(d => d[idVar].value.replace(idPrefix, ""));
+}
+```
+
+## `downstreamGene`
+- ChIP-Atlas で扱っている転写因子の ENSG ID を取る
+  - メインの SPARQL で一緒に取るほうが合理的だが、実用的な速さにならないのでここで予め取得しておく
+
+```sparql
+PREFIX obo: <http://purl.obolibrary.org/obo/>
+PREFIX ensg: <http://identifiers.org/ensembl/>
+
+SELECT DISTINCT ?tf_ensg ?target
+FROM <http://rdf.integbio.jp/dataset/togosite/chip_atlas>
+WHERE {
+  VALUES ?tf_ensg { {{#each tfWithTargetGoArray}} ensg:{{this}} {{/each}} }
+  GRAPH <http://rdf.integbio.jp/dataset/togosite/chip_atlas> {
+    ?tf_ensg obo:RO_0002428 ?target .
+  }
+}
+```
+
 ## `withoutAnnotation`
 - withAnnotation に出現しないが targetTfArray に出現するもの
 ```javascript
