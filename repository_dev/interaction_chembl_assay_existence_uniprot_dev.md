@@ -70,41 +70,66 @@ PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 PREFIX taxon: <http://identifiers.org/taxonomy/>
 PREFIX cco: <http://rdf.ebi.ac.uk/terms/chembl#>
 PREFIX uniprot: <http://purl.uniprot.org/uniprot/>
-#PREFIX bao: <http://www.bioassayontology.org/bao#BAO_>
 {{#if mode}}
-  SELECT DISTINCT ?uniprot
+  SELECT DISTINCT ?conf_score ?conf_label ?uniprot
 {{else}}
-SELECT COUNT(DISTINCT ?uniprot) AS ?count
+SELECT ?conf_score ?conf_label COUNT(DISTINCT ?uniprot) AS ?count
 {{/if}}
 FROM <http://rdf.integbio.jp/dataset/togosite/chembl>
 WHERE {
 {{#if queryArray}}
       VALUES ?uniprot { {{#each queryArray}} uniprot:{{this}} {{/each}} }
 {{/if}}
-  #VALUES ?bao { bao:0000186 bao:0000187 bao:0000188 bao:0000189 bao:0000190 bao:0000192 } # AC50 CC50 EC50 GI50 IC50 Ki
-  VALUES ?conf {9}
   ?chembl a cco:SmallMolecule ;
           cco:hasActivity/cco:hasAssay ?assay.
   ?assay a cco:Assay ;
-            cco:targetConfScore ?conf ;
+            cco:targetConfScore ?conf_score ;
+            cco:targetConfDesc ?conf_label ;
             cco:hasTarget/skos:exactMatch [
             cco:taxonomy taxon:9606 ;
             skos:exactMatch ?uniprot
           ] . 
-  #?activity bao:0000208 ?bao .
   ?uniprot a cco:UniprotRef .
 }
 ```
 
+## `countHasAssay`
+
+```sparql
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX taxon: <http://identifiers.org/taxonomy/>
+PREFIX cco: <http://rdf.ebi.ac.uk/terms/chembl#>
+PREFIX uniprot: <http://purl.uniprot.org/uniprot/>
+SELECT COUNT(DISTINCT ?uniprot) AS ?count
+FROM <http://rdf.integbio.jp/dataset/togosite/chembl>
+WHERE {
+{{#unless mode}}
+{{#if queryArray}}
+      VALUES ?uniprot { {{#each queryArray}} uniprot:{{this}} {{/each}} }
+{{/if}}
+  ?chembl a cco:SmallMolecule ;
+          cco:hasActivity/cco:hasAssay ?assay.
+  ?assay a cco:Assay ;
+            cco:targetConfScore ?conf_score ;
+            cco:targetConfDesc ?conf_label ;
+            cco:hasTarget/skos:exactMatch [
+            cco:taxonomy taxon:9606 ;
+            skos:exactMatch ?uniprot
+          ] . 
+  ?uniprot a cco:UniprotRef .
+{{/unless}}
+}
+```
+      
 ## `return`
 
 ```javascript
-({uniprotAll, hasAssay, queryIds, categoryIds, mode})=>{
+({uniprotAll, hasAssay, hasAssayCount, queryIds, categoryIds, mode})=>{
   const idVarName = "uniprot";
+  const categoryVarName = "conf_score";
+  const categoryLabelVarName = "conf_label";
   const idPrefix = "http://purl.uniprot.org/uniprot/";
-  const withId = "1";
-  const withoutId = "0";
-  const withLabel = "Proteins with ChEMBL assay";
+  const withoutId = "without";
   const withoutLabel = "Proteins without ChEMBL assay";
   if (mode) {
     let hasAssayArray = hasAssay.results.bindings.map(d=>d[idVarName].value.replace(idPrefix, ""));
@@ -115,46 +140,46 @@ WHERE {
         if (!hasAssayArray.includes(id)) notAssayArray.push(id);
       }
     }
-    if (mode == "objectList") {
-      if (categoryIds == withId) return hasAssayArray.map(d=>{
-        return {
-          id: d,
-          attribute: {categoryId: withId, label: withLabel}
-        }
-      });
-      if (categoryIds == withoutId) return notAssayArray.map(d=>{
-        return {
-          id: d,
-          attribute: {categoryId: withoutId, label: withoutLabel}
-        }
-      });
-      return hasAssayArray.map(d=>{
-        return {
-          id: d,
-          attribute: {categoryId: withId, label: withLabel}
-        }
-      }).concat(notAssayArray.map(d=>{
-        return {
-         id: d,
-          attribute: {categoryId: withoutId, label: withoutLabel}
-        }
-      }));
+    
+    let res = [];
+    let categoryies = {};
+    categoryIds.replace(/,/g," ").split(/\s+/).map(d => {
+      categories[d] = true;
     }
+                                                     
+    if (!categoryIds || categoryIds.match(/\d/)) {
+      hasAssay.results.bindings.map(d => {
+        if (!categoryIds || categories[d[categoryVarName].valiue]) {
+          res.push({
+            id: d[idVarName].value,
+            attribute: {categoryId: d[categoryVarName].value, label: d[categoryLabelVarName].value}
+          })
+        }
+      })
+    }
+    if (!categoryIds || categories[withoutId]) {
+      notAssayArray.map(d => {
+        res.push({
+          id: d,
+          attribute: {categoryId: withoutId, label: withoutLabel}
+        })
+      )}
+    }
+    if (mode == "objectList") {
+        return res;
     if (mode == "idList") {
-      if (categoryIds == withId) return hasAssayArray;
-      if (categoryIds == withoutId) return notAssayArray;
-      return hasAssayArray.concat(notAssayArray);  
+      return res.map(d => d.id);
     }
   }
       
-  var countHasAssay = hasAssay.results.bindings[0].count.value;
+  var countHasAssay = countHasAssay.results.bindings[0].count.value;
   var countRemain = uniprotAll.results.bindings[0].count.value - countHasAssay;
   let obj = [];
-  if (!queryIds || Number(countHasAssay) != 0) {
+  hasAssay.results.bindings.map(d => {
     obj.push({
-      categoryId: withId, 
-      label: withLabel, 
-      count: Number(countHasAssay)
+      categoryId: d[categoryVarname].value, 
+      label: d[categoryLabelVarname].value, 
+      count: Number(d.count.value)
     });
   }
   if (!queryIds || Number(countRemain) != 0) {
