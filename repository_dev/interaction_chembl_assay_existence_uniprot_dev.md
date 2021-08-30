@@ -124,34 +124,35 @@ WHERE {
 ## `return`
 
 ```javascript
-({uniprotAll, hasAssay, hasAssayCount, queryIds, categoryIds, mode})=>{
+({uniprotAll, hasAssay, countHasAssay, queryIds, categoryIds, mode})=>{
   const idVarName = "uniprot";
   const categoryVarName = "conf_score";
   const categoryLabelVarName = "conf_label";
   const idPrefix = "http://purl.uniprot.org/uniprot/";
   const withoutId = "without";
   const withoutLabel = "Proteins without ChEMBL assay";
+
   if (mode) {
     let hasAssayArray = hasAssay.results.bindings.map(d=>d[idVarName].value.replace(idPrefix, ""));
     let notAssayArray = [];
-    if (!categoryIds || categoryIds.match(/0/)) {
+    if (!categoryIds || categoryIds.match(/without/)) {
       for (let d of uniprotAll.results.bindings) {
         let id = d[idVarName].value.replace(idPrefix, "");
         if (!hasAssayArray.includes(id)) notAssayArray.push(id);
       }
     }
     
-    let res = [];
+    let obj = [];
     let categoryies = {};
     categoryIds.replace(/,/g," ").split(/\s+/).map(d => {
       categories[d] = true;
-    }
-                                                     
+    })
+    
     if (!categoryIds || categoryIds.match(/\d/)) {
       hasAssay.results.bindings.map(d => {
-        if (!categoryIds || categories[d[categoryVarName].valiue]) {
-          res.push({
-            id: d[idVarName].value,
+	    if (!categoryIds || categories[d[categoryVarName].valiue]) {
+	      obj.push({
+	        id: d[idVarName].value,
             attribute: {categoryId: d[categoryVarName].value, label: d[categoryLabelVarName].value}
           })
         }
@@ -159,36 +160,37 @@ WHERE {
     }
     if (!categoryIds || categories[withoutId]) {
       notAssayArray.map(d => {
-        res.push({
+        obj.push({
           id: d,
           attribute: {categoryId: withoutId, label: withoutLabel}
         })
       )}
     }
+
     if (mode == "objectList") {
-        return res;
-    if (mode == "idList") {
-      return res.map(d => d.id);
+      return obj;
+    } else if (mode == "idList") {
+	  return obj.map(d => d.id);
     }
   }
-      
+
   var countHasAssay = countHasAssay.results.bindings[0].count.value;
   var countRemain = uniprotAll.results.bindings[0].count.value - countHasAssay;
   let obj = [];
   hasAssay.results.bindings.map(d => {
     obj.push({
-      categoryId: d[categoryVarname].value, 
-      label: d[categoryLabelVarname].value, 
+      categoryId: d[categoryVarName].value, 
+      label: d[categoryLabelVarName].value, 
       count: Number(d.count.value)
-    });
-  }
+    })
+  })
   if (!queryIds || Number(countRemain) != 0) {
     obj.push({
       categoryId: withoutId, 
       label: withoutLabel, 
       count: Number(countRemain)
-    });
+    })
   }
   return obj;
-};	
+}
 ```
