@@ -132,6 +132,11 @@ WHERE {
   const withoutId = "without";
   const withoutLabel = "Proteins without ChEMBL assay";
 
+  let categories = {};
+  categoryIds.replace(/,/g," ").split(/\s+/).map(d => {
+    categories[d] = true;
+  })
+  
   if (mode) {
     let hasAssayArray = hasAssay.results.bindings.map(d=>d[idVarName].value.replace(idPrefix, ""));
     let notAssayArray = [];
@@ -141,16 +146,11 @@ WHERE {
         if (!hasAssayArray.includes(id)) notAssayArray.push(id);
       }
     }
-    
-    let obj = [];
-    let categoryies = {};
-    categoryIds.replace(/,/g," ").split(/\s+/).map(d => {
-      categories[d] = true;
-    })
-    
+
+    let obj = [];    
     if (!categoryIds || categoryIds.match(/\d/)) {
       hasAssay.results.bindings.map(d => {
-	    if (!categoryIds || categories[d[categoryVarName].valiue]) {
+	    if (!categoryIds || categories[d[categoryVarName].value]) {
 	      obj.push({
 	        id: d[idVarName].value,
             attribute: {categoryId: d[categoryVarName].value, label: d[categoryLabelVarName].value}
@@ -158,13 +158,14 @@ WHERE {
         }
       })
     }
+
     if (!categoryIds || categories[withoutId]) {
       notAssayArray.map(d => {
         obj.push({
           id: d,
           attribute: {categoryId: withoutId, label: withoutLabel}
         })
-      )}
+      })
     }
 
     if (mode == "objectList") {
@@ -173,18 +174,20 @@ WHERE {
 	  return obj.map(d => d.id);
     }
   }
-
+  
   var countHasAssay = countHasAssay.results.bindings[0].count.value;
   var countRemain = uniprotAll.results.bindings[0].count.value - countHasAssay;
   let obj = [];
   hasAssay.results.bindings.map(d => {
-    obj.push({
-      categoryId: d[categoryVarName].value, 
-      label: d[categoryLabelVarName].value, 
-      count: Number(d.count.value)
-    })
+    if (!categoryIds || categories[d[categoryVarName].value]) {
+      obj.push({
+        categoryId: d[categoryVarName].value, 
+        label: d[categoryLabelVarName].value, 
+        count: Number(d.count.value)
+      })
+    }
   })
-  if (!queryIds || Number(countRemain) != 0) {
+  if ((!queryIds || Number(countRemain) != 0) && (!categoryIds || categories[withoutId])) {
     obj.push({
       categoryId: withoutId, 
       label: withoutLabel, 
