@@ -92,20 +92,20 @@ order by desc(?count)
       )
     ));
   } else if (mode === "objectList") {
-    return main.results.bindings.map((elem) => ({
+    return Array.from(new Set(main.results.bindings.map((elem) => ({
       id: elem.glytoucan.value.replace("http://rdf.glycoinfo.org/glycan/", ""),
       attribute: {
         categoryId: elem.tissue.value.replace("http://purl.obolibrary.org/obo/", ""),
         uri: elem.tissue.value,
         label: elem.tissue_label.value
       }
-    }));
+    }))));
   } else {
-    return main.results.bindings.map((elem) => ({
+    return Array.from(new Set(main.results.bindings.map((elem) => ({
       categoryId: elem.tissue.value.replace("http://purl.obolibrary.org/obo/", ""),
       label: elem.tissue_label.value,
       count: Number(elem.count.value),
-    }));
+    }))));
   }
 }
 ```
