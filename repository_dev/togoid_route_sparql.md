@@ -15,6 +15,7 @@
 ({source, target}) => {
   let config = {
     database: {
+      glycan: ["glytoucan"],
       variant: ["togovar"],
       gene: ["hgnc", "ncbigene", "ensembl_gene", "ensembl_transcript"],
       protein: ["uniprot", "chembl_target"],
@@ -24,6 +25,16 @@
       disease: ["mondo", "medgen", "omim_phenotype", "orphanet", "hp", "mesh"]
     },
     route: {
+      glycan: {
+        glycan: [[]],
+        variant: [["uniprot", "hgnc"]],
+        gene: [["uniprot"]],
+        protein: [["uniprot"]],
+        structure: [["uniprot", "pdb"]],
+        compound: [["pubchem_compound"]],
+        nando: [["uniprot", "ncbigene", "medgen", "mondo"]],
+        disease: [["uniprot", "ncbigene", "medgen"]]
+      },
       variant: {
         variant: [[]],
         gene: [[]],
@@ -172,6 +183,7 @@ PREFIX pubchem_compound: <http://identifiers.org/pubchem.compound/>
 PREFIX reactome_reaction: <http://identifiers.org/reactome/>
 PREFIX togovar: <http://togovar.biosciencedbc.jp/variation/>
 PREFIX uniprot: <http://purl.uniprot.org/uniprot/>
+PREFIX glytoucan: <http://identifiers.org/glytoucan/>
 
 SELECT DISTINCT ?source_id ?target_id #?source_uri ?target_uri
 WHERE {
