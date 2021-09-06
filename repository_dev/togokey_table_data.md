@@ -93,8 +93,11 @@ async ({togoKey, properties, queryIds})=>{
   }
   
   // label 取得（labelApi が対応しない、ラベルの無い togovar などを入れる場合は注意）
-  let togoIdToLabelFetch = fetchReq(labelApi, options, "togoKey=" + togoKey + "&queryIds=" + queryIds); // promise
-    
+  let togoIdToLabelFetch;
+  if (togoKey != "glytoucan") {
+    togoIdToLabelFetch = fetchReq(labelApi, options, "togoKey=" + togoKey + "&queryIds=" + queryIds); // promise
+  }
+
   let attributeDataAll = await getAllAttributeData(); // promise
   // console.log(attributeDataAll);
   
@@ -133,7 +136,10 @@ async ({togoKey, properties, queryIds})=>{
   }
   
   // object to list
-  let togoIdToLabel = await togoIdToLabelFetch;
+  let togoIdToLabel;
+  if (togoKey != "glytoucan") {
+    togoIdToLabel = await togoIdToLabelFetch;
+  }
   return togoIdArray.map(togoId=>{
     let obj = { id: togoId };
     if (togoIdToLabel[togoId]) obj.label = togoIdToLabel[togoId];
