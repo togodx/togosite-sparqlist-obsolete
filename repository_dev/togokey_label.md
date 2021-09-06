@@ -1,5 +1,7 @@
 # togokey label (aggregate SPARQList) ラベル取得
 
+- ラベル無し key は "key" セクションでフラグ
+
 ## Parameters
 
 * `togoKey` hgnc, ncbigene, ensembl_gene, ensembl_transcript, uniprot, pdb, pubchem_compound, chembl_compound, chebi, mondo, mesh, hp, nando
@@ -19,6 +21,7 @@
 ({togoKey})=>{
   let obj = {};
   obj[togoKey] = true;
+  if (togoKey == "glytoucan" || togoKey == "togovar") obj.unlabeledKey = true;
   return obj;
 }
 ```
@@ -89,6 +92,7 @@ FROM <http://rdf.integbio.jp/dataset/togosite/hpo>
 FROM <http://rdf.integbio.jp/dataset/togosite/nando>
 {{/if}}
 WHERE {
+ {{#unless key.unlabeledKey}}
   VALUES ?uri { {{#each queryArray}} {{../togoKey}}:{{this}} {{/each}} }
   {{#if key.hgnc}}
   ?uri rdfs:label ?label .
@@ -134,6 +138,7 @@ WHERE {
   FILTER(LANG(?label) = "en")
   {{/if}}
   BIND(REPLACE(STR(?uri), {{togoKey}}:, "") AS ?id)
+ {{/unless}}
 }
 ```
 
@@ -142,6 +147,7 @@ WHERE {
 ({label})=>{
   let obj = {};
   for (let d of label.results.bindings) {
+    if (!d.id) break;
     obj[d.id.value] = d.label.value;
   }
   return obj;
