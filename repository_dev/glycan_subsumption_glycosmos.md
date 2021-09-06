@@ -58,29 +58,27 @@ PREFIX structures: <https://glytoucan.org/Structures/Glycans/>
 {{#if mode}}
 SELECT DISTINCT ?type ?glytoucan
 {{else}}
-SELECT ?type (count(DISTINCT ?wurcs) as ?count) 
+SELECT ?type (count(DISTINCT ?glytoucan) as ?count) 
 {{/if}}
 FROM <http://rdf.glytoucan.org/partner/glycome-db>
 FROM <http://rdf.glytoucan.org/partner/bcsdb>
 FROM <http://rdf.glytoucan.org/partner/glycoepitope>
 FROM <http://rdf.glycosmos.org/glycans/subsumption>
 WHERE {
-  SELECT DISTINCT ?wurcs ?type
-  WHERE {
   {{#if input_queries}}
-    VALUES ?glytoucan { {{#each input_queries}} structures:{{this}} {{/each}} }
+  VALUES ?glytoucan { {{#each input_queries}} structures:{{this}} {{/each}} }
   {{/if}}
   {{#if input_categories}}
-    VALUES ?tissue { {{#each input_categories}} obo:{{this}} {{/each}} }
+  VALUES ?type { {{#each input_categories}} sbsmpt:{{this}} {{/each}} }
   {{/if}}
-    ?wurcs a ?type ;
-           rdfs:seeAlso ?glytoucan ;
-           sbsmpt:subsumes* / dcterms:source / glycan:is_from_source / rdfs:seeAlso ?taxonomy .
-    VALUES ?taxonomy { <http://identifiers.org/taxonomy/9606> }
-  }
+  ?wurcs a ?type ;
+         rdfs:seeAlso ?glytoucan ;
+         sbsmpt:subsumes* / dcterms:source / glycan:is_from_source / rdfs:seeAlso ?taxonomy .
+  VALUES ?taxonomy { <http://identifiers.org/taxonomy/9606> }
 }
 {{#unless mode}}
 GROUP BY ?type
+ORDER BY ?count
 {{/unless}}
 ```
 
@@ -100,13 +98,13 @@ GROUP BY ?type
         uri: elem.type.value,
         label: elem.type.value.replace("http://www.glycoinfo.org/glyco/owl/relation#", "")
       }
-    });
+    }));
   } else {
     return main.results.bindings.map((elem) => ({
       categoryId: elem.type.value.replace("http://www.glycoinfo.org/glyco/owl/relation#", ""),
-      label: elem.type.value.replace("http://www.glycoinfo.org/glyco/owl/relation#", ""),,
+      label: elem.type.value.replace("http://www.glycoinfo.org/glyco/owl/relation#", ""),
       count: Number(elem.count.value),
-    });
+    }));
   }
 }
 ```
