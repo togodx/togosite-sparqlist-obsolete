@@ -1,7 +1,4 @@
-# UniProt におけるAssayの有無の内訳を返す（守屋）
-#2021/08/26 信定：hasAssayにconfidence score=9の条件を追加
-
-＃＃
+# UniProtについて、ChEMBL Assayの有無とtargetの内訳を返す（信定）
 
 ## Description
  
@@ -72,25 +69,28 @@ PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 PREFIX taxon: <http://identifiers.org/taxonomy/>
 PREFIX cco: <http://rdf.ebi.ac.uk/terms/chembl#>
 PREFIX uniprot: <http://purl.uniprot.org/uniprot/>
+#PREFIX bao: <http://www.bioassayontology.org/bao#BAO_>
 {{#if mode}}
-  SELECT DISTINCT ?conf_score ?conf_label ?uniprot
+  SELECT DISTINCT ?uniprot
 {{else}}
-SELECT ?conf_score ?conf_label COUNT(DISTINCT ?uniprot) AS ?count
+SELECT COUNT(DISTINCT ?uniprot) AS ?count
 {{/if}}
 FROM <http://rdf.integbio.jp/dataset/togosite/chembl>
 WHERE {
 {{#if queryArray}}
       VALUES ?uniprot { {{#each queryArray}} uniprot:{{this}} {{/each}} }
 {{/if}}
+  #VALUES ?bao { bao:0000186 bao:0000187 bao:0000188 bao:0000189 bao:0000190 bao:0000192 } # AC50 CC50 EC50 GI50 IC50 Ki
+  VALUES ?conf {9}
   ?chembl a cco:SmallMolecule ;
           cco:hasActivity/cco:hasAssay ?assay.
   ?assay a cco:Assay ;
-            cco:targetConfScore ?conf_score ;
-            cco:targetConfDesc ?conf_label ;
+            cco:targetConfScore ?conf ;
             cco:hasTarget/skos:exactMatch [
             cco:taxonomy taxon:9606 ;
             skos:exactMatch ?uniprot
           ] . 
+  #?activity bao:0000208 ?bao .
   ?uniprot a cco:UniprotRef .
 }
 ```
