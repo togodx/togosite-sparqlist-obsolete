@@ -88,8 +88,8 @@ WHERE {
   ?s
     mass:WURCSMassCalculator ?mass ;
     rdfs:seeAlso ?glytoucan ;
-    sbsmpt:subsumes* / dcterms:source / glycan:is_from_source / rdfs:seeAlso ?taxnomy .
-  VALUES ?taxnomy { <http://identifiers.org/taxonomy/9606> }
+    sbsmpt:subsumes* / dcterms:source / glycan:is_from_source / rdfs:seeAlso ?taxonomy .
+  VALUES ?taxonomy { <http://identifiers.org/taxonomy/9606> }
   {{#if range}}
       FILTER (
         {{#if range.begin}} 
