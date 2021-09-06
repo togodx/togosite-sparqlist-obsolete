@@ -79,16 +79,16 @@ PREFIX struct: <https://glytoucan.org/Structures/Glycans/>
 {{#if mode}}
 SELECT DISTINCT ?mass ?glytoucan
 {{else}}
-SELECT ?mass_2 ?label (COUNT(?glytoucan) as ?count) 
+SELECT ?mass_2 ?label (COUNT(DISTINCT ?glytoucan) as ?count) 
 {{/if}}
 WHERE {
   {{#if input_queries}}
   VALUES ?glytoucan { {{#each input_queries}} struct:{{this}} {{/each}} }
   {{/if}}
-  []
+  ?s
     mass:WURCSMassCalculator ?mass ;
     rdfs:seeAlso ?glytoucan ;
-    dcterms:source / glycan:is_from_source / rdfs:seeAlso ?taxnomy .
+    sbsmpt:subsumes* / dcterms:source / glycan:is_from_source / rdfs:seeAlso ?taxnomy .
   VALUES ?taxnomy { <http://identifiers.org/taxonomy/9606> }
   {{#if range}}
       FILTER (

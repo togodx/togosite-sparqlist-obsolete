@@ -100,7 +100,7 @@ WHERE {
 ## `return`
 
 ```javascript
-({uniprotAll, hasAssay, countHasAssay, queryIds, categoryIds, mode})=>{
+({uniprotAll, hasAssay, queryIds, categoryIds, mode})=>{
   const idVarName = "uniprot";
   const categoryVarName = "conf_score";
   const categoryLabelVarName = "conf_label";
