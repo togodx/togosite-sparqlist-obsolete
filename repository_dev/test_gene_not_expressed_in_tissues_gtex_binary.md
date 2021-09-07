@@ -4,11 +4,6 @@
 
 - Data sources
     - [GTEx version 8](https://gtexportal.org/home/datasets)
-- Query
-    -  Input
-        - Ensembl Gene ID
-    - Output
-        - RefEx Sample ID for tissues
 
 ## Endpoint
 
@@ -25,7 +20,6 @@ PREFIX refexo:  <http://purl.jp/bio/01/refexo#>
 PREFIX sio: <http://semanticscience.org/resource/>
 PREFIX schema: <http://schema.org/>
 PREFIX ensg: <http://rdf.ebi.ac.uk/resource/ensembl/>
-PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 
 SELECT DISTINCT ?parent_label ?parent ?child ?child_label
 WHERE {
