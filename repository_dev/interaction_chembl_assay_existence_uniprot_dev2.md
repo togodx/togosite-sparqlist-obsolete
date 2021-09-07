@@ -129,7 +129,7 @@ WHERE {
 ## `return`
 
 ```javascript
-({uniprotAll, hasAssay, queryIds, categoryIds, mode})=>{
+({uniprotAll, hasAssay, countHasAssay, queryIds, categoryIds, mode})=>{
   const idVarName = "uniprot";
   const categoryVarName = "conf_score";
   const categoryLabelVarName = "conf_label";
@@ -141,7 +141,9 @@ WHERE {
   categoryIds.replace(/,/g," ").split(/\s+/).map(d => {
     categories[d] = true;
   })
-  
+  //tentatively
+    return categories
+  //
   if (mode) {
     let hasAssayArray = hasAssay.results.bindings.map(d=>d[idVarName].value.replace(idPrefix, ""));
     let notAssayArray = [];

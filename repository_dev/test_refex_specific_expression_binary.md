@@ -62,7 +62,7 @@ WHERE {
       id: d.child.value.replace(childIdPrefix, ""),
       label: d.child_label.value,
       leaf: true,
-      parent: d.parent.value.replace(paretntIdPrefix, "")
+      parent: d.parent.value.replace(parentIdPrefix, "")
     })
   });
   
