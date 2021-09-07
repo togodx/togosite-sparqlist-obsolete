@@ -42,7 +42,7 @@ WHERE {
       "11" "12" "13" "14" "15" "16" "17" "18" "19" "20" "21" "22"
       "X" "Y" "MT"
   }
-}LIMIT 100
+}
 
 ```
 
@@ -64,7 +64,7 @@ WHERE {
       chk[d.parent.value] = true;
       tree.push({     
         id: d.parent.value.replace(idPrefix, ""),
-        label: d.parent.value.replace(idPrefix, "").replace("_", " "),
+        label: d.parent.value.replace(idPrefix, "").replace(/_/g, " "),
         leaf: false,
         parent: "root"
       })
