@@ -26,7 +26,7 @@ async ({togoKey, properties, queryIds})=>{
     }
   }
   
-  const togositeConfig = "https://raw.githubusercontent.com/togodx/togodx-config-human/develop/properties.json";
+  const togositeConfig = "https://raw.githubusercontent.com/togodx/togodx-config-human/develop/config/properties.json";
   const sparqlSplitter = "sparqlist_splitter"; // nested SPARQLet relative path
   const togoidApi = "togoid_route_sparql";  // nested SPARQLet relative path
   const labelApi = "togokey_label";  // nested SPARQLet relative path
