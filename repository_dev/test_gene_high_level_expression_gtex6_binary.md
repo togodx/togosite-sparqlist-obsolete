@@ -1,4 +1,4 @@
-# Genes expressed in tissues (GTEx ver6)（小野・池田・千葉）
+# Genes highly expressed in tissues (GTEx ver6)（小野・池田・千葉）
 
 ## Description
 

@@ -16,21 +16,20 @@ WHERE {
   GRAPH <http://rdf.integbio.jp/dataset/togosite/hpa_tissue_specificity> {
     ?child refexo:isPositivelySpecificTo ?parent .
   }
-  # 遅い
   BIND(URI(REPLACE(STR(?child), "http://identifiers.org/ensembl/", "http://rdf.ebi.ac.uk/resource/ensembl/")) AS ?ebi_ensg)
   GRAPH <http://rdf.integbio.jp/dataset/togosite/ensembl> {
     ?ebi_ensg rdfs:label ?child_label .
   }
   ?parent rdfs:label ?parent_label .
 }
-LIMIT 100
 ```
 
 ## `return`
 
 ```javascript
 ({data}) => {
-  const idPrefix = "http://identifiers.org/ensembl/";
+  const childIdPrefix = "http://identifiers.org/ensembl/";
+  const parentIdPrefix = "http://purl.obolibrary.org/obo/caloha.obo#"
 
   let tree = [{
     id: "root",
@@ -43,17 +42,17 @@ LIMIT 100
     if (!chk[d.parent.value]) {
       chk[d.parent.value] = true;
       tree.push({     
-        id: d.parent.value,
+        id: d.parent.value.replace(parentIdPrefix, ""),
         label: d.parent_label.value,
         leaf: false,
         parent: "root"
       })
     }
     tree.push({
-      id: d.child.value.replace(idPrefix, ""),
+      id: d.child.value.replace(childIdPrefix, ""),
       label: d.child_label.value,
       leaf: true,
-      parent: d.parent.value
+      parent: d.parent.value.replace(parentIdPrefix, "")
     })
   });
   

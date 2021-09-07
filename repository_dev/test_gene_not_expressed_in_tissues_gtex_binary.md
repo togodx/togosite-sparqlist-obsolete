@@ -47,7 +47,7 @@ WHERE {
     MINUS { ?child a enso:rRNA_pseudogene }
   }
 
-}LIMIT 100#ORDER BY ?parent_label
+}
 ```
 
 ## `return`
