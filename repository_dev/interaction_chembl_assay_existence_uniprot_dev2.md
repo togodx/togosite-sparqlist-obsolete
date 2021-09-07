@@ -71,7 +71,7 @@ PREFIX cco: <http://rdf.ebi.ac.uk/terms/chembl#>
 PREFIX uniprot: <http://purl.uniprot.org/uniprot/>
 #PREFIX bao: <http://www.bioassayontology.org/bao#BAO_>
 {{#if mode}}
-  SELECT DISTINCT ?uniprot
+  SELECT DISTINCT ?uniprot ?assaytype ?conf_score ?conf_label
 {{else}}
 SELECT COUNT(DISTINCT ?uniprot) AS ?count ?assaytype ?conf_score ?conf_label
 {{/if}}
@@ -141,13 +141,11 @@ WHERE {
   categoryIds.replace(/,/g," ").split(/\s+/).map(d => {
     categories[d] = true;
   })
-  //tentatively
-    console.log("test")
-  //
+
   if (mode) {
     let hasAssayArray = hasAssay.results.bindings.map(d=>d[idVarName].value.replace(idPrefix, ""));
     let notAssayArray = [];
-    if (!categoryIds || categoryIds.match(/without/)) {
+    if (!categoryIds || categoryIds.match(/without/)||categoryIds.match(/0/)) {
       for (let d of uniprotAll.results.bindings) {
         let id = d[idVarName].value.replace(idPrefix, "");
         if (!hasAssayArray.includes(id)) notAssayArray.push(id);
