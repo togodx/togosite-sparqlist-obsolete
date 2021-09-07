@@ -73,7 +73,7 @@ PREFIX uniprot: <http://purl.uniprot.org/uniprot/>
 {{#if mode}}
   SELECT DISTINCT ?uniprot
 {{else}}
-SELECT COUNT(DISTINCT ?uniprot AS ?count) ?assaytype ?conf_score ?conf_label
+SELECT COUNT(DISTINCT ?uniprot) AS ?count ?assaytype ?conf_score ?conf_label
 {{/if}}
 FROM <http://rdf.integbio.jp/dataset/togosite/chembl>
 WHERE {
