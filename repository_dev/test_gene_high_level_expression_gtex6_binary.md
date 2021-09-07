@@ -29,7 +29,7 @@ WHERE {
   GRAPH <http://rdf.integbio.jp/dataset/togosite/refex_tissue_specific_genes_gtex_v6_refexsample> {
     ?child refexo:isPositivelySpecificTo ?tissue .
   }
-  # 遅い
+  # 遅い ## 思ったより遅くない(40s くらい)
   BIND(URI(REPLACE(STR(?child), "http://identifiers.org/ensembl/", "http://rdf.ebi.ac.uk/resource/ensembl/")) AS ?ebi_ensg)
   GRAPH <http://rdf.integbio.jp/dataset/togosite/ensembl> {
     ?ebi_ensg rdfs:label ?child_label .
@@ -59,7 +59,6 @@ WHERE {
       ?child refexo:isPositivelySpecificTo ?t .
     }
   }
-  # 遅い
   BIND(URI(REPLACE(STR(?child), "http://identifiers.org/ensembl/", "http://rdf.ebi.ac.uk/resource/ensembl/")) AS ?ebi_ensg)
   GRAPH <http://rdf.integbio.jp/dataset/togosite/ensembl> {
     ?ebi_ensg rdfs:label ?child_label .

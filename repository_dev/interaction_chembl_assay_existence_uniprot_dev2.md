@@ -96,7 +96,36 @@ WHERE {
   ?uniprot a cco:UniprotRef .
 }
 ```
-      
+
+
+## `countHasAssay`
+
+```sparql
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX taxon: <http://identifiers.org/taxonomy/>
+PREFIX cco: <http://rdf.ebi.ac.uk/terms/chembl#>
+PREFIX uniprot: <http://purl.uniprot.org/uniprot/>
+SELECT COUNT(DISTINCT ?uniprot) AS ?count
+FROM <http://rdf.integbio.jp/dataset/togosite/chembl>
+WHERE {
+{{#unless mode}}
+{{#if queryArray}}
+      VALUES ?uniprot { {{#each queryArray}} uniprot:{{this}} {{/each}} }
+{{/if}}
+  ?chembl a cco:SmallMolecule ;
+          cco:hasActivity/cco:hasAssay ?assay.
+  ?assay a cco:Assay ;
+            cco:targetConfScore ?conf_score ;
+            cco:targetConfDesc ?conf_label ;
+            cco:hasTarget/skos:exactMatch [
+            cco:taxonomy taxon:9606 ;
+            skos:exactMatch ?uniprot
+          ] . 
+  ?uniprot a cco:UniprotRef .
+{{/unless}}
+}
+```
+           
 ## `return`
 
 ```javascript
