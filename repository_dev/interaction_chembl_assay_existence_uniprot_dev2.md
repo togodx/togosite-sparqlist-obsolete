@@ -142,7 +142,7 @@ WHERE {
     categories[d] = true;
   })
   //tentatively
-    return categories
+    console.log("test")
   //
   if (mode) {
     let hasAssayArray = hasAssay.results.bindings.map(d=>d[idVarName].value.replace(idPrefix, ""));
