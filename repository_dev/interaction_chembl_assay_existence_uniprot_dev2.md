@@ -139,44 +139,84 @@ WHERE {
   categoryIds.replace(/,/g," ").split(/\s+/).map(d => {
     categories[d] = true;
   })
-
   if (mode) {
-    let hasAssayArray = hasAssay.results.bindings.map(d=>d[idVarName].value.replace(idPrefix, ""));
-    let notAssayArray = [];
-    if (!categoryIds || categoryIds.match(/without/)||categoryIds.match(/0/)) {
-      for (let d of uniprotAll.results.bindings) {
-        let id = d[idVarName].value.replace(idPrefix, "");
-        if (!hasAssayArray.includes(id)) notAssayArray.push(id);
-      }
-    }
-
-    let obj = [];    
-    if (!categoryIds || categoryIds.match(/\d/)) {
-      hasAssay.results.bindings.map(d => {
-	    if (!categoryIds || categories[d[categoryVarName].value]) {
-	      obj.push({
-	        id: d[idVarName].value,
-            attribute: {categoryId: d[categoryVarName].value, label: d[categoryLabelVarName].value}
-          })
+        let hasAssayArray = hasAssay.results.bindings.map(d=>d[idVarName].value.replace(idPrefix, ""));
+        let notAssayArray = [];
+        // list proteins without assay
+        if (!categoryIds || categoryIds.match(/without/)) {
+          for (let d of uniprotAll.results.bindings) {
+            let id = d[idVarName].value.replace(idPrefix, "");
+            if (!hasAssayArray.includes(id)) notAssayArray.push(id);
+          }
         }
-      })
-    }
-
-    if (!categoryIds || categories[withoutId]) {
-      notAssayArray.map(d => {
-        obj.push({
-          id: d,
-          attribute: {categoryId: withoutId, label: withoutLabel}
-        })
-      })
-    }
-
-    if (mode == "objectList") {
-      return obj;
-    } else if (mode == "idList") {
-	  return obj.map(d => d.id);
-    }
-  }
+        //
+        let obj = [];
+        
+        //DEBUG
+    	obj.push(categoryIds)
+        obj.push(categories)
+        // with/without
+    	if (!categoryIds) {
+            hasAssay.results.bindings.map(d => {
+                if (categories[d[categoryVarName].value]) {
+                    obj.push({
+                        id: d[idVarName].value,
+                        attribute: {
+                            categoryId: d[categoryVarName].value, 
+                            label: d[categoryLabelVarName].value
+                        }
+                    }) //push
+                    
+                }
+                
+              })
+            notAssayArray.map(d => {
+                obj.push({
+                  id: d,
+                  attribute: {
+                      categoryId: withoutId, 
+                      label: withoutLabel}
+                })
+            })
+        } else if (categoryIds=="1") {
+                hasAssay.results.bindings.map(d => {
+                    if (categories[d[categoryVarName].value]) {
+                        obj.push({
+                            id: d[idVarName].value,
+                            attribute: {
+                                categoryId: d[categoryVarName].value, 
+                                label: d[categoryLabelVarName].value}
+                              })
+                        }
+                      })
+                if (categories[withoutId]) {
+                  notAssayArray.map(d => {
+                    obj.push({
+                      id: d,
+                      attribute: {
+                          categoryId: withoutId, 
+                          label: withoutLabel
+                      }
+                    })
+                  })
+                }
+        } else { // categoryId= Assay Type  
+             hasAssay.results.bindings.map(d => {
+                    obj.push({
+                            id: d[idVarName].value,
+                            attribute: {
+                                categoryId: d["assaytype"].value.slice( 0, 1 ), 
+                                label: d["assaytype"].value}
+                              })
+                        })       
+        }
+        
+        if (mode == "objectList") {
+          return obj;
+        } else if (mode == "idList") {
+          return obj.map(d => d.id);
+        }
+  }// mode
   
   var countHasAssay = countHasAssay.results.bindings[0].count.value;
   var countRemain = uniprotAll.results.bindings[0].count.value - countHasAssay;
