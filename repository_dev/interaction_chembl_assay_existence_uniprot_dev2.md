@@ -202,19 +202,26 @@ WHERE {
               
         } else { // categoryId= Assay Type  
           //DEBUG
-    		obj.push(categoryIds)
-        	obj.push(categories)  
-            obj.push(hasAssayArray)
-            obj.push(notAssayArray)
+    	  //	obj.push(categoryIds)
+          //	obj.push(categories)  
+          //  obj.push(hasAssayArray)
           //DEBUG  
-             hasAssay.results.bindings.map(d => {
-                    obj.push({
+             
+            hasAssay.results.bindings.map(d => {
+               let assaytype=d["assaytype"].value 
+               //DEBUG
+               //obj.push(assaytype)
+               //DEBUG
+               if (categories[assaytype]) {
+                 obj.push({
                             id: d[idVarName].value,
                             attribute: {
                                 categoryId: d["assaytype"].value.slice( 0, 1 ), 
                                 label: d["assaytype"].value}
                               })
-                        })       
+                }  
+            })
+                  
         }
         
         if (mode == "objectList") {
