@@ -154,9 +154,7 @@ WHERE {
         //
         let obj = [];
         
-        //DEBUG
-    	obj.push(categoryIds)
-        obj.push(categories)
+
         // with/without
     	if (!categoryIds) {
             hasAssay.results.bindings.map(d => {
@@ -180,12 +178,16 @@ WHERE {
                       label: withoutLabel}
                 })
             })
-        } else if (categoryIds.match/\d/) {
+        } else if (categoryIds.match(/\d/)) {
             //DEBUG
     		obj.push(categoryIds)
         	obj.push(categories)   
             hasAssay.results.bindings.map(d => {
+                //DEBUG
+    			obj.push(d[categoryVarName].value)
+                obj.push(categories[d[categoryVarName].value])
                 if (categories[d[categoryVarName].value]) {
+                            
                     obj.push({
                         id: d[idVarName].value,
                         attribute: {
