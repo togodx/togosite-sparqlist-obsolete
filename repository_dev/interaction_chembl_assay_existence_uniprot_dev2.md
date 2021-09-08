@@ -80,8 +80,6 @@ WHERE {
 {{#if queryArray}}
       VALUES ?uniprot { {{#each queryArray}} uniprot:{{this}} {{/each}} }
 {{/if}}
-  #VALUES ?bao { bao:0000186 bao:0000187 bao:0000188 bao:0000189 bao:0000190 bao:0000192 } # AC50 CC50 EC50 GI50 IC50 Ki
-  VALUES ?conf {9}
   ?chembl a cco:SmallMolecule ;
           cco:hasActivity/cco:hasAssay ?assay.
   ?assay a cco:Assay ;
