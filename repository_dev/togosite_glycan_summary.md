@@ -45,11 +45,11 @@ WHERE {
 ({ main }) => {
   return main.results.bindings.map((elem) => ({
     GlyTouCan_ID: elem.gtc_1.value.replace("https://glytoucan.org/Structures/Glycans/", ""),
-    //GlyTouCan_URL: "https://glycosmos.org/glycans/show?gtc_id=" + elem.gtc_1.value.replace("https://glytoucan.org/Structures/Glycans/", ""),
+    GlyTouCan_URL: "https://glycosmos.org/glycans/show?gtc_id=" + elem.gtc_1.value.replace("https://glytoucan.org/Structures/Glycans/", ""),
     IUPAC: elem.iupac?.value,
+    WURCS: elem.wurcs_label.value,
     mass: elem.mass.value,
     Subsumption: elem.sbsmpt.value.replace("http://www.glycoinfo.org/glyco/owl/relation#", "").replace(/_/g, " "),
-    WURCS: elem.wurcs_label.value,
     tissue: elem.tissue_labels?.value
     //uniprot_id: elem.uniprot_ids.value.split(",").map((elem)=>("<a href=\"http://identifiers.org/uniprot/"+elem+"\">"+elem+"</a>")).join(", "),
     //uniprot_url: "http://identifiers.org/uniprot/" + elem.uniprot_id?.value,
