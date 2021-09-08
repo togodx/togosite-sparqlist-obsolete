@@ -129,6 +129,7 @@ WHERE {
 ```javascript
 ({uniprotAll, hasAssay, countHasAssay, queryIds, categoryIds, mode})=>{
   const idVarName = "uniprot";
+  const assayVarName="assaytype";
   const categoryVarName = "conf_score";
   const categoryLabelVarName = "conf_label";
   const idPrefix = "http://purl.uniprot.org/uniprot/";
@@ -157,17 +158,13 @@ WHERE {
 
         // with/without
     	if (!categoryIds) {
-            hasAssay.results.bindings.map(d => {
-                if (categories[d[categoryVarName].value]) {
-                    obj.push({
-                        id: d[idVarName].value,
-                        attribute: {
-                            categoryId: d[categoryVarName].value, 
-                            label: d[categoryLabelVarName].value
-                        }
-                    }) //push
-                    
-                }
+            hasAssayArray.map(d => {
+                obj.push({
+                  id: d,
+                  attribute: {
+                      categoryId: withId, 
+                      label: withLabel}
+                })
                 
               })
             notAssayArray.map(d => {
@@ -183,21 +180,17 @@ WHERE {
     		obj.push(categoryIds)
         	obj.push(categories)   
             hasAssay.results.bindings.map(d => {
-                //DEBUG
-    			obj.push(d[categoryVarName].value)
-                obj.push(categories[d[categoryVarName].value])
-                if (categories[d[categoryVarName].value]) {
-                            
+                if (categories[d[withId].value]) {
                     obj.push({
                         id: d[idVarName].value,
                         attribute: {
-                            categoryId: d[categoryVarName].value, 
-                            label: d[categoryLabelVarName].value
+                            categoryId: withId,
+                            label: withLabel
                         }
                     })
                  }
              })
-                if (categories[withoutId]) {
+             if (categories[withoutId]) {
                   notAssayArray.map(d => {
                     obj.push({
                       id: d,
@@ -207,7 +200,8 @@ WHERE {
                       }
                     })
                   })
-                }
+              }
+              
         } else { // categoryId= Assay Type  
              hasAssay.results.bindings.map(d => {
                     obj.push({
