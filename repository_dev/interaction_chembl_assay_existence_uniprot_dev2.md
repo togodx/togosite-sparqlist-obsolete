@@ -175,13 +175,8 @@ WHERE {
                       label: withoutLabel}
                 })
             })
-        } else if (categoryIds.match(/\d/)) {
-          //DEBUG
-    		obj.push(categoryIds)
-        	obj.push(categories)  
-            obj.push(hasAssayArray)
-            obj.push(notAssayArray)
-          //DEBUG  
+        } else if (categoryIds.match(/\d/)) { // 0,1 が指定
+          
             if (categories[withId]) {
             	hasAssayArray.map(d => {
                     obj.push({
@@ -206,6 +201,12 @@ WHERE {
               }
               
         } else { // categoryId= Assay Type  
+          //DEBUG
+    		obj.push(categoryIds)
+        	obj.push(categories)  
+            obj.push(hasAssayArray)
+            obj.push(notAssayArray)
+          //DEBUG  
              hasAssay.results.bindings.map(d => {
                     obj.push({
                             id: d[idVarName].value,
@@ -217,9 +218,9 @@ WHERE {
         }
         
         if (mode == "objectList") {
-          return obj;
+          return  Array.from(new Set(obj));
         } else if (mode == "idList") {
-          return obj.map(d => d.id);
+          return  Array.from(new Set(obj.map(d => d.id)));
         }
   }// mode
   
