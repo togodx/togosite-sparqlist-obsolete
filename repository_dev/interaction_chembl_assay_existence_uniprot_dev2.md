@@ -132,7 +132,9 @@ WHERE {
   const categoryVarName = "conf_score";
   const categoryLabelVarName = "conf_label";
   const idPrefix = "http://purl.uniprot.org/uniprot/";
-  const withoutId = "without";
+  const withId = "1";
+  const withLabel = "Proteins with ChEMBL assay";
+  const withoutId = "0";
   const withoutLabel = "Proteins without ChEMBL assay";
 
   let categories = {};
@@ -178,17 +180,21 @@ WHERE {
                       label: withoutLabel}
                 })
             })
-        } else if (categoryIds=="1") {
-                hasAssay.results.bindings.map(d => {
-                    if (categories[d[categoryVarName].value]) {
-                        obj.push({
-                            id: d[idVarName].value,
-                            attribute: {
-                                categoryId: d[categoryVarName].value, 
-                                label: d[categoryLabelVarName].value}
-                              })
+        } else if (categoryIds.match/\d/) {
+            //DEBUG
+    		obj.push(categoryIds)
+        	obj.push(categories)   
+            hasAssay.results.bindings.map(d => {
+                if (categories[d[categoryVarName].value]) {
+                    obj.push({
+                        id: d[idVarName].value,
+                        attribute: {
+                            categoryId: d[categoryVarName].value, 
+                            label: d[categoryLabelVarName].value
                         }
-                      })
+                    })
+                 }
+             })
                 if (categories[withoutId]) {
                   notAssayArray.map(d => {
                     obj.push({
