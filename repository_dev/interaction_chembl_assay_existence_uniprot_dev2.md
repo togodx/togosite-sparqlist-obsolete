@@ -143,10 +143,10 @@ WHERE {
     categories[d] = true;
   })
   if (mode) {
-        let hasAssayArray = hasAssay.results.bindings.map(d=>d[idVarName].value.replace(idPrefix, ""));
+        let hasAssayArray = Array.from(new Set(hasAssay.results.bindings.map(d=>d[idVarName].value.replace(idPrefix, ""))));
         let notAssayArray = [];
         // list proteins without assay
-        if (!categoryIds || categoryIds.match(/without/)) {
+        if (!categoryIds || categoryIds.match(RegExp(withoutId))) {
           for (let d of uniprotAll.results.bindings) {
             let id = d[idVarName].value.replace(idPrefix, "");
             if (!hasAssayArray.includes(id)) notAssayArray.push(id);
@@ -176,20 +176,23 @@ WHERE {
                 })
             })
         } else if (categoryIds.match(/\d/)) {
-            //DEBUG
+          //DEBUG
     		obj.push(categoryIds)
-        	obj.push(categories)   
-            hasAssay.results.bindings.map(d => {
-                if (categories[d[withId].value]) {
+        	obj.push(categories)  
+            obj.push(hasAssayArray)
+            obj.push(notAssayArray)
+          //DEBUG  
+            if (categories[withId]) {
+            	hasAssayArray.map(d => {
                     obj.push({
-                        id: d[idVarName].value,
+                        id: d,
                         attribute: {
                             categoryId: withId,
                             label: withLabel
                         }
                     })
-                 }
-             })
+                 })
+             }
              if (categories[withoutId]) {
                   notAssayArray.map(d => {
                     obj.push({
