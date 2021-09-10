@@ -174,7 +174,7 @@ PREFIX hp: <http://purl.obolibrary.org/obo/HP_>
 PREFIX medgen: <http://identifiers.org/medgen/>
 PREFIX mesh: <http://identifiers.org/mesh/>
 PREFIX mondo: <http://purl.obolibrary.org/obo/MONDO_>
-PREFIX nando: <http://nanbyodata.jp/ontology/nando#>
+PREFIX nando: <http://nanbyodata.jp/ontology/NANDO_>
 PREFIX ncbigene: <http://identifiers.org/ncbigene/>
 PREFIX omim_phenotype: <http://identifiers.org/mim/>
 PREFIX orphanet: <http://identifiers.org/orphanet.ordo/>
