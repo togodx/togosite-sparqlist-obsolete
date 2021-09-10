@@ -14,13 +14,13 @@
 async ({togoKey, properties, inputIds})=>{
   const fetchReq = async (url, options, body) => {
     if (body) options.body = body;
-    /* //==== debug code
+    //==== debug code
     let res = await fetch(url, options);
     console.log(res.status);
     console.log(url + "?" + body);
     return res.json();
-    //==== */
-    return await fetch(url, options).then(res=>res.json());
+    //====
+    //return await fetch(url, options).then(res=>res.json());
   }
 
   let options = {
