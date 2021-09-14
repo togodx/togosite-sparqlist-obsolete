@@ -1,15 +1,15 @@
 # Transcript attributes from Ensembl RDF（井手・八塚・池田）
 
-ENSG ID を受け取って、子の transcript の情報を返す
+ENST ID を受け取って、自分と兄弟のの transcript の情報を返す
 
 ## Endpoint
 
 https://integbio.jp/rdf/ebi/sparql
 
 ## Parameters
-* `ensg`
-  * default: ENSG00000171097
-  * example: ENSG00000171097
+* `enst`
+  * default: ENST00000302586
+  * example: ENST00000302586
 
 ## `main`
 
@@ -27,10 +27,11 @@ SELECT ?enst_id ?gene_name ?label ?location ?type_name (GROUP_CONCAT(DISTINCT ?u
 FROM <http://rdf.ebi.ac.uk/dataset/ensembl/102/homo_sapiens>
 WHERE
 {
-  VALUES ?ensg { ensg:{{ensg}} }
-  ?enst obo:SO_transcribed_from ?ensg .
+  VALUES ?input_enst { enst:{{enst}} }
+  ?input_enst obo:SO_transcribed_from ?ensg .
   ?ensg dc:description ?gene_name .
-  ?enst a ?type ;
+  ?enst obo:SO_transcribed_from ?ensg ;
+        a ?type ;
         rdfs:label ?label ;
         dc:identifier ?enst_id ;
         biohack:location/rdfs:label ?location ;
