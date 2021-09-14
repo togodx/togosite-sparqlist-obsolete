@@ -5,6 +5,8 @@
 * categoryIds: 下層を取ってくる場合に使用 (要、UIなどの検討）
 * userKey: post された ID のデータベース
 * userIds: post された ID リスト
+* DAVI p-value (EASE Score)
+  * https://david.ncifcrf.gov/content.jsp?file=functional_annotation.html
 
 ## Parameters
 
@@ -263,14 +265,20 @@ async ({sparqlet, categoryIds, userIds, userKey, primaryKey, pValueFlag, populat
     return pValue;
   }
   
-  population = Number(population.results.bindings[0].total_count.value);
-  let queries = queryIds.split(/,/).length;
+  const PT = Number(population.results.bindings[0].total_count.value);
+  const LT = queryIds.split(/,/).length;
   
-  for (let i = 0; i < originalDistribution.length; i++) {
-    if (originalDistribution[i].git_count == 0) continue;
-    if (originalDistribution[i].hit_count == 1) originalDistribution[i].pValue = 1;
-    else originalDistribution[i].pValue = calcPvalue(originalDistribution[i].hit_count - 1, queries - (originalDistribution[i].hit_count - 1), originalDistribution[i].count - (originalDistribution[i].hit_count - 1), population - originalDistribution[i].count - queries);
-  }
-  return originalDistribution;
+  return originalDistribution.filter(d => d.hit_count > 0).map(d => {
+    const LH = d.hit_count;
+    const PH = d.count;
+    if (LH == 1) d.pValue = 1;
+    else d.pValue = calcPvalue(
+      LH - 1, 
+      LT - LH, 
+      PH - LH + 1, 
+      PT - LT - (PH - LH)
+    );
+    return d;
+  })
 }
 ```
