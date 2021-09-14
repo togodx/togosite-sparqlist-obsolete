@@ -265,23 +265,21 @@ async ({sparqlet, categoryIds, userIds, userKey, primaryKey, pValueFlag, populat
     return pValue;
   }
   
-  population = Number(population.results.bindings[0].total_count.value);
-  let queries = queryIds.split(/,/).length;
+  const PT = Number(population.results.bindings[0].total_count.value);
+  const LT = queryIds.split(/,/).length;
   
-  const PT = population;
-  const LT = queries;
-  for (let i = 0; i < originalDistribution.length; i++) {
-    const LH = originalDistribution[i].hit_count;
-    const PH = originalDistribution[i].count;
-    if (LH == 0) continue;
-    if (LH == 1) originalDistribution[i].pValue = 1;
-    else originalDistribution[i].pValue = calcPvalue(
+  return originalDistribution.map(d => {
+    const LH = d.hit_count;
+    const PH = d.count;
+    if (LH == 0) return d;
+    if (LH == 1) d.pValue = 1;
+    else d.pValue = calcPvalue(
       LH - 1, 
       LT - LH, 
       PH - LH + 1, 
       PT - LT - (PH - LH)
     );
-  }
-  return originalDistribution;
+    return d;
+  })
 }
 ```
