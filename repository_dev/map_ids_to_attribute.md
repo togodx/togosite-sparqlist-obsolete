@@ -268,9 +268,10 @@ async ({sparqlet, categoryIds, userIds, userKey, primaryKey, pValueFlag, populat
   const PT = Number(population.results.bindings[0].total_count.value);
   const LT = queryIds.split(/,/).length;
   
-  return originalDistribution.filter(d => d.hit_count > 0).map(d => {
+  return originalDistribution.map(d => {
     const LH = d.hit_count;
     const PH = d.count;
+    if (LH == 0) return d;
     if (LH == 1) d.pValue = 1;
     else d.pValue = calcPvalue(
       LH - 1, 
