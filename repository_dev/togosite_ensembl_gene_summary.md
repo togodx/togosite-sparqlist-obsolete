@@ -34,7 +34,7 @@ WHERE {
              faldo:location ?loc ;
              a ?type .
     FILTER(STRSTARTS(STR(?type), "http://rdf.ebi.ac.uk/terms/ensembl/"))
-    BIND(STRAFTER(STR(?type), "http://rdf.ebi.ac.uk/terms/ensembl/") as ?type_label)
+    BIND(REPLACE(STRAFTER(STR(?type), "http://rdf.ebi.ac.uk/terms/ensembl/"), "_", " ") as ?type_label)
     ?loc rdfs:label ?location .
   }
   OPTIONAL {
