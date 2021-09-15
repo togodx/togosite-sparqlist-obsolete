@@ -51,16 +51,17 @@ PREFIX refexo: <http://purl.jp/bio/01/refexo#>
 PREFIX schema: <http://schema.org/>
 PREFIX nuc: <http://ddbj.nig.ac.jp/ontologies/nucleotide/>
 PREFIX hop: <http://purl.org/net/orthordf/hOP/ontology#>
+PREFIX ebiensg: <http://rdf.ebi.ac.uk/resource/ensembl/>
 
 SELECT DISTINCT *
 WHERE {
   {{#if idDict.ensg}}
     {
-      SELECT ?ensg ?ensg_id ?gene_symbol ?desc ?location (GROUP_CONCAT(DISTINCT ?tissue_label; separator=", ") AS ?tissue_labels)
+      SELECT ?ensg ?ensg_id ?gene_symbol ?type_label ?desc ?location (GROUP_CONCAT(DISTINCT ?tissue_label; separator=", ") AS ?tissue_labels)
       WHERE {
         VALUES ?ensg { ensembl:{{idDict.ensg}} }
-        BIND(STRAFTER(STR(?ensg), "http://identifiers.org/ensembl/") AS ?ensg_id)
-        GRAPH <http://rdf.ebi.ac.uk/dataset/ensembl/102/homo_sapiens> {
+        VALUES ?ebiensg { ebiensg:{{idDict.ensg}} }
+        GRAPH <http://rdf.integbio.jp/dataset/togosite/ensembl> {
           ?ebiensg obo:RO_0002162 taxon:9606 ;
                    dc:identifier ?ensg_id ;
                    rdfs:label ?gene_symbol ;
@@ -68,7 +69,7 @@ WHERE {
                    faldo:location ?loc ;
        	           a ?type .
    	      FILTER(STRSTARTS(STR(?type), "http://rdf.ebi.ac.uk/terms/ensembl/"))
-          BIND(STRAFTER(STR(?type), "http://rdf.ebi.ac.uk/terms/ensembl/") as ?type_label)
+          BIND(REPLACE(STRAFTER(STR(?type), "http://rdf.ebi.ac.uk/terms/ensembl/"), "_", " ") as ?type_label)
           ?loc rdfs:label ?location .
         }
         OPTIONAL {
@@ -83,23 +84,12 @@ WHERE {
                 schema:valueReference ?tissue .
           }
         }
-#        {
-#          GRAPH <http://rdf.integbio.jp/dataset/togosite/efo> {
-#            ?tissue rdfs:label ?tissue_label .
-#          }
-#        }
-#        UNION
-#        {
-#          GRAPH <http://rdf.integbio.jp/dataset/togosite/uberon> {
-#            ?tissue rdfs:label ?tissue_label .
-#          }
-#        }
       }
     }
   {{/if}}
   {{#if idDict.ncbigene}}
     {
-      SELECT ?ncbigene ?ncbigene_id ?desc ?location ?gene_symbol ?type_of_gene
+      SELECT ?ncbigene ?ncbigene_id ?desc ?location ?gene_symbol ?type_label
                        (GROUP_CONCAT(DISTINCT ?others; separator=", ") AS ?other_names)
                        (GROUP_CONCAT(DISTINCT ?tissue_label; separator=", ") AS ?tissue_labels)
                        (GROUP_CONCAT(DISTINCT ?synonym; separator=", ") AS ?synonyms)
@@ -108,7 +98,7 @@ WHERE {
         GRAPH <http://rdf.integbio.jp/dataset/togosite/homo_sapiens_gene_info> {
           ?ncbigene dct:description ?desc ;
                     dct:identifier ?ncbigene_id ;
-                    hop:typeOfGene ?type_of_gene ;
+                    hop:typeOfGene ?type_label ;
                     nuc:chromosome ?chromosome ;
                     nuc:map ?location .
           OPTIONAL {
@@ -175,7 +165,7 @@ WHERE {
     { "Location": "location" },
     { "Tissue specificity": "tissue_labels"},
     { "Synonym": "synonyms" },
-    { "Type": "type_of_gene" },
+    { "Type": "type_label" },
     { "Other names": "other_names" }
   ];
   return array;
