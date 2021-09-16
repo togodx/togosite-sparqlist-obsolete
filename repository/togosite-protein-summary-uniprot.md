@@ -48,7 +48,7 @@ WHERE{
          core:recommendedName|core:submittedName ?rname .
   ?rname core:fullName ?full_name .
   OPTIONAL{
-    ?rname core:shortName ?sname .
+    ?rname core:shortName ?short_name .
   }
   ?entry core:sequence [
     a core:Simple_Sequence ;
@@ -83,8 +83,6 @@ WHERE{
     ?entry rdfs:seeAlso ?pdb .
     ?pdb core:database db:PDB .
   }
-  BIND(CONCAT("", ?sname) AS ?shortname)
-  BIND(IF(STRLEN(?shortname)=0,"-", ?shortname) AS ?short_name)  
   BIND(STRLEN(?sequence) AS ?length)
   BIND(REPLACE(STR(?entry), uniprot:, "") AS ?id)
 }
