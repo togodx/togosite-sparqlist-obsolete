@@ -45,7 +45,7 @@ WHERE{
   {{/if}}
   ?entry a core:Protein ;
          core:mnemonic ?mnemonic ;
-         core:recommendedName ?rname .
+         core:recommendedName|core:submittedName ?rname .
   ?rname core:fullName ?full_name .
   OPTIONAL{
     ?rname core:shortName ?sname .
