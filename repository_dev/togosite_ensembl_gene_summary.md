@@ -22,7 +22,7 @@ PREFIX refexo: <http://purl.jp/bio/01/refexo#>
 PREFIX schema: <http://schema.org/>
 PREFIX ensg: <http://rdf.ebi.ac.uk/resource/ensembl/>
 
-SELECT DISTINCT ?ensg_id ?idt_ensg ?gene_symbol ?desc ?type_label ?location (GROUP_CONCAT(DISTINCT ?tissue_label; separator=", ") AS ?tissue_labels)
+SELECT DISTINCT ?ensg_id ?idt_ensg ?gene_symbol ?desc ?type_label ?location (GROUP_CONCAT(DISTINCT ?gtex_tissue_label; separator=", ") AS ?gtex_tissue_labels)
 WHERE {
   VALUES ?ensg { ensg:{{id}} }
   VALUES ?idt_ensg { idt_ensg:{{id}} }
@@ -39,61 +39,39 @@ WHERE {
   }
   OPTIONAL {
     GRAPH <http://rdf.integbio.jp/dataset/togosite/refex_tissue_specific_genes_gtex_v6> {
-      ?idt_ensg refexo:isPositivelySpecificTo ?tissue .
+      ?idt_ensg refexo:isPositivelySpecificTo ?gtex_tissue .
     }
     GRAPH <http://rdf.integbio.jp/dataset/togosite/refexsample_gtex_v8_summary> {
       VALUES ?name {"cell type" "tissue"}
       ?refexs schema:additionalProperty [
         schema:name ?name ;
-        schema:value ?tissue_label ;
-        schema:valueReference ?tissue
+        schema:value ?gtex_tissue_label ;
+        schema:valueReference ?gtex_tissue
       ] .
     }
   }
 }
 ```
 
-## `columns` columns and their order to show
-
-```javascript
-() => {
-  const array = [
-    { "Ensembl ID": "ensg_id" },
-    { "Ensembl URL": "idt_ensg" },
-    { "Gene symbol": "gene_symbol" },
-    { "Description": "desc" },
-    { "Location": "location" },
-    { "Tissue specificity": "tissue_labels"},
-    { "Type": "type_label" }
-  ];
-  return array;
-}
-```
-
 ## `return`
 
 ```javascript
-({ main, columns }) => {
-  return main.results.bindings.map((binding) => {
-    const results = columns.map((row) => {
-      const obj = {};
-      for (const [k, v] of Object.entries(row)) {
-        obj[k] = binding[v];
-      }
-      return obj;
-    });
+({ main, id }) => {
+  let binding = main.results.bindings[0];
+  let objs = [{
+    "Ensembl ID": binding.ensg_id.value,
+    "Ensembl URL": binding.idt_ensg.value,
+    "Gene symbol": binding.gene_symbol.value,
+    "Description": binding.desc.value,
+    "Location": binding.location.value,
+    "Tissue specificity (GTEx)": binding.gtex_tissue_labels.value,
+    "Gene type": binding.type_label.value,
+    "Expression": "<a href=\"https://gtexportal.org/home/gene/" + id + "\">" + "View Expression at GTEx Portal</a>"
+  }];
 
-    return results.reduce((obj, elem) => {
-      for (const [key, node] of Object.entries(elem)) {
-        if (node) {
-          obj[key] = node.value;
-          if (key == "Tissue specificity" && obj[key] == "") {
-            obj[key] = "(Low tissue specificity)";
-          }
-        }
-        return obj;
-      };
-    }, {});
-  });
+  if (objs[0]["Tissue specificity (GTEx)"] == "") {
+    objs[0]["Tissue specificity (GTEx)"] = "(Low tissue specificity)";
+  }
+  return objs;
 };
 ```
