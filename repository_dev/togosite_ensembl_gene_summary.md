@@ -22,7 +22,10 @@ PREFIX refexo: <http://purl.jp/bio/01/refexo#>
 PREFIX schema: <http://schema.org/>
 PREFIX ensg: <http://rdf.ebi.ac.uk/resource/ensembl/>
 
-SELECT DISTINCT ?ensg_id ?idt_ensg ?gene_symbol ?desc ?type_label ?location (GROUP_CONCAT(DISTINCT ?gtex_tissue_label; separator=", ") AS ?gtex_tissue_labels)
+SELECT DISTINCT ?ensg_id ?idt_ensg ?gene_symbol ?desc ?type_label ?location
+  (GROUP_CONCAT(DISTINCT ?gtex_tissue_label; separator=", ") AS ?gtex_tissue_labels)
+  (GROUP_CONCAT(DISTINCT ?hpa_tissue_label; separator=", ") AS ?hpa_tissue_labels)
+  (GROUP_CONCAT(DISTINCT ?hpa_cell_label; separator=", ") AS ?hpa_cell_labels)
 WHERE {
   VALUES ?ensg { ensg:{{id}} }
   VALUES ?idt_ensg { idt_ensg:{{id}} }
@@ -50,6 +53,22 @@ WHERE {
       ] .
     }
   }
+  OPTIONAL {
+    GRAPH <http://rdf.integbio.jp/dataset/togosite/hpa_cell_specificity> {
+      ?idt_ensg refexo:isPositivelySpecificTo ?hpa_cell .
+    }
+    GRAPH <http://rdf.integbio.jp/dataset/togosite/caloha> {
+      ?hpa_cell rdfs:label ?hpa_cell_label .
+    }
+  }
+  OPTIONAL {
+    GRAPH <http://rdf.integbio.jp/dataset/togosite/hpa_tissue_specificity> {
+      ?idt_ensg refexo:isPositivelySpecificTo ?hpa_tissue .
+    }
+    GRAPH <http://rdf.integbio.jp/dataset/togosite/caloha> {
+      ?hpa_tissue rdfs:label ?hpa_tissue_label .
+    }
+  }
 }
 ```
 
@@ -63,14 +82,23 @@ WHERE {
     "Ensembl URL": binding.idt_ensg.value,
     "Gene symbol": binding.gene_symbol.value,
     "Description": binding.desc.value,
+    "Gene type": binding.type_label.value,
     "Location": binding.location.value,
     "Tissue specificity (GTEx)": binding.gtex_tissue_labels.value,
-    "Gene type": binding.type_label.value,
-    "Expression": "<a href=\"https://gtexportal.org/home/gene/" + id + "\">" + "View Expression at GTEx Portal</a>"
+    "Tissue specificity (HPA)": binding.hpa_tissue_labels.value,
+    "Cell specificity (HPA)": binding.hpa_cell_labels.value,
+    "Expression": "<a href=\"https://gtexportal.org/home/gene/" + id + "\">" + "View Expression at GTEx Portal</a>, " +
+                  "<a href=\"https://www.proteinatlas.org/" + id + "\">" + "View Expression at ProteinAtlas</a>"
   }];
 
   if (objs[0]["Tissue specificity (GTEx)"] == "") {
     objs[0]["Tissue specificity (GTEx)"] = "(Low tissue specificity)";
+  }
+  if (objs[0]["Tissue specificity (HPA)"] == "") {
+    objs[0]["Tissue specificity (HPA)"] = "(Low tissue specificity)";
+  }
+  if (objs[0]["Cell specificity (HPA)"] == "") {
+    objs[0]["Cell specificity (HPA)"] = "(Low cell specificity)";
   }
   return objs;
 };
