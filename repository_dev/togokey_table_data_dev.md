@@ -5,14 +5,13 @@
 * `togoKey`
   * default: ensembl_gene
 * `properties`
-  * default:  [{"propertyId":"gene_evolutionary_conservation_homologene","categoryIds":["5"]}]
-  *example: [{"propertyId":"gene_evolutionary_conservation_homologene","categoryIds":["5"]},{"propertyId":"protein_biological_process_uniprot"},{"propertyId":"protein_biological_process_uniprot","categoryIds":["GO_0050789","GO_0065008","GO_0065009"]}]
+  * default:  [{"propertyId":"gene_evolutionary_conservation_homologene","categoryIds":["5"]},{"propertyId":"protein_biological_process_uniprot"},{"propertyId":"protein_biological_process_uniprot","categoryIds":["GO_0050789","GO_0065008","GO_0065009"]}]
 * `queryIds` togoKey 100個程度ずつ
-  * default: ["ENSG00000169221"]
-  *example: ["ENSG00000169221","ENSG00000253159","ENSG00000135631","ENSG00000276040","ENSG00000137098","ENSG00000124657","ENSG00000092330","ENSG00000117215","ENSG00000185385","ENSG00000196184"]
+  * default: ["ENSG00000169221","ENSG00000253159","ENSG00000135631","ENSG00000276040","ENSG00000137098","ENSG00000124657","ENSG00000092330","ENSG00000117215","ENSG00000185385","ENSG00000196184"]
+
 
 ## `primaryIds`
-```javascrip
+```javascript
 async ({togoKey, properties, queryIds})=>{
   const fetchReq = async (url, options, body) => {
     console.log(url + " " + body);  // debug
