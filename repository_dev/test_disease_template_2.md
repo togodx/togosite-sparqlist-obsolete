@@ -165,7 +165,7 @@ WHERE {
       OPTIONAL{?nando skos:altLabel ?nando_altLabel_s.}
       OPTIONAL{?nando rdfs:subClassOf ?nando_upper.
                ?nando_upper rdfs:label ?nando_upper_label.
-               ?nando_upper dcterms:identifier ?nando_upper_id.}
+               ?nando_upper dcterms:identifier ?nando_upper_id.
         FILTER(lang(?nando_upper_label)= "en")
       }
     }
