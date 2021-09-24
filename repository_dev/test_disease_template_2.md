@@ -81,19 +81,22 @@ SELECT DISTINCT *
 WHERE {    
 {{#if idDict.hp}}
   {
-    SELECT ?hpo_id ?hpo_label ?hpo_definition ?hpo_alt_id 
-           (GROUP_CONCAT(DISTINCT ?hpo_dbxref_s,",") AS ?hpo_dbxref)
-           ?hpo_comment ?hpo_subclass  ?hpo_exac_synonym ?hpo_obo_ns ?hpo_related_synonym ?hpo_seealso
+    SELECT ?hpo_id ?hpo_label ?hpo_definition 
+           (GROUP_CONCAT(DISTINCT ?hpo_alt_id_s, ",") AS ?hpo_alt_id) 
+           (GROUP_CONCAT(DISTINCT ?hpo_dbxref_s, ",") AS ?hpo_dbxref)
+           ?hpo_comment ?hpo_subclass  
+            (GROUP_CONCAT(DISTINCT ?hpo_exact_synonym_s, ",")AS ?hpo_exact_synonym)
+            ?hpo_obo_ns ?hpo_related_synonym ?hpo_seealso
     WHERE {
       VALUES ?hpo { <http://purl.obolibrary.org/obo/HP_{{idDict.hp}}> }
       GRAPH <http://rdf.integbio.jp/dataset/togosite/hpo> {
         ?hpo rdfs:label ?hpo_label.
       OPTIONAL {?hpo obo:IAO_0000115 ?hpo_definition.}
-      OPTIONAL {?hpo go:hasAlternativeId ?hpo_alt_id.}
+      OPTIONAL {?hpo go:hasAlternativeId ?hpo_alt_id_s.}
       OPTIONAL {?hpo go:hasDbXref ?hpo_dbxref_s.}
       OPTIONAL {?hpo rdfs:comment ?hpo_comment.}
       OPTIONAL {?hpo rdfs:subClassOf ?hpo_subclass.}
-      OPTIONAL {?hpo go:hasExactSynonym ?hpo_exac_synonym.}
+      OPTIONAL {?hpo go:hasExactSynonym ?hpo_exact_synonym_s.}
       OPTIONAL {?hpo go:hasOBONamespace ?hpo_obo_ns.}
       OPTIONAL {?hpo go:hasRelatedSynonym ?hpo_related_synonym.}
       OPTIONAL {?hpo rdfs:seeAlso ?hpo_seealso.}
