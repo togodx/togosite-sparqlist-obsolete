@@ -88,7 +88,7 @@ WHERE {
       VALUES ?hpo { <http://purl.obolibrary.org/obo/HP_{{idDict.hp}}> }
       GRAPH <http://rdf.integbio.jp/dataset/togosite/hpo> {
         ?hpo rdfs:label ?hpo_label.
-        ?hpo obo:IAO_0000115 ?hpo_definition.
+      OPTIONAL {?hpo obo:IAO_0000115 ?hpo_definition.}
       OPTIONAL {?hpo go:hasAlternativeId ?hpo_alt_id.}
       OPTIONAL {?hpo go:hasDbXref ?hpo_dbxref_s.}
       OPTIONAL {?hpo rdfs:comment ?hpo_comment.}
@@ -147,8 +147,9 @@ WHERE {
     
 {{#if idDict.nando}}
   {
-    SELECT DISTINCT ?nando ?nando_id ?nando_label  ?nando_label_jp ?nando_description ?nando_source ?nando_altLabel ?nando_upper_label ?nando_upper_id
-                    (GROUP_CONCAT(?nando_mondo_s, ",") AS ?nando_mondo)
+    SELECT DISTINCT ?nando ?nando_id ?nando_label  ?nando_label_jp ?nando_description ?nando_source 
+                    (GROUP_CONCAT(DISTINCT ?nando_altLabel_s, ",")AS ?nando_altLabel) ?nando_upper_label ?nando_upper_id
+                    (GROUP_CONCAT(DISTINCT ?nando_mondo_s, ",") AS ?nando_mondo)
                     
     WHERE { 
      VALUES ?nando { <http://nanbyodata.jp/ontology/NANDO_{{idDict.nando}}> }
@@ -161,10 +162,10 @@ WHERE {
       OPTIONAL{?nando dcterms:description ?nando_description.}
       OPTIONAL{?nando skos:closeMatch ?nando_mondo_s.}
       OPTIONAL{?nando dcterms:source ?nando_source.}
-      OPTIONAL{?nando skos:altLabel ?nando_altLabel.}
+      OPTIONAL{?nando skos:altLabel ?nando_altLabel_s.}
       OPTIONAL{?nando rdfs:subClassOf ?nando_upper.
-               ?nando_upper rdfs:label ?nando_upper_label;
-                            dcterms:identifier ?nando_upper_id.
+      OPTIONAL{?nando_upper rdfs:label ?nando_upper_label;
+                            dcterms:identifier ?nando_upper_id.}
         FILTER(lang(?nando_upper_label)= "en")
       }
     }
