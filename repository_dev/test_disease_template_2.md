@@ -133,8 +133,8 @@ WHERE {
      VALUES ?mondo { <http://purl.obolibrary.org/obo/MONDO_{{idDict.mondo}}> }
      GRAPH <http://rdf.integbio.jp/dataset/togosite/mondo> {
       ?mondo oboinowl:id ?mondo_id ;
-         rdfs:label ?mondo_label ;
-         obo:IAO_0000115 ?mondo_definition .
+         rdfs:label ?mondo_label .
+      OPTIONAL {?mondo obo:IAO_0000115 ?mondo_definition .}
       OPTIONAL {?mondo oboinowl:hasDbXref ?related .}
       OPTIONAL {?mondo oboinowl:hasExactSynonym ?synonym .}
       OPTIONAL {?mondo rdfs:subClassOf ?upper_class .
@@ -164,8 +164,8 @@ WHERE {
       OPTIONAL{?nando dcterms:source ?nando_source.}
       OPTIONAL{?nando skos:altLabel ?nando_altLabel_s.}
       OPTIONAL{?nando rdfs:subClassOf ?nando_upper.
-      OPTIONAL{?nando_upper rdfs:label ?nando_upper_label;
-                            dcterms:identifier ?nando_upper_id.}
+               ?nando_upper rdfs:label ?nando_upper_label.
+               ?nando_upper dcterms:identifier ?nando_upper_id.}
         FILTER(lang(?nando_upper_label)= "en")
       }
     }
