@@ -36,14 +36,23 @@ async ({togoKey, properties, queryIds})=>{
   const queryPropertyIds = queryProperties.map(d => d.propertyId);
   const togoIdArray = JSON.parse(queryIds);
   const start = Date.now(); // debug
+
+  let propertyId2config = {}
+  for (let configSubject of togositeConfigJson) {
+    for (let configProperty of configSubject.properties) {
+      propertyId2config[configProperty.propertyId] = configProperty;
+    }
+  }
   
-  const getAttributeData = async (configProperty) => {
-    configProperty.data = configProperty.data.split(/\//).slice(-1)[0]; // nested SPARQLet relative path
+  const getAttributeData = async (query) => {
+    const propertyId = query.propertyId;
+    const config = propertyId2config[propertyId];
+    config.data = config.data.split(/\//).slice(-1)[0]; // nested SPARQLet relative path
     //const t1 = Date.now() - start; // debug
     
     // get 'togoKey' ID - 'primalyKey' ID list via TogoID API
     let idPair = [];
-    if (togoKey != configProperty.primaryKey) idPair = await fetchReq(togoidApi, options, "source=" + togoKey + "&target=" + configProperty.primaryKey + "&ids=" + encodeURIComponent(togoIdArray.join(" ")));
+    if (togoKey != config.primaryKey) idPair = await fetchReq(togoidApi, options, "source=" + togoKey + "&target=" + config.primaryKey + "&ids=" + encodeURIComponent(togoIdArray.join(" ")));
     else idPair = togoIdArray.map(d => {return {source_id: d, target_id: d} });
     let togo2primary = {};
     for (let d of idPair) {
@@ -55,34 +64,26 @@ async ({togoKey, properties, queryIds})=>{
     // get attributes of 'primaryKey' Ids
     let primaryIds = Array.from(new Set(idPair.map(d=>d.target_id))).join(",");
     let categoryIdsParam = "";
-    for (let queryProperty of queryProperties) {
-      if (queryProperty.propertyId == configProperty.propertyId) {
-        if (queryProperty.categoryIds) categoryIdsParam = "&categoryIds=" + queryProperty.categoryIds.join(",");
-        break;
-      }
-    }
+    if (query.categoryIds) categoryIdsParam = "&categoryIds=" + query.categoryIds.join(",");
+
     let body = "mode=objectList&queryIds=" + encodeURIComponent(primaryIds) + categoryIdsParam;
     let objectList = [];
     if (primaryIds.length <= idLimit) {
-      objectList = await fetchReq(configProperty.data, options, body);
+      objectList = await fetchReq(config.data, options, body);
     } else {
-      body += "&sparqlet=" + encodeURIComponent(configProperty.data) + "&limit=" + idLimit;
+      body += "&sparqlet=" + encodeURIComponent(config.data) + "&limit=" + idLimit;
       objectList =  await fetchReq(sparqlSplitter, options, body);
     }  
     //const t3 = Date.now() - start; // debug
-    //console.log(configProperty.propertyId + ": start " + t1 + ",mid " + t2 + ",fin " + t3);
+    //console.log(propertyId + ": start " + t1 + ",mid " + t2 + ",fin " + t3);
     
     return {"pair": togo2primary, "list": objectList};
   }
   
   const getAllAttributeData = async () => {
     let attributeData = {};
-    for (let configSubject of togositeConfigJson) {
-      for (let configProperty of configSubject.properties) {
-        if (queryPropertyIds.includes(configProperty.propertyId)) { // クエリに Hit したら
-          attributeData[configProperty.propertyId] = getAttributeData(configProperty).then(d => d);
-        }
-      }
+    for (let i = 0; i < queryProperties.length; i++) {
+      attributeData[i] = getAttributeData(queryProperties[i]).then(d => d);
     }
     return attributeData;
   } 
@@ -94,41 +95,36 @@ async ({togoKey, properties, queryIds})=>{
   
   // label 取得（labelApi が対応しない、ラベルの無い togovar などを入れる場合は注意）
   let togoIdToLabelFetch = fetchReq(labelApi, options, "togoKey=" + togoKey + "&queryIds=" + queryIds); // promise
-    
+
   let attributeDataAll = await getAllAttributeData(); // promise
   // console.log(attributeDataAll);
-  
-  for (let configSubject of togositeConfigJson) {
-    for (let configProperty of configSubject.properties) {
-      if (queryPropertyIds.includes(configProperty.propertyId)) { // クエリに Hit したら
-        
-        let attributeData = await attributeDataAll[configProperty.propertyId];
-       // console.log(attributeData);
-        let togo2primary = attributeData.pair;
-	    let objectList = attributeData.list;
+
+  for (let i = 0; i < queryProperties.length; i++) {
+    const propertyId = queryProperties[i].propertyId;     
+    const config = propertyId2config[propertyId]; 
+    
+    let attributeData = await attributeDataAll[i];
+    // console.log(attributeData);
+    let togo2primary = attributeData.pair;
+	let objectList = attributeData.list;
           
-        // mapping to 'togoKey' ID
-        let primaryId2attribute = {};
-        for (let d of objectList) {
-          if (!primaryId2attribute[d.id]) primaryId2attribute[d.id] = [];
-          primaryId2attribute[d.id].push(d);
-        }
-        for (let togoId of Object.keys(togo2primary)) {
-          let attributeList = [];
-          for (let promaryId of togo2primary[togoId]) {
-            if (primaryId2attribute[promaryId]) attributeList = attributeList.concat(primaryId2attribute[promaryId]);
-          }
-          if (attributeList[0]) { 
-            tableData[togoId].push({
-              propertyId: configProperty.propertyId,
-              propertyLabel: configProperty.label,
-              propertyKey: configProperty.primaryKey,
-              attributes: attributeList
-            })
-          }
-        }
-        
+    // mapping to 'togoKey' ID
+    let primaryId2attribute = {};
+    for (let d of objectList) {
+      if (!primaryId2attribute[d.id]) primaryId2attribute[d.id] = [];
+      primaryId2attribute[d.id].push(d);
+    }
+    for (let togoId of Object.keys(togo2primary)) {
+      let attributeList = [];
+      for (let promaryId of togo2primary[togoId]) {
+        if (primaryId2attribute[promaryId]) attributeList = attributeList.concat(primaryId2attribute[promaryId]);
       }
+      tableData[togoId].push({
+        propertyId: propertyId,
+        propertyLabel: config.label,
+        propertyKey: config.primaryKey,
+        attributes: attributeList
+      })
     }
   }
   
