@@ -114,9 +114,9 @@ WHERE {
       VALUES ?type { meshv:TopicalDescriptor meshv:SCR_Disease }
       ?mesh a ?type.
       ?mesh rdfs:label ?mesh_label.
-      OPTIONAL { ?mesh meshv:treeNumber ?mesh_tree_uri }
+      OPTIONAL { ?mesh meshv:treeNumber ?mesh_tree_uri. }
       ?mesh meshv:preferredConcept ?mesh_concept.
-      ?mesh_concept meshv:scopeNote ?mesh_note_temp.
+      OPTIONAL { ?mesh_concept meshv:scopeNote ?mesh_note_temp. }
 
       BIND(IF(bound(?mesh_note_temp), ?mesh_note_temp,"null") AS ?mesh_scope_note) 
       BIND (substr(str(?mesh), 28) AS ?mesh_id)
