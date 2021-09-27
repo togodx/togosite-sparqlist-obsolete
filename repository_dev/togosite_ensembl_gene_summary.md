@@ -22,7 +22,7 @@ PREFIX refexo: <http://purl.jp/bio/01/refexo#>
 PREFIX schema: <http://schema.org/>
 PREFIX ensg: <http://rdf.ebi.ac.uk/resource/ensembl/>
 
-SELECT DISTINCT ?ensg_id ?idt_ensg ?gene_symbol ?desc ?type_label ?location
+SELECT DISTINCT ?ensg_id ?idt_ensg ?gene_symbol ?desc ?type_label ?location ?type_gtex ?type_hpa_cell ?type_hpa_tissue
   (GROUP_CONCAT(DISTINCT ?gtex_tissue_label; separator=", ") AS ?gtex_tissue_labels)
   (GROUP_CONCAT(DISTINCT ?hpa_tissue_label; separator=", ") AS ?hpa_tissue_labels)
   (GROUP_CONCAT(DISTINCT ?hpa_cell_label; separator=", ") AS ?hpa_cell_labels)
@@ -40,6 +40,23 @@ WHERE {
     BIND(REPLACE(STRAFTER(STR(?type), "http://rdf.ebi.ac.uk/terms/ensembl/"), "_", " ") as ?type_label)
     ?loc rdfs:label ?location .
   }
+
+  OPTIONAL {
+    GRAPH <http://rdf.integbio.jp/dataset/togosite/refex_tissue_specific_genes_gtex_v6> {
+      ?idt_ensg a ?type_gtex .
+    }
+  }
+  OPTIONAL {
+    GRAPH <http://rdf.integbio.jp/dataset/togosite/hpa_cell_specificity> {
+      ?idt_ensg a ?type_hpa_cell .
+    }
+  }
+  OPTIONAL {
+    GRAPH <http://rdf.integbio.jp/dataset/togosite/hpa_tissue_specificity> {
+      ?idt_ensg a ?type_hpa_tissue .
+    }
+  }
+
   OPTIONAL {
     GRAPH <http://rdf.integbio.jp/dataset/togosite/refex_tissue_specific_genes_gtex_v6> {
       ?idt_ensg refexo:isPositivelySpecificTo ?gtex_tissue .
@@ -77,6 +94,28 @@ WHERE {
 ```javascript
 ({ main, id }) => {
   let binding = main.results.bindings[0];
+  let ts_gtex = binding.gtex_tissue_labels.value;
+  if (ts_gtex == "") {
+    if (binding.type_gtex.value == "")
+      ts_gtex = "N/A";
+    else 
+      ts_gtex = "(Low tissue specificity)";
+  }
+  let ts_hpa = binding.hpa_tissue_labels.value;
+  if (ts_hpa == "") {
+    if (binding.type_hpa_tissue.value == "")
+      ts_hpa = "N/A";
+    else 
+      ts_hpa = "(Low tissue specificity)";
+  }
+  let cs_hpa = binding.hpa_cell_labels.value;
+  if (cs_hpa == "") {
+    if (binding.type_hpa_cell.value == "")
+      cs_hpa = "N/A";
+    else 
+      cs_hpa = "(Low cell specificity)";
+  }
+
   let objs = [{
     "Ensembl ID": binding.ensg_id.value,
     "Ensembl URL": binding.idt_ensg.value,
@@ -84,22 +123,13 @@ WHERE {
     "Description": binding.desc.value,
     "Gene type": binding.type_label.value,
     "Location": binding.location.value,
-    "Tissue specificity (GTEx)": binding.gtex_tissue_labels.value,
-    "Tissue specificity (HPA)": binding.hpa_tissue_labels.value,
-    "Cell specificity (HPA)": binding.hpa_cell_labels.value,
+    "Tissue specificity (GTEx)": ts_gtex,
+    "Tissue specificity (HPA)": ts_hpa,
+    "Cell specificity (HPA)": cs_hpa,
     "Expression": "<a href=\"https://gtexportal.org/home/gene/" + id + "\">" + "View Expression at GTEx Portal</a>, " +
                   "<a href=\"https://www.proteinatlas.org/" + id + "\">" + "View Expression at ProteinAtlas</a>"
   }];
 
-  if (objs[0]["Tissue specificity (GTEx)"] == "") {
-    objs[0]["Tissue specificity (GTEx)"] = "(Low tissue specificity)";
-  }
-  if (objs[0]["Tissue specificity (HPA)"] == "") {
-    objs[0]["Tissue specificity (HPA)"] = "(Low tissue specificity)";
-  }
-  if (objs[0]["Cell specificity (HPA)"] == "") {
-    objs[0]["Cell specificity (HPA)"] = "(Low cell specificity)";
-  }
   return objs;
 };
 ```
