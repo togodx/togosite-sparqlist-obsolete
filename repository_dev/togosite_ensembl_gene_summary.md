@@ -96,24 +96,24 @@ WHERE {
   let binding = main.results.bindings[0];
   let ts_gtex = binding.gtex_tissue_labels.value;
   if (ts_gtex == "") {
-    if (binding.type_gtex.value == "")
-      ts_gtex = "N/A";
-    else 
+    if (binding.type_gtex?.value)
       ts_gtex = "(Low tissue specificity)";
+    else 
+      ts_gtex = "N/A";
   }
   let ts_hpa = binding.hpa_tissue_labels.value;
   if (ts_hpa == "") {
-    if (binding.type_hpa_tissue.value == "")
-      ts_hpa = "N/A";
-    else 
+    if (binding.type_hpa_tissue?.value)
       ts_hpa = "(Low tissue specificity)";
+    else 
+      ts_hpa = "N/A";
   }
   let cs_hpa = binding.hpa_cell_labels.value;
   if (cs_hpa == "") {
-    if (binding.type_hpa_cell.value == "")
-      cs_hpa = "N/A";
-    else 
+    if (binding.type_hpa_cell?.value)
       cs_hpa = "(Low cell specificity)";
+    else 
+      cs_hpa = "N/A";
   }
 
   let objs = [{
