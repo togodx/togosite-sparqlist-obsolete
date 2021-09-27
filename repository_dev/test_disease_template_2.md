@@ -108,19 +108,19 @@ WHERE {
 {{#if idDict.mesh}}
   {
     SELECT ?mesh_id ?mesh_label ?mesh_tree_uri ?mesh_concept ?mesh_scope_note
+    FROM <http://rdf.integbio.jp/dataset/togosite/mesh>
     WHERE { 
-       VALUES ?mesh { <http://id.nlm.nih.gov/mesh/{{idDict.mesh}}> }
-      GRAPH <http://rdf.integbio.jp/dataset/togosite/mesh> {
-        ?mesh a meshv:TopicalDescriptor;
-            rdfs:label ?mesh_label;
-            meshv:treeNumber ?mesh_tree_uri;
-            meshv:preferredConcept ?mesh_concept.
-        ?mesh_concept meshv:scopeNote ?mesh_note_temp.
+      VALUES ?mesh { <http://id.nlm.nih.gov/mesh/{{idDict.mesh}}> }
+      VALUES ?type { meshv:TopicalDescriptor meshv:SCR_Disease }
+      ?mesh a ?type.
+      ?mesh rdfs:label ?mesh_label.
+      OPTIONAL { ?mesh meshv:treeNumber ?mesh_tree_uri }
+      ?mesh meshv:preferredConcept ?mesh_concept.
+      ?mesh_concept meshv:scopeNote ?mesh_note_temp.
 
-        BIND(IF(bound(?mesh_note_temp), ?mesh_note_temp,"null") AS ?mesh_scope_note) 
-        BIND (substr(str(?mesh), 28) AS ?mesh_id)
-        BIND (substr(str(?mesh_tree_uri),28) AS ?mesh_tree_temp)
-     }
+      BIND(IF(bound(?mesh_note_temp), ?mesh_note_temp,"null") AS ?mesh_scope_note) 
+      BIND (substr(str(?mesh), 28) AS ?mesh_id)
+      BIND (substr(str(?mesh_tree_uri),28) AS ?mesh_tree_temp)
     }
   }
 {{/if}}
