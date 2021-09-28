@@ -17,11 +17,13 @@
 
 ## Test pattern
 
-* [type=mondo(MONDO_0004997)で対応する全ての値が1つずつ存在する](https://integbio.jp/togosite/sparqlist/api/test_disease_template_3_mitsuhashi?id=0004997&type=mondo)
-* [type=nando(nando:2200051)で対応する全ての値が1つずつ存在する](https://integbio.jp/togosite/sparqlist/api/test_disease_template_3_mitsuhashi?id=2200051&type=nando)
-* [type=mesh( mesh:D002804)で対応する全ての値が1つずつ存在する](https://integbio.jp/togosite/sparqlist/api/test_disease_template_3_mitsuhashi?id=D002804&type=mesh)
-* [type=hp( HP_0030432)で対応する全ての値が1つずつ存在する](https://integbio.jp/togosite/sparqlist/api/test_disease_template_3_mitsuhashi?id=0030432&type=hp)
-* [type=mondo(MONDO_0005854)でNANDOが２つ(1200278,2200430)存在する](https://integbio.jp/togosite/sparqlist/api/test_disease_template_3_mitsuhashi?id=0005854&type=mondo)
+* [type=mondo(MONDO_0004997)で対応する全ての値が1つずつ存在する](api/test_disease_template_2?id=0004997&type=mondo)
+* [type=nando(nando:2200051)で対応する全ての値が1つずつ存在する](api/test_disease_template_2?id=2200051&type=nando)
+* [type=mesh(mesh:D002804)で対応する全ての値が1つずつ存在する](api/test_disease_template_2?id=D002804&type=mesh)
+* [type=mesh(mesh:C536171)で対応する全ての値が1つずつ存在する](api/test_disease_template_2?id=C536171&type=mesh)
+  * Cで始まるIDは[Class 3 Supplementary Records - Diseases](https://www.nlm.nih.gov/mesh/intro_record_types.html)でTreeNumberを持たないID
+* [type=hp(HP_0030432)で対応する全ての値が1つずつ存在する](api/test_disease_template_2?id=0030432&type=hp)
+* [type=mondo(MONDO_0005854)でNANDOが２つ(1200278,2200430)存在する](api/test_disease_template_2?id=0005854&type=mondo)
 
 ## Endpoint
 
@@ -81,19 +83,22 @@ SELECT DISTINCT *
 WHERE {    
 {{#if idDict.hp}}
   {
-    SELECT ?hpo_id ?hpo_label ?hpo_definition ?hpo_alt_id 
-           (GROUP_CONCAT(DISTINCT ?hpo_dbxref_s,",") AS ?hpo_dbxref)
-           ?hpo_comment ?hpo_subclass  ?hpo_exac_synonym ?hpo_obo_ns ?hpo_related_synonym ?hpo_seealso
+    SELECT ?hpo_id ?hpo_label ?hpo_definition 
+           (GROUP_CONCAT(DISTINCT ?hpo_alt_id_s, ",") AS ?hpo_alt_id) 
+           (GROUP_CONCAT(DISTINCT ?hpo_dbxref_s, ",") AS ?hpo_dbxref)
+           ?hpo_comment ?hpo_subclass  
+            (GROUP_CONCAT(DISTINCT ?hpo_exact_synonym_s, ",")AS ?hpo_exact_synonym)
+            ?hpo_obo_ns ?hpo_related_synonym ?hpo_seealso
     WHERE {
       VALUES ?hpo { <http://purl.obolibrary.org/obo/HP_{{idDict.hp}}> }
       GRAPH <http://rdf.integbio.jp/dataset/togosite/hpo> {
         ?hpo rdfs:label ?hpo_label.
-        ?hpo obo:IAO_0000115 ?hpo_definition.
-      OPTIONAL {?hpo go:hasAlternativeId ?hpo_alt_id.}
+      OPTIONAL {?hpo obo:IAO_0000115 ?hpo_definition.}
+      OPTIONAL {?hpo go:hasAlternativeId ?hpo_alt_id_s.}
       OPTIONAL {?hpo go:hasDbXref ?hpo_dbxref_s.}
       OPTIONAL {?hpo rdfs:comment ?hpo_comment.}
       OPTIONAL {?hpo rdfs:subClassOf ?hpo_subclass.}
-      OPTIONAL {?hpo go:hasExactSynonym ?hpo_exac_synonym.}
+      OPTIONAL {?hpo go:hasExactSynonym ?hpo_exact_synonym_s.}
       OPTIONAL {?hpo go:hasOBONamespace ?hpo_obo_ns.}
       OPTIONAL {?hpo go:hasRelatedSynonym ?hpo_related_synonym.}
       OPTIONAL {?hpo rdfs:seeAlso ?hpo_seealso.}
@@ -105,19 +110,19 @@ WHERE {
 {{#if idDict.mesh}}
   {
     SELECT ?mesh_id ?mesh_label ?mesh_tree_uri ?mesh_concept ?mesh_scope_note
+    FROM <http://rdf.integbio.jp/dataset/togosite/mesh>
     WHERE { 
-       VALUES ?mesh { <http://id.nlm.nih.gov/mesh/{{idDict.mesh}}> }
-      GRAPH <http://rdf.integbio.jp/dataset/togosite/mesh> {
-        ?mesh a meshv:TopicalDescriptor;
-            rdfs:label ?mesh_label;
-            meshv:treeNumber ?mesh_tree_uri;
-            meshv:preferredConcept ?mesh_concept.
-        ?mesh_concept meshv:scopeNote ?mesh_note_temp.
+      VALUES ?mesh { <http://id.nlm.nih.gov/mesh/{{idDict.mesh}}> }
+      VALUES ?type { meshv:TopicalDescriptor meshv:SCR_Disease }
+      ?mesh a ?type.
+      ?mesh rdfs:label ?mesh_label.
+      OPTIONAL { ?mesh meshv:treeNumber ?mesh_tree_uri. }
+      ?mesh meshv:preferredConcept ?mesh_concept.
+      OPTIONAL { ?mesh_concept meshv:scopeNote ?mesh_note_temp. }
 
-        BIND(IF(bound(?mesh_note_temp), ?mesh_note_temp,"null") AS ?mesh_scope_note) 
-        BIND (substr(str(?mesh), 28) AS ?mesh_id)
-        BIND (substr(str(?mesh_tree_uri),28) AS ?mesh_tree_temp)
-     }
+      BIND(IF(bound(?mesh_note_temp), ?mesh_note_temp,"") AS ?mesh_scope_note) 
+      BIND (substr(str(?mesh), 28) AS ?mesh_id)
+      BIND (substr(str(?mesh_tree_uri),28) AS ?mesh_tree_temp)
     }
   }
 {{/if}}
@@ -133,8 +138,8 @@ WHERE {
      VALUES ?mondo { <http://purl.obolibrary.org/obo/MONDO_{{idDict.mondo}}> }
      GRAPH <http://rdf.integbio.jp/dataset/togosite/mondo> {
       ?mondo oboinowl:id ?mondo_id ;
-         rdfs:label ?mondo_label ;
-         obo:IAO_0000115 ?mondo_definition .
+         rdfs:label ?mondo_label .
+      OPTIONAL {?mondo obo:IAO_0000115 ?mondo_definition .}
       OPTIONAL {?mondo oboinowl:hasDbXref ?related .}
       OPTIONAL {?mondo oboinowl:hasExactSynonym ?synonym .}
       OPTIONAL {?mondo rdfs:subClassOf ?upper_class .
@@ -147,8 +152,9 @@ WHERE {
     
 {{#if idDict.nando}}
   {
-    SELECT DISTINCT ?nando ?nando_id ?nando_label  ?nando_label_jp ?nando_description ?nando_source ?nando_altLabel ?nando_upper_label ?nando_upper_id
-                    (GROUP_CONCAT(?nando_mondo_s, ",") AS ?nando_mondo)
+    SELECT DISTINCT ?nando ?nando_id ?nando_label  ?nando_label_jp ?nando_description ?nando_source 
+                    (GROUP_CONCAT(DISTINCT ?nando_altLabel_s, ",")AS ?nando_altLabel) ?nando_upper_label ?nando_upper_id
+                    (GROUP_CONCAT(DISTINCT ?nando_mondo_s, ",") AS ?nando_mondo)
                     
     WHERE { 
      VALUES ?nando { <http://nanbyodata.jp/ontology/NANDO_{{idDict.nando}}> }
@@ -161,10 +167,10 @@ WHERE {
       OPTIONAL{?nando dcterms:description ?nando_description.}
       OPTIONAL{?nando skos:closeMatch ?nando_mondo_s.}
       OPTIONAL{?nando dcterms:source ?nando_source.}
-      OPTIONAL{?nando skos:altLabel ?nando_altLabel.}
+      OPTIONAL{?nando skos:altLabel ?nando_altLabel_s.}
       OPTIONAL{?nando rdfs:subClassOf ?nando_upper.
-               ?nando_upper rdfs:label ?nando_upper_label;
-                            dcterms:identifier ?nando_upper_id.
+               ?nando_upper rdfs:label ?nando_upper_label.
+               ?nando_upper dcterms:identifier ?nando_upper_id.
         FILTER(lang(?nando_upper_label)= "en")
       }
     }
