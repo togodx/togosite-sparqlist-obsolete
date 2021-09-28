@@ -58,11 +58,15 @@ WHERE {
       OPTIONAL {?PDBentry pdbo:has_em_bufferCategory/pdbo:has_em_buffer/pdbo:em_buffer.pH ?pH .}
       BIND(IF(STRLEN(?pH)>0, STR(?pH),"N/A") AS ?pH_str)
 
-      OPTIONAL {?PDBentry pdbo:has_struct_keywordsCategory/pdbo:has_struct_keywords/pdbo:struct_keywords.pdbx_keywords ?keywords .}
-      OPTIONAL {?PDBentry pdbo:has_struct_keywordsCategory/pdbo:has_struct_keywords/pdbo:struct_keywords.text ?text.}
+      OPTIONAL {?PDBentry pdbo:has_struct_keywordsCategory/pdbo:has_struct_keywords/pdbo:struct_keywords.pdbx_keywords ?keywords_tmp .}
+      BIND(IF(STRLEN(?keywords_tmp)>0, ?keywords_tmp ,"") AS ?keywords)
+      OPTIONAL {?PDBentry pdbo:has_struct_keywordsCategory/pdbo:has_struct_keywords/pdbo:struct_keywords.text ?text_tmp.}
+      BIND(IF(STRLEN(?text_tmp)>0, ?text_tmp ,"") AS ?text)
 
-      OPTIONAL {?PDBentry pdbo:has_entity_src_genCategory/pdbo:has_entity_src_gen/pdbo:entity_src_gen.pdbx_gene_src_scientific_name ?spieces.}
-      OPTIONAL {?PDBentry pdbo:has_entity_src_genCategory/pdbo:has_entity_src_gen/pdbo:entity_src_gen.pdbx_host_org_scientific_name ?host.}
+      OPTIONAL {?PDBentry pdbo:has_entity_src_genCategory/pdbo:has_entity_src_gen/pdbo:entity_src_gen.pdbx_gene_src_scientific_name ?spieces_tmp.}
+      BIND(IF(STRLEN(?spieces_tmp)>0, ?spieces_tmp ,"") AS ?spieces)
+      OPTIONAL {?PDBentry pdbo:has_entity_src_genCategory/pdbo:has_entity_src_gen/pdbo:entity_src_gen.pdbx_host_org_scientific_name ?host_tmp.}
+      BIND(IF(STRLEN(?host_tmp)>0, ?host_tmp ,"") AS ?host)
     
      {Select DISTINCT ?PDBentry COUNT(?polypeptide)AS ?polypeptide_number {
      ?PDBentry pdbo:has_entity_polyCategory/pdbo:has_entity_poly ?polypeptide.
