@@ -116,13 +116,13 @@ WHERE {
       VALUES ?type { meshv:TopicalDescriptor meshv:SCR_Disease }
       ?mesh a ?type.
       ?mesh rdfs:label ?mesh_label.
-      OPTIONAL { ?mesh meshv:treeNumber ?mesh_tree_uri. }
+      OPTIONAL { ?mesh meshv:treeNumber ?mesh_tree_uri_temp. }
       ?mesh meshv:preferredConcept ?mesh_concept.
       OPTIONAL { ?mesh_concept meshv:scopeNote ?mesh_note_temp. }
 
-      BIND(IF(bound(?mesh_note_temp), ?mesh_note_temp,"") AS ?mesh_scope_note) 
+      BIND(IF(bound(?mesh_note_temp),?mesh_note_temp,"") AS ?mesh_scope_note) 
       BIND (substr(str(?mesh), 28) AS ?mesh_id)
-      BIND (substr(str(?mesh_tree_uri),28) AS ?mesh_tree_temp)
+      BIND (IF(bound(?mesh_tree_uri_temp),?mesh_tree_uri_temp,"") AS ?mesh_tree_uri)
     }
   }
 {{/if}}
