@@ -164,15 +164,15 @@ WHERE {
       FILTER(lang(?nando_label_jp)= "ja")
       OPTIONAL{?nando dcterms:description ?nando_description_temp.}
       OPTIONAL{?nando skos:closeMatch ?nando_mondo_s.}
-      OPTIONAL{?nando dcterms:source ?nando_source.}
+      OPTIONAL{?nando dcterms:source ?nando_source_temp.}
       OPTIONAL{?nando skos:altLabel ?nando_altLabel_s.}
       OPTIONAL{?nando rdfs:subClassOf ?nando_upper.
                ?nando_upper rdfs:label ?nando_upper_label.
                ?nando_upper dcterms:identifier ?nando_upper_id.
         FILTER(lang(?nando_upper_label)= "en") }
      
-      BIND(IF(bound(?nando_description_temp), ?nando_description_temp,"null") AS ?nando_description)
-      BIND(IF(bound(?nando_source_temp), ?nando_source, "null") AS ?nando_source)
+      BIND(IF(bound(?nando_description_temp), ?nando_description_temp,"") AS ?nando_description)
+      BIND(IF(bound(?nando_source_temp), ?nando_source_temp, "") AS ?nando_source)
     }
    }
   }
