@@ -17,13 +17,11 @@
 
 ## Test pattern
 
-* [type=mondo(MONDO_0004997)で対応する全ての値が1つずつ存在する](api/test_disease_template_2?id=0004997&type=mondo)
-* [type=nando(nando:2200051)で対応する全ての値が1つずつ存在する](api/test_disease_template_2?id=2200051&type=nando)
-* [type=mesh(mesh:D002804)で対応する全ての値が1つずつ存在する](api/test_disease_template_2?id=D002804&type=mesh)
-* [type=mesh(mesh:C536171)で対応する全ての値が1つずつ存在する](api/test_disease_template_2?id=C536171&type=mesh)
-  * Cで始まるIDは[Class 3 Supplementary Records - Diseases](https://www.nlm.nih.gov/mesh/intro_record_types.html)でTreeNumberを持たないID
-* [type=hp(HP_0030432)で対応する全ての値が1つずつ存在する](api/test_disease_template_2?id=0030432&type=hp)
-* [type=mondo(MONDO_0005854)でNANDOが２つ(1200278,2200430)存在する](api/test_disease_template_2?id=0005854&type=mondo)
+* [type=mondo(MONDO_0004997)で対応する全ての値が1つずつ存在する](https://integbio.jp/togosite/sparqlist/api/test_disease_template_3_mitsuhashi?id=0004997&type=mondo)
+* [type=nando(nando:2200051)で対応する全ての値が1つずつ存在する](https://integbio.jp/togosite/sparqlist/api/test_disease_template_3_mitsuhashi?id=2200051&type=nando)
+* [type=mesh( mesh:D002804)で対応する全ての値が1つずつ存在する](https://integbio.jp/togosite/sparqlist/api/test_disease_template_3_mitsuhashi?id=D002804&type=mesh)
+* [type=hp( HP_0030432)で対応する全ての値が1つずつ存在する](https://integbio.jp/togosite/sparqlist/api/test_disease_template_3_mitsuhashi?id=0030432&type=hp)
+* [type=mondo(MONDO_0005854)でNANDOが２つ(1200278,2200430)存在する](https://integbio.jp/togosite/sparqlist/api/test_disease_template_3_mitsuhashi?id=0005854&type=mondo)
 
 ## Endpoint
 
@@ -116,13 +114,13 @@ WHERE {
       VALUES ?type { meshv:TopicalDescriptor meshv:SCR_Disease }
       ?mesh a ?type.
       ?mesh rdfs:label ?mesh_label.
-      OPTIONAL { ?mesh meshv:treeNumber ?mesh_tree_uri_temp. }
+      OPTIONAL { ?mesh meshv:treeNumber ?mesh_tree_uri. }
       ?mesh meshv:preferredConcept ?mesh_concept.
       OPTIONAL { ?mesh_concept meshv:scopeNote ?mesh_note_temp. }
 
-      BIND(IF(bound(?mesh_note_temp),?mesh_note_temp,"") AS ?mesh_scope_note) 
+      BIND(IF(bound(?mesh_note_temp), ?mesh_note_temp,"null") AS ?mesh_scope_note) 
       BIND (substr(str(?mesh), 28) AS ?mesh_id)
-      BIND (IF(bound(?mesh_tree_uri_temp),?mesh_tree_uri_temp,"") AS ?mesh_tree_uri)
+      BIND (substr(str(?mesh_tree_uri),28) AS ?mesh_tree_temp)
     }
   }
 {{/if}}
@@ -144,7 +142,7 @@ WHERE {
       OPTIONAL {?mondo oboinowl:hasExactSynonym ?synonym .}
       OPTIONAL {?mondo rdfs:subClassOf ?upper_class .
                 ?upper_class rdfs:label ?upper_label.}
-        BIND(REPLACE(STR(?upper_class), "http://purl.obolibrary.org/obo/MONDO_","MONDO:") AS ?upper_class_s)
+      BIND(REPLACE(STR(?upper_class), "http://purl.obolibrary.org/obo/MONDO_","MONDO:") AS ?upper_class_s)
     }
    }
   }
@@ -164,7 +162,7 @@ WHERE {
       FILTER(lang(?nando_label)= "en")
       ?nando rdfs:label ?nando_label_jp.
       FILTER(lang(?nando_label_jp)= "ja")
-      OPTIONAL{?nando dcterms:description ?nando_description.}
+      OPTIONAL{?nando dcterms:description ?nando_description_temp.}
       OPTIONAL{?nando skos:closeMatch ?nando_mondo_s.}
       OPTIONAL{?nando dcterms:source ?nando_source.}
       OPTIONAL{?nando skos:altLabel ?nando_altLabel_s.}
@@ -172,6 +170,8 @@ WHERE {
                ?nando_upper rdfs:label ?nando_upper_label.
                ?nando_upper dcterms:identifier ?nando_upper_id.
         FILTER(lang(?nando_upper_label)= "en")
+               
+      BIND(IF(bound(?nando_description_temp), ?nando_description_temp,"") AS ?nando_description)
       }
     }
    }
