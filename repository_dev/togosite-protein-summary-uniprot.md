@@ -34,8 +34,8 @@ SELECT DISTINCT ?entry ?id ?mnemonic ?full_name ?short_name ?length ?mass
 (GROUP_CONCAT(distinct ?pdb ; separator = ",") AS ?pdbs)
   (COUNT(?citation) AS ?citation_number)
   (GROUP_CONCAT(DISTINCT ?go_mf_l, ",") AS ?molecular_function)
-  (GROUP_CONCAT(DISTINCT ?kw_cc_l, ",") AS ?cellular_component)
-  (GROUP_CONCAT(DISTINCT ?kw_bp_l, ",") AS ?biological_process)
+#  (GROUP_CONCAT(DISTINCT ?kw_cc_l, ",") AS ?cellular_component)
+#  (GROUP_CONCAT(DISTINCT ?kw_bp_l, ",") AS ?biological_process)
   (GROUP_CONCAT(DISTINCT ?tissue, ",") AS ?isolated_tissue) 
 FROM <http://rdf.integbio.jp/dataset/togosite/uniprot>
 FROM <http://rdf.integbio.jp/dataset/togosite/uniprot/keywords>
@@ -45,6 +45,7 @@ WHERE{
   {{#if uniprot_list}}
   VALUES ?entry { {{#each uniprot_list}} uniprot:{{this}} {{/each}} }
   {{/if}}
+  GRAPH <http://rdf.integbio.jp/dataset/togosite/uniprot> {
   ?entry a core:Protein ;
          core:mnemonic ?mnemonic ;
          core:recommendedName|core:submittedName ?rname .
@@ -60,29 +61,38 @@ WHERE{
   OPTIONAL{
     ?entry core:citation ?citation .
   }
-  OPTIONAL{ 
+  }
+  OPTIONAL{
+    GRAPH <http://rdf.integbio.jp/dataset/togosite/uniprot> {
     ?entry core:classifiedWith ?go_mf .
+    }
+    GRAPH <http://rdf.integbio.jp/dataset/togosite/go> {
     ?go_mf rdfs:subClassOf* obo:GO_0003674 ;
            rdfs:label ?go_mf_l .
+    }
   }
-  OPTIONAL{ 
-    ?entry core:classifiedWith ?kw_cc . 
-    ?kw_cc a core:Concept ;
-           rdfs:subClassOf+ keywords:9998 ;
-           skos:prefLabel ?kw_cc_l .
-  }
-  OPTIONAL{ 
-    ?entry core:classifiedWith ?kw_bp .
-    ?kw_bp a core:Concept ;
-           rdfs:subClassOf+ keywords:9999 ;
-           skos:prefLabel ?kw_bp_l .
-  }
+  #OPTIONAL{ 
+  ##  ?entry core:classifiedWith ?kw_cc . 
+  #  ?kw_cc a core:Concept ;
+  #         rdfs:subClassOf+ keywords:9998 ;
+  #         skos:prefLabel ?kw_cc_l .
+  #}
+  ##OPTIONAL{ 
+  #  ?entry core:classifiedWith ?kw_bp .
+  #  ?kw_bp a core:Concept ;
+  #         rdfs:subClassOf+ keywords:9999 ;
+  #         skos:prefLabel ?kw_bp_l .
+  #}
+  GRAPH <http://rdf.integbio.jp/dataset/togosite/uniprot/tissues> {
   OPTIONAL {
     ?entry core:isolatedFrom/skos:prefLabel ?tissue .
   }
+  }
+  GRAPH <http://rdf.integbio.jp/dataset/togosite/uniprot> {
   OPTIONAL {
     ?entry rdfs:seeAlso ?pdb .
     ?pdb core:database db:PDB .
+  }
   }
   BIND(STRLEN(?sequence) AS ?length)
   BIND(REPLACE(STR(?entry), uniprot:, "") AS ?id)
