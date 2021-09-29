@@ -84,23 +84,29 @@ WHERE {
     SELECT ?hpo_id ?hpo_label ?hpo_definition 
            (GROUP_CONCAT(DISTINCT ?hpo_alt_id_s, ",") AS ?hpo_alt_id) 
            (GROUP_CONCAT(DISTINCT ?hpo_dbxref_s, ",") AS ?hpo_dbxref)
-           ?hpo_comment ?hpo_subclass  
+           ?hpo_comment 
+            (GROUP_CONCAT(DISTINCT ?hpo_subclass_s, ",") AS ?hpo_subclass)  
             (GROUP_CONCAT(DISTINCT ?hpo_exact_synonym_s, ",")AS ?hpo_exact_synonym)
-            ?hpo_obo_ns ?hpo_related_synonym ?hpo_seealso
+            (GROUP_CONCAT(DISTINCT ?hpo_related_synonym_s, ",") AS ?hpo_related_synonym)
+            ?hpo_obo_ns 
+            (GROUP_CONCAT(DISTINCT ?hpo_seealso, ",") AS ?hpo_seealso)
     WHERE {
       VALUES ?hpo { <http://purl.obolibrary.org/obo/HP_{{idDict.hp}}> }
       GRAPH <http://rdf.integbio.jp/dataset/togosite/hpo> {
         ?hpo rdfs:label ?hpo_label.
-      OPTIONAL {?hpo obo:IAO_0000115 ?hpo_definition.}
+      OPTIONAL {?hpo obo:IAO_0000115 ?hpo_definition_temp.}
       OPTIONAL {?hpo go:hasAlternativeId ?hpo_alt_id_s.}
       OPTIONAL {?hpo go:hasDbXref ?hpo_dbxref_s.}
-      OPTIONAL {?hpo rdfs:comment ?hpo_comment.}
-      OPTIONAL {?hpo rdfs:subClassOf ?hpo_subclass.}
+      OPTIONAL {?hpo rdfs:comment ?hpo_comment_temp.}
+      OPTIONAL {?hpo rdfs:subClassOf ?hpo_subclass_s.}
       OPTIONAL {?hpo go:hasExactSynonym ?hpo_exact_synonym_s.}
-      OPTIONAL {?hpo go:hasOBONamespace ?hpo_obo_ns.}
-      OPTIONAL {?hpo go:hasRelatedSynonym ?hpo_related_synonym.}
+      OPTIONAL {?hpo go:hasOBONamespace ?hpo_obo_ns_temp.}
+      OPTIONAL {?hpo go:hasRelatedSynonym ?hpo_related_synonym_s.}
       OPTIONAL {?hpo rdfs:seeAlso ?hpo_seealso.}
         BIND (replace(str(?hpo), 'http://purl.obolibrary.org/obo/HP_', 'HP:') AS ?hpo_id)
+        BIND (IF(bound(?hpo_definition_temp), ?hpo_definition_temp, "") AS ?hpo_definition)
+        BIND (IF(bound(?hpo_comment_temp), ?hpo_comment_temp, "") AS ?hpo_comment)
+        BIND (IF(bound(?hpo_obo_ns_temp), ?hpo_obo_ns_temp, "") AS ?hpo_obo_ns)
     }
    }
   }
@@ -137,12 +143,13 @@ WHERE {
      GRAPH <http://rdf.integbio.jp/dataset/togosite/mondo> {
       ?mondo oboinowl:id ?mondo_id ;
          rdfs:label ?mondo_label .
-      OPTIONAL {?mondo obo:IAO_0000115 ?mondo_definition .}
+      OPTIONAL {?mondo obo:IAO_0000115 ?mondo_definition_temp .}
       OPTIONAL {?mondo oboinowl:hasDbXref ?related .}
       OPTIONAL {?mondo oboinowl:hasExactSynonym ?synonym .}
       OPTIONAL {?mondo rdfs:subClassOf ?upper_class .
                 ?upper_class rdfs:label ?upper_label.}
       BIND(REPLACE(STR(?upper_class), "http://purl.obolibrary.org/obo/MONDO_","MONDO:") AS ?upper_class_s)
+      BIND(IF(bound(?mondo_definition_temp), ?mondo_definition_temp, "") AS ?mondo_definition)
     }
    }
   }
