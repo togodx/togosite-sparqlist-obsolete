@@ -169,11 +169,10 @@ WHERE {
       OPTIONAL{?nando rdfs:subClassOf ?nando_upper.
                ?nando_upper rdfs:label ?nando_upper_label.
                ?nando_upper dcterms:identifier ?nando_upper_id.
-        FILTER(lang(?nando_upper_label)= "en") 
-               
-      BIND(IF(bound(?nando_description_temp), ?nando_description_temp,"null") AS ?nando_description)
+        FILTER(lang(?nando_upper_label)= "en") }
      
-       }
+      BIND(IF(bound(?nando_description_temp), ?nando_description_temp,"null") AS ?nando_description)
+      BIND(IF(bound(?nando_source_temp), ?nando_source, "null") AS ?nando_source)
     }
    }
   }
