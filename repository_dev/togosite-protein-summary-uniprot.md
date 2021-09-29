@@ -1,4 +1,4 @@
-# Protein attributes from Uniprot RDF（井手, 守屋）
+# Protein attributes from Uniprot RDF（井手, 守屋, 池田）
 
 ## Parameters
 * `uniprot`
@@ -21,6 +21,7 @@
 https://integbio.jp/togosite/sparql
 
 ## `main`
+一つの SPARQL だと遅いので分割
 ```sparql
 PREFIX uniprot: <http://purl.uniprot.org/uniprot/>
 PREFIX core: <http://purl.uniprot.org/core/>
@@ -29,7 +30,7 @@ PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 SELECT DISTINCT ?entry ?id ?mnemonic ?full_name ?short_name ?length ?mass 
   (GROUP_CONCAT(distinct ?pdb ; separator = ",") AS ?pdbs)
-  (COUNT(?citation) AS ?citation_number)
+  (COUNT(DISTINCT ?citation) AS ?citation_number)
 FROM <http://rdf.integbio.jp/dataset/togosite/uniprot>
 WHERE{
   {{#if uniprot_list}}
