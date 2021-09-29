@@ -85,11 +85,11 @@ WHERE {
            (GROUP_CONCAT(DISTINCT ?hpo_alt_id_s, ",") AS ?hpo_alt_id) 
            (GROUP_CONCAT(DISTINCT ?hpo_dbxref_s, ",") AS ?hpo_dbxref)
            ?hpo_comment 
-            (GROUP_CONCAT(DISTINCT ?hpo_subclass_s, ",") AS ?hpo_subclass)  
-            (GROUP_CONCAT(DISTINCT ?hpo_exact_synonym_s, ",")AS ?hpo_exact_synonym)
-            (GROUP_CONCAT(DISTINCT ?hpo_related_synonym_s, ",") AS ?hpo_related_synonym)
-            ?hpo_obo_ns 
-            (GROUP_CONCAT(DISTINCT ?hpo_seealso, ",") AS ?hpo_seealso)
+           (GROUP_CONCAT(DISTINCT ?hpo_subclass_s, ",") AS ?hpo_subclass)  
+           (GROUP_CONCAT(DISTINCT ?hpo_exact_synonym_s, ",")AS ?hpo_exact_synonym)
+           (GROUP_CONCAT(DISTINCT ?hpo_related_synonym_s, ",") AS ?hpo_related_synonym)
+           ?hpo_obo_ns
+           (GROUP_CONCAT(DISTINCT ?hpo_seealso, ",") AS ?hpo_seealso)
     WHERE {
       VALUES ?hpo { <http://purl.obolibrary.org/obo/HP_{{idDict.hp}}> }
       GRAPH <http://rdf.integbio.jp/dataset/togosite/hpo> {
@@ -206,7 +206,7 @@ WHERE {
     { "HPO_relatedDB": "hpo_dbxref" },
     { "HPO_comment": "hpo_comment" },
     { "HPO_upperClass": "hpo_subclass" },
-    { "HPO_exact_synonym": "hpo_exac_synonym" },
+    { "HPO_exact_synonym": "hpo_exact_synonym" },
     { "HPO_related_synonym": "hpo_related_synonym" },
     { "HPO_seeAlso": "hpo_seealso" },
     { "HPO_obo_ns": "hpo_obo_ns" },
