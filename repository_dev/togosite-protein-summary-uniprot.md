@@ -29,16 +29,18 @@ PREFIX db: <http://purl.uniprot.org/database/>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX obo: <http://purl.obolibrary.org/obo/>
 SELECT DISTINCT ?entry ?id ?mnemonic ?full_name ?short_name ?length ?mass 
 (GROUP_CONCAT(distinct ?pdb ; separator = ",") AS ?pdbs)
   (COUNT(?citation) AS ?citation_number)
-  (GROUP_CONCAT(DISTINCT ?kw_mf_l, ",") AS ?molecular_function)
+  (GROUP_CONCAT(DISTINCT ?go_mf_l, ",") AS ?molecular_function)
   (GROUP_CONCAT(DISTINCT ?kw_cc_l, ",") AS ?cellular_component)
   (GROUP_CONCAT(DISTINCT ?kw_bp_l, ",") AS ?biological_process)
   (GROUP_CONCAT(DISTINCT ?tissue, ",") AS ?isolated_tissue) 
 FROM <http://rdf.integbio.jp/dataset/togosite/uniprot>
 FROM <http://rdf.integbio.jp/dataset/togosite/uniprot/keywords>
 FROM <http://rdf.integbio.jp/dataset/togosite/uniprot/tissues>
+FROM <http://rdf.integbio.jp/dataset/togosite/go>
 WHERE{
   {{#if uniprot_list}}
   VALUES ?entry { {{#each uniprot_list}} uniprot:{{this}} {{/each}} }
@@ -59,10 +61,9 @@ WHERE{
     ?entry core:citation ?citation .
   }
   OPTIONAL{ 
-    ?entry core:classifiedWith ?kw_mf .
-    ?kw_mf a core:Concept ;
-           rdfs:subClassOf+ keywords:9992 ;
-           skos:prefLabel ?kw_mf_l .
+    ?entry core:classifiedWith ?go_mf .
+    ?go_mf rdfs:subClassOf* obo:GO_0003674 ;
+           rdfs:label ?go_mf_l .
   }
   OPTIONAL{ 
     ?entry core:classifiedWith ?kw_cc . 
