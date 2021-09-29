@@ -24,28 +24,17 @@ https://integbio.jp/togosite/sparql
 ```sparql
 PREFIX uniprot: <http://purl.uniprot.org/uniprot/>
 PREFIX core: <http://purl.uniprot.org/core/>
-PREFIX keywords: <http://purl.uniprot.org/keywords/>
 PREFIX db: <http://purl.uniprot.org/database/>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
-PREFIX obo: <http://purl.obolibrary.org/obo/>
 SELECT DISTINCT ?entry ?id ?mnemonic ?full_name ?short_name ?length ?mass 
 (GROUP_CONCAT(distinct ?pdb ; separator = ",") AS ?pdbs)
   (COUNT(?citation) AS ?citation_number)
-  (GROUP_CONCAT(DISTINCT ?go_mf_l, ",") AS ?molecular_function)
-#  (GROUP_CONCAT(DISTINCT ?kw_cc_l, ",") AS ?cellular_component)
-#  (GROUP_CONCAT(DISTINCT ?kw_bp_l, ",") AS ?biological_process)
-  (GROUP_CONCAT(DISTINCT ?tissue, ",") AS ?isolated_tissue) 
 FROM <http://rdf.integbio.jp/dataset/togosite/uniprot>
-FROM <http://rdf.integbio.jp/dataset/togosite/uniprot/keywords>
-FROM <http://rdf.integbio.jp/dataset/togosite/uniprot/tissues>
-FROM <http://rdf.integbio.jp/dataset/togosite/go>
 WHERE{
   {{#if uniprot_list}}
   VALUES ?entry { {{#each uniprot_list}} uniprot:{{this}} {{/each}} }
   {{/if}}
-  GRAPH <http://rdf.integbio.jp/dataset/togosite/uniprot> {
   ?entry a core:Protein ;
          core:mnemonic ?mnemonic ;
          core:recommendedName|core:submittedName ?rname .
@@ -61,41 +50,114 @@ WHERE{
   OPTIONAL{
     ?entry core:citation ?citation .
   }
-  }
-  OPTIONAL{
-    GRAPH <http://rdf.integbio.jp/dataset/togosite/uniprot> {
-    ?entry core:classifiedWith ?go_mf .
-    }
-    GRAPH <http://rdf.integbio.jp/dataset/togosite/go> {
-    ?go_mf rdfs:subClassOf* obo:GO_0003674 ;
-           rdfs:label ?go_mf_l .
-    }
-  }
-  #OPTIONAL{ 
-  ##  ?entry core:classifiedWith ?kw_cc . 
-  #  ?kw_cc a core:Concept ;
-  #         rdfs:subClassOf+ keywords:9998 ;
-  #         skos:prefLabel ?kw_cc_l .
-  #}
-  ##OPTIONAL{ 
-  #  ?entry core:classifiedWith ?kw_bp .
-  #  ?kw_bp a core:Concept ;
-  #         rdfs:subClassOf+ keywords:9999 ;
-  #         skos:prefLabel ?kw_bp_l .
-  #}
-  GRAPH <http://rdf.integbio.jp/dataset/togosite/uniprot/tissues> {
-  OPTIONAL {
-    ?entry core:isolatedFrom/skos:prefLabel ?tissue .
-  }
-  }
-  GRAPH <http://rdf.integbio.jp/dataset/togosite/uniprot> {
   OPTIONAL {
     ?entry rdfs:seeAlso ?pdb .
     ?pdb core:database db:PDB .
   }
-  }
   BIND(STRLEN(?sequence) AS ?length)
   BIND(REPLACE(STR(?entry), uniprot:, "") AS ?id)
+}
+
+```
+## `go_mf`
+```sparql
+PREFIX uniprot: <http://purl.uniprot.org/uniprot/>
+PREFIX core: <http://purl.uniprot.org/core/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX obo: <http://purl.obolibrary.org/obo/>
+SELECT DISTINCT ?entry
+  (GROUP_CONCAT(DISTINCT ?go_mf_l, ",") AS ?molecular_function)
+FROM <http://rdf.integbio.jp/dataset/togosite/uniprot>
+FROM <http://rdf.integbio.jp/dataset/togosite/go>
+WHERE{
+  {{#if uniprot_list}}
+  VALUES ?entry { {{#each uniprot_list}} uniprot:{{this}} {{/each}} }
+  {{/if}}
+  OPTIONAL{
+    GRAPH <http://rdf.integbio.jp/dataset/togosite/uniprot> {
+      ?entry core:classifiedWith ?go_mf .
+    }
+    GRAPH <http://rdf.integbio.jp/dataset/togosite/go> {
+      ?go_mf rdfs:subClassOf* obo:GO_0003674 ;
+             rdfs:label ?go_mf_l .
+    }
+  }
+}
+```
+
+## `go_bp`
+```sparql
+PREFIX uniprot: <http://purl.uniprot.org/uniprot/>
+PREFIX core: <http://purl.uniprot.org/core/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX obo: <http://purl.obolibrary.org/obo/>
+SELECT DISTINCT ?entry
+  (GROUP_CONCAT(DISTINCT ?go_bp_l, ",") AS ?biological_process)
+FROM <http://rdf.integbio.jp/dataset/togosite/uniprot>
+FROM <http://rdf.integbio.jp/dataset/togosite/go>
+WHERE{
+  {{#if uniprot_list}}
+  VALUES ?entry { {{#each uniprot_list}} uniprot:{{this}} {{/each}} }
+  {{/if}}
+  OPTIONAL{
+    GRAPH <http://rdf.integbio.jp/dataset/togosite/uniprot> {
+      ?entry core:classifiedWith ?go_bp .
+    }
+    GRAPH <http://rdf.integbio.jp/dataset/togosite/go> {
+      ?go_bp rdfs:subClassOf* obo:GO_0008150 ;
+             rdfs:label ?go_bp_l .
+    }
+  }
+}
+
+```
+
+## `go_cc`
+```sparql
+PREFIX uniprot: <http://purl.uniprot.org/uniprot/>
+PREFIX core: <http://purl.uniprot.org/core/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX obo: <http://purl.obolibrary.org/obo/>
+SELECT DISTINCT ?entry
+  (GROUP_CONCAT(DISTINCT ?go_cc_l, ",") AS ?cellular_component)
+FROM <http://rdf.integbio.jp/dataset/togosite/uniprot>
+FROM <http://rdf.integbio.jp/dataset/togosite/go>
+WHERE{
+  {{#if uniprot_list}}
+  VALUES ?entry { {{#each uniprot_list}} uniprot:{{this}} {{/each}} }
+  {{/if}}
+  OPTIONAL{
+    GRAPH <http://rdf.integbio.jp/dataset/togosite/uniprot> {
+      ?entry core:classifiedWith ?go_cc .
+    }
+    GRAPH <http://rdf.integbio.jp/dataset/togosite/go> {
+      ?go_cc rdfs:subClassOf* obo:GO_0005575 ;
+             rdfs:label ?go_cc_l .
+    }
+  }
+}
+
+```
+
+## `tissue`
+```sparql
+PREFIX uniprot: <http://purl.uniprot.org/uniprot/>
+PREFIX core: <http://purl.uniprot.org/core/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+SELECT DISTINCT ?entry
+  (GROUP_CONCAT(DISTINCT ?tissue, ",") AS ?isolated_tissue) 
+FROM <http://rdf.integbio.jp/dataset/togosite/uniprot/tissues>
+FROM <http://rdf.integbio.jp/dataset/togosite/uniprot>
+WHERE{
+  {{#if uniprot_list}}
+  VALUES ?entry { {{#each uniprot_list}} uniprot:{{this}} {{/each}} }
+  {{/if}}
+  OPTIONAL {
+    ?entry core:isolatedFrom/skos:prefLabel ?tissue .
+  }
 }
 
 ```
