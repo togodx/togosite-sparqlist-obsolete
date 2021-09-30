@@ -5,7 +5,7 @@
 * `togoKey`
   * default: hgnc
 * `properties`
-  * default: [{"propertyId": "gene_high_level_expression_refex", "categoryIds": ["v32_40", "v25_40"]}, {"propertyId": "protein_cellular_component_uniprot","categoryIds": ["GO_0005886"]}, {"propertyId": "structure_data_existence_uniprot", "categoryIds": ["1"]}, {"propertyId": "interaction_chembl_assay_existence_uniprot", "categoryIds": ["1"]},{"propertyId": "gene_low_level_expression_refex", "map": true}, {"propertyId": "protein_number_of_phosphorylation_sites_uniprot", "map": true}, {"propertyId": "protein_biological_process_uniprot", "categoryIds": ["GO_0009987"], "map": true}]
+  * default: [{"propertyId": "gene_high_level_expression_refex", "categoryIds": ["v32_40", "v25_40"]}, {"propertyId": "protein_cellular_component_uniprot","categoryIds": ["GO_0005886"]}, {"propertyId": "structure_data_existence_uniprot", "categoryIds": ["1"]}, {"propertyId": "interaction_chembl_assay_existence_uniprot", "categoryIds": ["1"]},{"propertyId": "gene_low_level_expression_refex", "mapping": true}, {"propertyId": "protein_number_of_phosphorylation_sites_uniprot", "mapping": true}, {"propertyId": "protein_biological_process_uniprot", "categoryIds": ["GO_0009987"], "mapping": true}]
 * `queryIds` togoKey 100個程度ずつ
   * default: ["4942","5344","6148", "6265","6344","6677","6735","10593","10718","10876"]
 
@@ -76,6 +76,25 @@ async ({togoKey, properties, queryIds})=>{
     }  
     //const t3 = Date.now() - start; // debug
     //console.log(propertyId + ": start " + t1 + ",mid " + t2 + ",fin " + t3);
+    
+    // map attribute for lower-level category 下層カテゴリへのマッピングのための処理
+    if (query.mapping && query.categoryIds) {
+      let body = "categoryIds=" + query.categoryIds.join(",");
+      let lowClass = await fetchReq(config.data, options, body);
+      body = "mode=objectList&queryIds=" + encodeURIComponent(primaryIds) + "&categoryIds=" + lowClass.map(d => d.categoryId).join(",");
+      let objectList_2 = [];
+      if (primaryIds.length <= idLimit) {
+        objectList_2 = await fetchReq(config.data, options, body);
+      } else {
+        body += "&sparqlet=" + encodeURIComponent(config.data) + "&limit=" + idLimit;
+        objectList_2 =  await fetchReq(sparqlSplitter, options, body);
+      }
+      let withLowCategory = {}
+      objectList_2.forEach(d => {
+        withLowCategory[d.id] = true;
+      })
+      objectList = objectList_2.concat(objectList.filter(d => !withLowCategory[d.id]))
+    }
     
     return {"pair": togo2primary, "list": objectList};
   }
