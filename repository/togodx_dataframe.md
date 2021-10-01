@@ -13,7 +13,7 @@
 * `filters`
   * default: [{"attribute": "gene_high_level_expression_refex", "nodes": ["v32_40", "v25_40"]}, {"attribute": "protein_cellular_component_uniprot","nodes": ["GO_0005886"]}, {"attribute": "structure_data_existence_uniprot", "nodes": ["1"]}, {"attribute": "interaction_chembl_assay_existence_uniprot", "nodes": ["1"]}]
 * `annotations`
-  * default: [{"attribute": "gene_low_level_expression_refex"}, {"attribute": "protein_number_of_phosphorylation_sites_uniprot"}, {"attribute": "protein_biological_process_uniprot", "nodes": ["GO_0009987"]}]
+  * default: [{"attribute": "gene_low_level_expression_refex"}, {"attribute": "protein_number_of_phosphorylation_sites_uniprot"}, {"attribute": "protein_biological_process_uniprot", "node": "GO_0009987"}]
 * `queries` togokey 100個程度ずつ
   * default: ["4942","5344","6148", "6265","6344","6677","6735","10593","10718","10876"]
 
@@ -83,8 +83,8 @@ async ({togokey, filters, annotations, queries})=>{
     //console.log(attribute + ": start " + t1 + ",mid " + t2 + ",fin " + t3);
     
     // map attribute for lower-level category 下層カテゴリへのマッピングのための処理
-    if (query.annotation && query.nodes) {
-      let body = "categoryIds=" + query.nodes.join(",");    // #### 入れ子 SPARQList. 要パラメータ名の整理
+    if (query.annotation && query.node) {
+      let body = "categoryIds=" + query.node;    // #### 入れ子 SPARQList. 要パラメータ名の整理
       let lowClass = await fetchReq(config.api, options, body);
       //console.log(lowClass.map(d => d.categoryId).join(","));
       body = "mode=objectList&queryIds=" + encodeURIComponent(primaryIds) + "&categoryIds=" + lowClass.map(d => d.categoryId).join(",");  // #### 入れ子 SPARQList. 要パラメータ名の整理
