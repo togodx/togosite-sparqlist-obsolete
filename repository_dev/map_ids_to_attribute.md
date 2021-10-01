@@ -179,7 +179,7 @@ async ({sparqlet, categoryIds, userIds, userKey, primaryKey, pValueFlag, populat
   if (userKey != primaryKey) {
     let body = "source=" + userKey + "&target=" + primaryKey + "&ids=" +  encodeURIComponent(userIds);
     let togoidPair;
-    if (queryIds.split(/,/).length <= idLimit) {
+    if (userIds.split(/,/).length <= idLimit) {
       togoidPair = await fetchReq(togoidApi, body);
     } else {
       body += "&sparqlet=" + encodeURIComponent(togoidApi) + "&limit=" + idLimit;

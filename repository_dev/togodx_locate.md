@@ -1,46 +1,53 @@
-# Map user IDs to attribute bar with p-value
+# TogoDX locate SPARQList (Parameter 変更) 21.10.01
 
-* sparqlet: Property の API (properties.json の 'data')
-* primaryKey: Property で対象とするデータベース (properties.json の 'primaryKey')
-* categoryIds: 下層を取ってくる場合に使用 (要、UIなどの検討）
-* userKey: post された ID のデータベース
-* userIds: post された ID リスト
-* DAVI p-value (EASE Score)
-  * https://david.ncifcrf.gov/content.jsp?file=functional_annotation.html
+- 元 map_ids_to_attribute
+- 入れ子 SPARQList の parameters もそのうち修正する
+  - categoryIds -> nodes
+  - togokey -> togokey
+  - queryIds -> queries
+- DAVI p-value (EASE Score)
+  - https://david.ncifcrf.gov/content.jsp?file=functional_annotation.html
 
 ## Parameters
 
-* `sparqlet`
-  * default: https://integbio.jp/togosite/sparqlist/api/gene_high_level_expression_refex
-* `primaryKey` databse of SPARQLet
-  * default: ncbigene
-* `categoryIds`
+* `attribute`
+  * default: gene_high_level_expression_refex
+* `node`
   * example:
-* `userKey` database of uploaded user IDs
+* `togokey`
   * default: uniprot
-* `userIds` uploaded user IDs
+* `queries` (IDs from "Map your IDs")
   * default: Q9NYF8,Q4V339,A6NCE7,A7E2F4,P69849,A6NN73,Q92928,Q5T1J5,P0C7P4,Q6DN03,P09874,Q08211,Q5T4S7,P12270,Q9UPN3,P07814,P53621,P49321,P0C629,Q9BZK8,Q9BY65
 
 ## `pValueFlag`
 ```javascript
-({primaryKey, sparqlet})=>{
-  let obj = {};
-  if (primaryKey == "uniprot") {  // || primaryKey == "pdb") {
-    obj[primaryKey] = true;
-  } else if (sparqlet.match(/gene_biotype_ensembl$/) || sparqlet.match(/Ensembl_gene_type$/)) {
+async ({attribute})=>{
+  const fetchReq = async (url, options, body) => {
+    console.log(url + " " + body);  // debug
+    if (body) options.body = body;
+    return await fetch(url, options).then(res=>res.json());
+  }
+
+  const togoDxAttributes = "https://raw.githubusercontent.com/togodx/togodx-config-human/develop/config/attributes.json";
+  const attributesJson = await fetchReq(togoDxAttributes, {method: "get"});
+  const dataset = attributesJson.attributes[attribute].dataset;
+  let obj = {attribute: attributesJson.attributes[attribute]};
+  if (dataset == "uniprot") {  // || dataset == "pdb") {
+    obj[dataset] = true;
+  } else if (attribute.match(/gene_biotype_ensembl$/)) {
     obj.ensembl_gene_biotype = true;  
-  } else if (sparqlet.match(/gene_chromosome_ensembl$/)) {
+  } else if (attribute.match(/gene_chromosome_ensembl$/)) {
     obj.ensembl_gene_chromosome = true;  
-  } else if (sparqlet.match(/gene_number_of_exons_ensembl$/) || sparqlet.match(/Ensembl-exon-count$/)) {
+  } else if (attribute.match(/gene_number_of_exons_ensembl$/)) {
     obj.ensembl_transcript_exons = true;  
-  } else if (sparqlet.match(/gene_number_of_paralogs_homologene$/) || sparqlet.match(/homologene_human_paralog_count$/)
-            || sparqlet.match(/gene_evolutionary_conservation_homologene$/) || sparqlet.match(/homologene_category$/)) {
+  } else if (attribute.match(/gene_number_of_paralogs_homologene$/)
+            || attribute.match(/gene_evolutionary_conservation_homologene$/)) {
     obj.ncbigene_homologene = true;  
-  } else if (sparqlet.match(/gene_\w+_level_expression_refex$/) || sparqlet.match(/refex_specific_\w+_expression$/)) {
+  } else if (attribute.match(/gene_\w+_level_expression_refex$/)) {
     obj.ncbigene_refex = true;  
-  } else if (sparqlet.match(/gene_high_level_expression_gtex6$/) || sparqlet.match(/gtex6_tissues$/)) {
+  } else if (attribute.match(/gene_high_level_expression_gtex6$/)) {
     obj.ensembl_gene_gtex6 = true;  
-  } else if (sparqlet.match(/gene_transcription_factors_chip_atlas$/) || sparqlet.match(/chip_atlas$/)) {
+  } else if (attribute.match(/gene_transcription_factors_chip_atlas$/)) {
     obj.ensembl_gene_chip_atlas = true;  
   }
   if (Object.keys(obj).length) return obj;
@@ -152,7 +159,7 @@ WHERE {
 
 ## `distribution`
 ```javascript
-async ({sparqlet, categoryIds, userIds, userKey, primaryKey, pValueFlag, population})=>{
+async ({node, queries, togokey, pValueFlag, population})=>{
   const fetchReq = async (url, body) => {
     let options = {	
       method: 'POST',
@@ -167,36 +174,38 @@ async ({sparqlet, categoryIds, userIds, userKey, primaryKey, pValueFlag, populat
     return await fetch(url, options).then(res=>res.json());
   }
 
+  const dataset = pValueFlag.attribute.dataset;
+  const api = pValueFlag.attribute.api;
   const togoidSparqlistSplitter = "togoid_sparqlist_splitter"; // nested SPARQLet relative path
   const sparqlistSplitter = "sparqlist_splitter"; // nested SPARQLet relative path
   const togoidApi = "togoid_route_sparql"; // nested SPARQLet relative path
   let idLimit = 2000; // split 判定
-  if (primaryKey == "chembl_compound") idLimit = 500; // restrict POST response size
-  sparqlet = sparqlet.split(/\//).slice(-1)[0];  // nested SPARQLet relative path
+  if (dataset == "chembl_compound") idLimit = 500; // restrict POST response size
+  const sparqlet = api.split(/\//).slice(-1)[0];  // nested SPARQLet relative path
 
   // convert user IDs to primary IDs for SPARQLet
-  let queryIds = "";
-  if (userKey != primaryKey) {
-    let body = "source=" + userKey + "&target=" + primaryKey + "&ids=" +  encodeURIComponent(userIds);
+  let converted_queries = "";
+  if (togokey != dataset) {
+    let body = "source=" + togokey + "&target=" + dataset + "&ids=" +  encodeURIComponent(queries);
     let togoidPair;
-    if (queryIds.split(/,/).length <= idLimit) {
+    if (queries.split(/,/).length <= idLimit) {
       togoidPair = await fetchReq(togoidApi, body);
     } else {
       body += "&sparqlet=" + encodeURIComponent(togoidApi) + "&limit=" + idLimit;
       togoidPair = await fetchReq(togoidSparqlistSplitter, body).map(d=>d.target_id).join(",");
     }
-    queryIds = togoidPair.map(d=>d.target_id).join(",");
+    converted_queries = togoidPair.map(d=>d.target_id).join(",");
   } else {
-    queryIds = userIds;
+    converted_queries = queries;
   }
   
-  if (!queryIds.match(/\w/)) return [];
+  if (!converted_queries.match(/\w/)) return [];
   
   // get property data
   let distribution = [];
-  let body = "queryIds=" + queryIds;
-  if (categoryIds) body += "&categoryIds=" + categoryIds;
-  if (queryIds.split(/,/).length <= idLimit) distribution = await fetchReq(sparqlet, body);
+  let body = "queryIds=" + converted_queries;  // #### 入れ子 SPARQList. 要パラメータ名の整理
+  if (node) body += "&categoryIds=" + node;  // #### 入れ子 SPARQList. 要パラメータ名の整理
+  if (converted_queries.split(/,/).length <= idLimit) distribution = await fetchReq(sparqlet, body);
   body += "&sparqlet=" + encodeURIComponent(sparqlet) + "&limit=" + idLimit;
   distribution = await fetchReq(sparqlistSplitter, body);
   let hit = {};
@@ -206,7 +215,7 @@ async ({sparqlet, categoryIds, userIds, userKey, primaryKey, pValueFlag, populat
   
   // get unfiltered data
   body = false;
-  if (categoryIds) body = "categoryIds=" + categoryIds;
+  if (node) body = "categoryIds=" + node;  // #### 入れ子 SPARQList. 要パラメータ名の整理
   let originalDistribution = await fetchReq(sparqlet, body);
   for (let i = 0; i < originalDistribution.length; i++) {
     let hit_tmp = 0;
@@ -266,7 +275,7 @@ async ({sparqlet, categoryIds, userIds, userKey, primaryKey, pValueFlag, populat
   }
   
   const PT = Number(population.results.bindings[0].total_count.value);
-  const LT = queryIds.split(/,/).length;
+  const LT = converted_queries.split(/,/).length;
   
   return originalDistribution.map(d => {
     const LH = d.hit_count;
