@@ -1,4 +1,4 @@
-# TogoDX dataframe SPARQList (Map attributesの内訳指定を親階層での選択版) 21.09.30
+# TogoDX dataframe SPARQList (Parameter, JSON 変更) 21.10.01
 
 - 元 togokey_table_data
 
@@ -6,14 +6,16 @@
 
 * `togoKey`
   * default: hgnc
-* `properties`
-  * default: {"filter": [{"propertyId": "gene_high_level_expression_refex", "categoryIds": ["v32_40", "v25_40"]}, {"propertyId": "protein_cellular_component_uniprot","categoryIds": ["GO_0005886"]}, {"propertyId": "structure_data_existence_uniprot", "categoryIds": ["1"]}, {"propertyId": "interaction_chembl_assay_existence_uniprot", "categoryIds": ["1"]}], "mapping": [{"propertyId": "gene_low_level_expression_refex"}, {"propertyId": "protein_number_of_phosphorylation_sites_uniprot"}, {"propertyId": "protein_biological_process_uniprot", "categoryIds": ["GO_0009987"]}]}
+* `filters`
+  * default: [{"propertyId": "gene_high_level_expression_refex", "categoryIds": ["v32_40", "v25_40"]}, {"propertyId": "protein_cellular_component_uniprot","categoryIds": ["GO_0005886"]}, {"propertyId": "structure_data_existence_uniprot", "categoryIds": ["1"]}, {"propertyId": "interaction_chembl_assay_existence_uniprot", "categoryIds": ["1"]}]
+* `annotate`
+  * default: [{"propertyId": "gene_low_level_expression_refex"}, {"propertyId": "protein_number_of_phosphorylation_sites_uniprot"}, {"propertyId": "protein_biological_process_uniprot", "categoryIds": ["GO_0009987"]}]
 * `queryIds` togoKey 100個程度ずつ
   * default: ["4942","5344","6148", "6265","6344","6677","6735","10593","10718","10876"]
 
 ## `primaryIds`
 ```javascript
-async ({togoKey, properties, queryIds})=>{
+async ({togoKey, filters, annotate, queryIds})=>{
   const fetchReq = async (url, options, body) => {
     console.log(url + " " + body);  // debug
     if (body) options.body = body;
@@ -34,13 +36,14 @@ async ({togoKey, properties, queryIds})=>{
   const labelApi = "togokey_label";  // nested SPARQLet relative path
   const togositeConfigJson = await fetchReq(togositeConfig, {method: "get"});
   const idLimit = 2000; // split 判定
-  const queryPropertiesPre = JSON.parse(properties);
+  const queryFilters = JSON.parse(filters);
+  const queryAnnotate= JSON.parse(annotate);
   const togoIdArray = JSON.parse(queryIds);
   const start = Date.now(); // debug
 
   let queryProperties = [];
-  if (queryPropertiesPre.filter) queryProperties = queryPropertiesPre.filter;
-  if (queryPropertiesPre.mapping) queryProperties = queryProperties.concat(queryPropertiesPre.mapping.map(d => { d.mapping = true; return d; }));
+  if (queryFilters) queryProperties = queryFilters;
+  if (queryAnnotate) queryProperties = queryProperties.concat(queryAnnotate.map(d => { d.annotate = true; return d; }));
   
   let propertyId2config = {}
   for (let configSubject of togositeConfigJson) {
@@ -83,7 +86,7 @@ async ({togoKey, properties, queryIds})=>{
     //console.log(propertyId + ": start " + t1 + ",mid " + t2 + ",fin " + t3);
     
     // map attribute for lower-level category 下層カテゴリへのマッピングのための処理
-    if (query.mapping && query.categoryIds) {
+    if (query.annotate && query.categoryIds) {
       let body = "categoryIds=" + query.categoryIds.join(",");
       let lowClass = await fetchReq(config.data, options, body);
       //console.log(lowClass.map(d => d.categoryId).join(","));
