@@ -1,4 +1,6 @@
-# TogoDX aggregate SPARQList (Map attributesの内訳指定を親階層での選択版) 元 togokey_table_data 21.09.30
+# TogoDX dataframe SPARQList (Map attributesの内訳指定を親階層での選択版) 21.09.30
+
+- 元 togokey_table_data
 
 ## Parameters
 
