@@ -9,13 +9,16 @@
 ## Parameters
 
 * `togokey`
-  * default: hgnc
+  * default: ensembl_gene
 * `filters`
-  * default: [{"attribute": "gene_high_level_expression_refex", "nodes": ["v32_40", "v25_40"]}, {"attribute": "protein_cellular_component_uniprot","nodes": ["GO_0005886"]}, {"attribute": "structure_data_existence_uniprot", "nodes": ["1"]}, {"attribute": "interaction_chembl_assay_existence_uniprot", "nodes": ["1"]}]
+  * default: [{"attribute": "gene_evolutionary_conservation_homologene","nodes": ["6"]}]
+  * example: [{"attribute": "gene_high_level_expression_refex", "nodes": ["v32_40", "v25_40"]}, {"attribute": "protein_cellular_component_uniprot","nodes": ["GO_0005886"]}, {"attribute": "structure_data_existence_uniprot", "nodes": ["1"]}, {"attribute": "interaction_chembl_assay_existence_uniprot", "nodes": ["1"]}]
 * `annotations`
-  * default: [{"attribute": "gene_low_level_expression_refex"}, {"attribute": "protein_number_of_phosphorylation_sites_uniprot"}, {"attribute": "protein_biological_process_uniprot", "node": "GO_0009987"}]
+  * default: [{"attribute": "protein_biological_process_uniprot"},{"attribute": "protein_biological_process_uniprot", "node": "GO_0044237"}]
+  * example: [{"attribute": "gene_low_level_expression_refex"}, {"attribute": "protein_number_of_phosphorylation_sites_uniprot"}, {"attribute": "protein_biological_process_uniprot", "node": "GO_0009987"}]
 * `queries` togokey 100個程度ずつ
-  * default: ["4942","5344","6148", "6265","6344","6677","6735","10593","10718","10876"]
+  * default: ["ENSG00000173230"]
+  * example: ["4942","5344","6148", "6265","6344","6677","6735","10593","10718","10876"]
 
 ## `primaryIds`
 ```javascript
