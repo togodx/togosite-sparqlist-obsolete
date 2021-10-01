@@ -4,7 +4,7 @@
 - 入れ子 SPARQList の parameters もそのうち修正する
   - categoryIds -> nodes
   - togokey -> togokey
-  - inputIds -> queries
+  - queryIds -> queries
 
 ## Parameters
 
@@ -14,12 +14,12 @@
   * default: [{"propertyId": "gene_high_level_expression_refex", "categoryIds": ["v32_40", "v25_40"]}, {"propertyId": "protein_cellular_component_uniprot","categoryIds": ["GO_0005886"]}, {"propertyId": "structure_data_existence_uniprot", "categoryIds": ["1"]}, {"propertyId": "interaction_chembl_assay_existence_uniprot", "categoryIds": ["1"]}]
 * `annotations`
   * default: [{"propertyId": "gene_low_level_expression_refex"}, {"propertyId": "protein_number_of_phosphorylation_sites_uniprot"}, {"propertyId": "protein_biological_process_uniprot", "categoryIds": ["GO_0009987"]}]
-* `queryIds` togokey 100個程度ずつ
+* `queries` togokey 100個程度ずつ
   * default: ["4942","5344","6148", "6265","6344","6677","6735","10593","10718","10876"]
 
 ## `primaryIds`
 ```javascript
-async ({togokey, filters, annotations, queryIds})=>{
+async ({togokey, filters, annotations, queries})=>{
   const fetchReq = async (url, options, body) => {
     console.log(url + " " + body);  // debug
     if (body) options.body = body;
@@ -42,7 +42,7 @@ async ({togokey, filters, annotations, queryIds})=>{
   const idLimit = 2000; // split 判定
   const queryFilters = JSON.parse(filters);
   const queryAnnotations= JSON.parse(annotations);
-  const togoIdArray = JSON.parse(queryIds);
+  const togoIdArray = JSON.parse(queries);
   const start = Date.now(); // debug
 
   let queryProperties = [];
@@ -76,9 +76,9 @@ async ({togokey, filters, annotations, queryIds})=>{
     // get attributes of 'primaryKey' Ids
     let primaryIds = Array.from(new Set(idPair.map(d=>d.target_id))).join(",");
     let categoryIdsParam = "";
-    if (query.categoryIds) categoryIdsParam = "&categoryIds=" + query.categoryIds.join(",");
+    if (query.categoryIds) categoryIdsParam = "&categoryIds=" + query.categoryIds.join(",");  // #### 入れ子 SPARQList. 要パラメータ名の整理
 
-    let body = "mode=objectList&queryIds=" + encodeURIComponent(primaryIds) + categoryIdsParam;
+    let body = "mode=objectList&queryIds=" + encodeURIComponent(primaryIds) + categoryIdsParam;  // #### 入れ子 SPARQList. 要パラメータ名の整理
     let objectList = [];
     if (primaryIds.length <= idLimit) {
       objectList = await fetchReq(config.data, options, body);
@@ -91,10 +91,10 @@ async ({togokey, filters, annotations, queryIds})=>{
     
     // map attribute for lower-level category 下層カテゴリへのマッピングのための処理
     if (query.annotations && query.categoryIds) {
-      let body = "categoryIds=" + query.categoryIds.join(",");
+      let body = "categoryIds=" + query.categoryIds.join(",");    // #### 入れ子 SPARQList. 要パラメータ名の整理
       let lowClass = await fetchReq(config.data, options, body);
       //console.log(lowClass.map(d => d.categoryId).join(","));
-      body = "mode=objectList&queryIds=" + encodeURIComponent(primaryIds) + "&categoryIds=" + lowClass.map(d => d.categoryId).join(",");
+      body = "mode=objectList&queryIds=" + encodeURIComponent(primaryIds) + "&categoryIds=" + lowClass.map(d => d.categoryId).join(",");  // #### 入れ子 SPARQList. 要パラメータ名の整理
       let objectList_2 = [];
       if (primaryIds.length <= idLimit) {
         objectList_2 = await fetchReq(config.data, options, body);
@@ -126,7 +126,7 @@ async ({togokey, filters, annotations, queryIds})=>{
   }
   
   // label 取得（labelApi が対応しない、ラベルの無い togovar などを入れる場合は注意）
-  let togoIdToLabelFetch = fetchReq(labelApi, options, "togoKey=" + togokey + "&queryIds=" + queryIds);  // #### 入れ子 SPARQList. 要パラメータ名の整理
+  let togoIdToLabelFetch = fetchReq(labelApi, options, "togoKey=" + togokey + "&queryIds=" + queries);  // #### 入れ子 SPARQList. 要パラメータ名の整理
 
   let attributeDataAll = await getAllAttributeData(); // promise
   // console.log(attributeDataAll);
