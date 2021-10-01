@@ -70,7 +70,8 @@ async ({togokey, filters, annotations, queries})=>{
     let primaryIds = Array.from(new Set(idPair.map(d=>d.target_id))).join(",");
     let categoryIdsParam = "";
     if (query.nodes) categoryIdsParam = "&categoryIds=" + query.nodes.join(",");  // #### 入れ子 SPARQList. 要パラメータ名の整理
-
+    if (query.node) categoryIdsParam = "&categoryIds=" + query.node;  // #### 入れ子 SPARQList. 要パラメータ名の整理
+    
     let body = "mode=objectList&queryIds=" + encodeURIComponent(primaryIds) + categoryIdsParam;  // #### 入れ子 SPARQList. 要パラメータ名の整理
     let objectList = [];
     if (primaryIds.length <= idLimit) {
