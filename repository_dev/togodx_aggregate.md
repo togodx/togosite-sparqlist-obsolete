@@ -1,19 +1,23 @@
 # TogoDX aggregate SPARQList (Parameter, JSON 変更) 21.10.01
 
 - 元 togokey_filter
-
+- 入れ子 SPARQList の parameters もそのうち修正する
+　- categoryIds -> nodes
+  - togokey -> togokey
+  - inputIds -> queries
+ 
 ## Parameters
 
-* `togoKey`
+* `togokey`
   * default: hgnc
 * `filters`
-  * default: [{"propertyId": "gene_high_level_expression_refex", "categoryIds": ["v32_40", "v25_40"]}, {"propertyId": "protein_cellular_component_uniprot","categoryIds": ["GO_0005886"]}, {"propertyId": "structure_data_existence_uniprot", "categoryIds": ["1"]}, {"propertyId": "interaction_chembl_assay_existence_uniprot", "categoryIds": ["1"]}]
-* `inputIds` Uploaded user IDs
+  * default: [{"attribute": "gene_high_level_expression_refex", "nodes": ["v32_40", "v25_40"]}, {"attribute": "protein_cellular_component_uniprot","nodes": ["GO_0005886"]}, {"attribute": "structure_data_existence_uniprot", "nodes": ["1"]}, {"attribute": "interaction_chembl_assay_existence_uniprot", "nodes": ["1"]}]
+* `queries` Uploaded user IDs
   * example: ["1193","13940","13557","15586","16605","4942","5344","6148", "6265","6344","6677","6735","10593","10718","10876"]
   
 ## `primaryIds`
 ```javascript
-async ({togoKey, filters, inputIds})=>{
+async ({togokey, filters, queries})=>{
   const fetchReq = async (url, options, body) => {
     if (body) options.body = body;
     /* //==== debug code
@@ -33,45 +37,38 @@ async ({togoKey, filters, inputIds})=>{
     }
   }
   
-  const togositeConfig = "https://raw.githubusercontent.com/togodx/togodx-config-human/develop/config/properties.json";
+  const togoDxAttributes = "https://raw.githubusercontent.com/togodx/togodx-config-human/develop/config/attributes.json";
   const sparqlSplitter = "togoid_sparqlist_splitter";  // nested SPARQLet relative path
   const togoidApi = "togoid_route_sparql";  // nested SPARQLet relative path
-  const togositeConfigJson = await fetchReq(togositeConfig, {method: "get"});
+  const attributesJson = await fetchReq(togoDxAttributes, {method: "get"});
   const queryProperties = JSON.parse(filters);
   let idLimit = 2000; // split 判定
-  if (togoKey == "pubchem_compound") idLimit = 500; // restrict POST respons size
+  if (togokey == "pubchem_compound") idLimit = 500; // restrict POST respons size
   const start = Date.now(); // debug
 
   // not filter (togoKey = hgnc, uniprot, pdb, mondo)
   const togoidNotFilter = "togokey_not_filter"; // nested SPARQLet relative path
-  if (queryProperties.length == 0 && (togoKey == "hgnc" || togoKey == "uniprot" || togoKey == "pdb" || togoKey == "mondo")) {
-    if (inputIds && JSON.parse(inputIds)[0]) return JSON.parse(inputIds);
-    return fetchReq(togoidNotFilter, options, "togoKey=" + togoKey);
-  }
-  
-  let propertyId2config = {}
-  for (let configSubject of togositeConfigJson) {
-    for (let configProperty of configSubject.properties) {
-      propertyId2config[configProperty.propertyId] = configProperty;
-    }
+  if (queryProperties.length == 0 && (togokey == "hgnc" || togokey == "uniprot" || togokey == "pdb" || togokey == "mondo")) {
+    if (queries && JSON.parse(queries)[0]) return JSON.parse(queries);
+    return fetchReq(togoidNotFilter, options, "togoKey=" + togokey);
   }
 
   const getIdPair = async (query) => {
-    const propertyId = query.propertyId;
-    const config = propertyId2config[propertyId];
+    const attribute = query.attribute;
+    const config = attributesJson.attributes[attribute];
      //const t1 = Date.now() - start; // debug
     
     // get 'primatyKey' ID list by category filtering
-    let queryCategoryIds = query.categoryIds.join(",");
+    let queryCategoryIds = query.nodes.join(",");
 
-    config.data = config.data.split(/\//).slice(-1)[0];  // nested SPARQLet relative path
-    let primaryIds = await fetchReq(config.data, options, "mode=idList&categoryIds=" + queryCategoryIds);
+    config.api = config.api.split(/\//).slice(-1)[0];  // nested SPARQLet relative path
+    let primaryIds = await fetchReq(config.api, options, "mode=idList&categoryIds=" + queryCategoryIds);
     //const t2 = Date.now() - start; // debug
     
     // get 'primalyKey' ID - togoKey' ID list via togoID API
     let idPair = [];
-    if (togoKey != config.primaryKey) {
-      let body = "source=" + config.primaryKey + "&target=" + togoKey + "&ids=" +  encodeURIComponent(primaryIds.join(","));
+    if (togoKey != config.dataset) {
+      let body = "source=" + config.dataset + "&target=" + togoKey + "&ids=" +  encodeURIComponent(primaryIds.join(","));
       if (primaryIds.length <= idLimit) {
         idPair = await fetchReq(togoidApi, options, body);
       } else {
@@ -82,7 +79,7 @@ async ({togoKey, filters, inputIds})=>{
       idPair = primaryIds.map(d => {return {source_id: d, target_id: d} });
     }
     //const t3 = Date.now() - start; // debug
-    //console.log(configProperty.propertyId + ": start " + t1 + ",mid " + t2 + ",fin " + t3);
+    //console.log(configProperty.attribute + ": start " + t1 + ",mid " + t2 + ",fin " + t3);
     
     return idPair;
   }
@@ -96,20 +93,17 @@ async ({togoKey, filters, inputIds})=>{
   } 
 
   let togoId = undefined;
-  if (inputIds && JSON.parse(inputIds)[0]) {
+  if (queries && JSON.parse(queries)[0]) {
     togoId = {};
-    for (let id of JSON.parse(inputIds)) {
+    for (let id of JSON.parse(queries)) {
       togoId[id] = true;
     }
   }
   
   let idPairAll = await getAllIdPair();
   // console.log(idPairAll);
-  
 
-  for (let i = 0; i < queryProperties.length; i++) {
-    const propertyId = queryProperties[i].propertyId;     
-    
+  for (let i = 0; i < queryProperties.length; i++) { 
     const idPair = await idPairAll[i];
      
     // set 'togoKey' Ids
