@@ -2,7 +2,7 @@
 
 - 元 togokey_filter
 - 入れ子 SPARQList の parameters もそのうち修正する
-　- categoryIds -> nodes
+  - categoryIds -> nodes
   - togokey -> togokey
   - inputIds -> queries
  
@@ -12,7 +12,7 @@
   * default: hgnc
 * `filters`
   * default: [{"attribute": "gene_high_level_expression_refex", "nodes": ["v32_40", "v25_40"]}, {"attribute": "protein_cellular_component_uniprot","nodes": ["GO_0005886"]}, {"attribute": "structure_data_existence_uniprot", "nodes": ["1"]}, {"attribute": "interaction_chembl_assay_existence_uniprot", "nodes": ["1"]}]
-* `queries` Uploaded user IDs
+* `queries` (IDs form "Map your IDs")
   * example: ["1193","13940","13557","15586","16605","4942","5344","6148", "6265","6344","6677","6735","10593","10718","10876"]
   
 ## `primaryIds`
@@ -50,7 +50,7 @@ async ({togokey, filters, queries})=>{
   const togoidNotFilter = "togokey_not_filter"; // nested SPARQLet relative path
   if (queryProperties.length == 0 && (togokey == "hgnc" || togokey == "uniprot" || togokey == "pdb" || togokey == "mondo")) {
     if (queries && JSON.parse(queries)[0]) return JSON.parse(queries);
-    return fetchReq(togoidNotFilter, options, "togoKey=" + togokey);
+    return fetchReq(togoidNotFilter, options, "togoKey=" + togokey);  // #### 入れ子 SPARQList. 要パラメータ名の整理
   }
 
   const getIdPair = async (query) => {
@@ -62,13 +62,13 @@ async ({togokey, filters, queries})=>{
     let queryCategoryIds = query.nodes.join(",");
 
     config.api = config.api.split(/\//).slice(-1)[0];  // nested SPARQLet relative path
-    let primaryIds = await fetchReq(config.api, options, "mode=idList&categoryIds=" + queryCategoryIds);
+    let primaryIds = await fetchReq(config.api, options, "mode=idList&categoryIds=" + queryCategoryIds);  // #### 入れ子 SPARQList. 要パラメータ名の整理
     //const t2 = Date.now() - start; // debug
     
     // get 'primalyKey' ID - togoKey' ID list via togoID API
     let idPair = [];
-    if (togoKey != config.dataset) {
-      let body = "source=" + config.dataset + "&target=" + togoKey + "&ids=" +  encodeURIComponent(primaryIds.join(","));
+    if (togokey != config.dataset) {
+      let body = "source=" + config.dataset + "&target=" + togokey + "&ids=" +  encodeURIComponent(primaryIds.join(","));
       if (primaryIds.length <= idLimit) {
         idPair = await fetchReq(togoidApi, options, body);
       } else {
