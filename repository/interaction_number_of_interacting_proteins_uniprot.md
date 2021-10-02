@@ -106,12 +106,11 @@ WHERE {
 {{#if queryArray}}
       VALUES ?uniprot { {{#each queryArray}} uniprot:{{this}} {{/each}} }
 {{/if}}
-      VALUES ?interact_type { up:Self_Interaction up:Non_Self_Interaction }
       ?uniprot a up:Protein ;
                up:organism taxon:9606 ;
                up:proteome ?proteome .
       FILTER(REGEX(STR(?proteome), "UP000005640"))    
-      MINUS { ?uniprot up:interaction [ a ?interact_type ] . }   
+      MINUS { ?uniprot up:interaction [] . }   
       BIND (0 AS ?target_num)
     }
   }
