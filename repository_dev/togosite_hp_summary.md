@@ -58,18 +58,18 @@ WHERE {
   const objs = [];
   const data = main.results.bindings[0];
   objs[0] = {
-    "URL ": data.hpo?.value,
-    "ID ": data.hpo_id?.value,
+    "URL": data.hpo?.value,
+    "ID": data.hpo_id?.value,
     "label": data.hpo_label?.value,
     "definition": data.hpo_definition?.value,
-    "altID": data.hpo_alt_id?.value,
+    //"altID": data.hpo_alt_id?.value,
     "xrefs": data.hpo_dbxref?.value,
     "comment": data.hpo_comment?.value,
-    "subclass_of": data.hpo_parent_class?.value,
-    "exact_synonym": data.hpo_exact_synonym?.value,
-    "related_synonym": data.hpo_related_synonym?.value,
-    "seeAlso": data.hpo_seealso?.value,
-    "obo_ns": data.hpo_obo_ns?.value
+    "subclass_of": data.hpo_parent_class?.value
+    //"exact_synonym": data.hpo_exact_synonym?.value,
+    //"related_synonym": data.hpo_related_synonym?.value,
+    //"seeAlso": data.hpo_seealso?.value,
+    //"obo_ns": data.hpo_obo_ns?.value
   };
 
   const class_ids = main.results.bindings[0].hpo_parent_class.value.split(/,/);
@@ -77,8 +77,8 @@ WHERE {
   if (objs[0]["subclass_of"]) {
     objs[0]["subclass_of"] = "<ul>";
     for (let i=0; i<class_ids.length; i++) {
-      objs[0]["subclass_of"] += "<li><a href=\"" + class_ids[i]
-                                + "\" target=\"_blank\">" + class_ids[i].replace("http://purl.obolibrary.org/obo/","")
+      objs[0]["subclass_of"] += "<li><a href=\"" + class_ids[i] + "\" target=\"_blank\">"
+                                + class_ids[i].replace("http://purl.obolibrary.org/obo/","").replace("_", ":")
                                 + "</a>" + " " +  class_labels[i] + "</li>";
     }
     objs[0]["subclass_of"] += "</ul>";
