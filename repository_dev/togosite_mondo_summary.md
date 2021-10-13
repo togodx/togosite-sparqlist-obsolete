@@ -8,7 +8,7 @@ https://integbio.jp/togosite/sparql
 
 * `id`
   * default: 0004997
-  * example: MONDO_0004997(w/ nando:2200051, mesh:D002804, HP_0030432), MONDO_0005854(w/nando:1200278,2200430, mesh:D008947)
+  * example: 0004997, 0005854
 
 ## `main`
 
@@ -97,6 +97,7 @@ WHERE {
     objs[0]["xrefs"] = makeList(objs[0]["xrefs"], ", ");
   }
   return objs;
+
   function makeList(str, sep) {
     const rx = new RegExp(sep, 'g');
     return "<ul><li>" + str.replace(rx, "</li><li>") + "</li></ul>";

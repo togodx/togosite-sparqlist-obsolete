@@ -1,4 +1,4 @@
-# [WIP] Disease detail for metastanza template (ohta)
+# [WIP] Disease detail for metastanza template (ikeda)
 
 - https://integbio.jp/togosite/sparqlist/disease-mondo
 - https://integbio.jp/togosite/sparqlist/Disease-nando
