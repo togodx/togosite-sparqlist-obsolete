@@ -1,4 +1,4 @@
-# [WIP] Disease detail for metastanza template (ohta)
+# Disease detail for metastanza template (ikeda)
 
 ## Endpoint
 
@@ -22,7 +22,7 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 
 SELECT DISTINCT ?mondo ?mondo_id ?mondo_label ?mondo_definition
                 (GROUP_CONCAT(DISTINCT ?related, ", ") AS ?mondo_related)
-                (GROUP_CONCAT(DISTINCT ?synonym, ", ") AS ?mondo_synonym) 
+                (GROUP_CONCAT(DISTINCT ?synonym, "__") AS ?mondo_synonym) 
                 (GROUP_CONCAT(DISTINCT ?upper_class_s,",")  AS ?mondo_upper_class)
                 (GROUP_CONCAT(DISTINCT ?upper_label , ",") AS ?mondo_upper_label)
 WHERE { 
@@ -50,10 +50,9 @@ WHERE {
     { "URL": "mondo" },
     { "label": "mondo_label" },
     { "definition": "mondo_definition" },
-    { "related DB": "mondo_related" },
+    { "related_DB": "mondo_related" },
     { "synonym": "mondo_synonym" },
-    { "upper_class": "mondo_upper_class" },
-    { "upper_label": "mondo_upper_label" }
+    { "subclass_of": "mondo_upper_class" }
   ];
   return array;
 }
@@ -83,12 +82,16 @@ WHERE {
   });
   const class_ids = main.results.bindings[0].mondo_upper_class.value.split(/,/);
   const class_labels = main.results.bindings[0].mondo_upper_label.value.split(/,/);
-  if (objs[0]["upper_class"]) {
-    objs[0]["upper_class"] = "<ul>";
-    for (let i=0; i<=class_ids.length; i++) {
-      objs[0]["upper_class"] += "<li>" + class_ids[i] + " " +  class_labels[i] + "</li>";
+  if (objs[0]["subclass_of"]) {
+    objs[0]["subclass_of"] = "<ul>";
+    for (let i=0; i<class_ids.length; i++) {
+      objs[0]["subclass_of"] += "<li><a href=\"http://purl.obolibrary.org/obo/" + class_ids[i].replace(":", "_")
+                                + "\" target=\"_blank\">" + class_ids[i] + "</a>" + " " +  class_labels[i] + "</li>";
     }
-    objs[0]["upper_class"] += "</ul>;"
+    objs[0]["subclass_of"] += "</ul>";
+  }
+  if (objs[0]["synonym"]) {
+    objs[0]["synonym"] = "<ul><li>" + objs[0]["synonym"].replace(/__/g, "</li><li>") + "</li></ul>";
   }
   return objs;
 };
