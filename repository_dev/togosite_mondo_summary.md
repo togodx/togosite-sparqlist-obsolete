@@ -50,7 +50,7 @@ WHERE {
     { "URL": "mondo" },
     { "label": "mondo_label" },
     { "definition": "mondo_definition" },
-    { "related_DB": "mondo_related" },
+    { "xrefs": "mondo_related" },
     { "synonym": "mondo_synonym" },
     { "subclass_of": "mondo_upper_class" }
   ];
@@ -91,8 +91,15 @@ WHERE {
     objs[0]["subclass_of"] += "</ul>";
   }
   if (objs[0]["synonym"]) {
-    objs[0]["synonym"] = "<ul><li>" + objs[0]["synonym"].replace(/__/g, "</li><li>") + "</li></ul>";
+    objs[0]["synonym"] = makeList(objs[0]["synonym"], "__");
+  }
+  if (objs[0]["xrefs"]) {
+    objs[0]["xrefs"] = makeList(objs[0]["xrefs"], ", ");
   }
   return objs;
+  function makeList(str, sep) {
+    const rx = new RegExp(sep, 'g');
+    return "<ul><li>" + str.replace(rx, "</li><li>") + "</li></ul>";
+  };
 };
 ```
