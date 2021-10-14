@@ -51,7 +51,7 @@ WHERE {
  const objs = [];
   const data = main.results.bindings[0];
   objs[0] = {  
-    "URL": data.mondo?.value,
+    "URL": data.nando?.value,
     "ID": data.nando_id?.value,
     "label": data.nando_label?.value,
     "label_ja": data.nando_label_jp?.value,
@@ -66,7 +66,7 @@ WHERE {
   if (objs[0]["subclass_of"]) {
     objs[0]["subclass_of"] = "<ul>";
     for (let i=0; i<class_ids.length; i++) {
-      objs[0]["subclass_of"] += "<li><a href=\"http://nanbyodata.jp/ontology/" + class_ids[i] + "\" target=\"_blank\">"
+      objs[0]["subclass_of"] += "<li><a href=\"http://nanbyodata.jp/ontology/" + class_ids[i].replace("_", ":") + "\" target=\"_blank\">"
                                 + class_ids[i].replace("_", ":")
                                 + "</a>" + " " +  class_labels[i] + "</li>";
     }
