@@ -46,14 +46,17 @@ WHERE {
     "ID": data.mesh_id.value,
     "URL": data.mesh.value,
     "label": data.mesh_label.value,
-    "scope_note": data.mesh_note?.value
+    "scope_note": "",
+    "parent": ""
   };
   if (data.mesh_parent_id?.value)
     objs[0].parent = "<a href=\"http://id.nlm.nih.gov/mesh/" + data.mesh_parent_id.value + "\" target=\"_blank\">"
                      + data.mesh_parent_id.value + "</a> " + data.mesh_parent_label.value;
+  if (data.mesh_note?.value)
+    objs[0].scope_note = data.mesh_note.value;
   objs[0].preferred_concept = "<a href=\"" + data.mesh_preferred_concept.value + "\" target=\"_blank\">"
                               + data.mesh_preferred_concept.value.replace("http://id.nlm.nih.gov/mesh/", "")
-                              + "</a> " + data.mesh_preferred_concept_label.value ;
+                              + "</a> " + data.mesh_preferred_concept_label.value;
   return objs;
 };
 ```
