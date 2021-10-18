@@ -30,13 +30,13 @@ WHERE {
   VALUES ?hpo { <http://purl.obolibrary.org/obo/HP_{{id}}> }
   GRAPH <http://rdf.integbio.jp/dataset/togosite/hpo> {
     ?hpo rdfs:label ?hpo_label .
-    OPTIONAL {?hpo obo:IAO_0000115 ?hpo_definition_temp .}
-    OPTIONAL {?hpo go:hasDbXref ?hpo_dbxref_s .}
-    OPTIONAL {?hpo rdfs:comment ?hpo_comment_temp .}
-    OPTIONAL {?hpo rdfs:subClassOf ?hpo_parent_class_s .
-              ?hpo_parent_class_s rdfs:label ?hpo_parent_class_label_s . }
-    OPTIONAL {?hpo go:hasExactSynonym ?hpo_exact_synonym_s .}
-    OPTIONAL {?hpo go:hasRelatedSynonym ?hpo_related_synonym_s .}
+    OPTIONAL { ?hpo obo:IAO_0000115 ?hpo_definition_temp . }
+    OPTIONAL { ?hpo go:hasDbXref ?hpo_dbxref_s . }
+    OPTIONAL { ?hpo rdfs:comment ?hpo_comment_temp . }
+    OPTIONAL { ?hpo go:hasExactSynonym ?hpo_exact_synonym_s . }
+    OPTIONAL { ?hpo go:hasRelatedSynonym ?hpo_related_synonym_s . }
+    OPTIONAL { ?hpo rdfs:subClassOf ?hpo_parent_class_s .
+               ?hpo_parent_class_s rdfs:label ?hpo_parent_class_label_s . }
     BIND (replace(str(?hpo), 'http://purl.obolibrary.org/obo/HP_', 'HP:') AS ?hpo_id)
     BIND (IF(bound(?hpo_definition_temp), ?hpo_definition_temp, "") AS ?hpo_definition)
     BIND (IF(bound(?hpo_comment_temp), ?hpo_comment_temp, "") AS ?hpo_comment)
@@ -51,9 +51,9 @@ WHERE {
   const objs = [];
   const data = main.results.bindings[0];
   objs[0] = {
-    "URL": data.hpo?.value,
-    "ID": data.hpo_id?.value,
-    "label": data.hpo_label?.value,
+    "URL": data.hpo.value,
+    "ID": data.hpo_id.value,
+    "label": data.hpo_label.value,
     "definition": data.hpo_definition?.value,
     "xrefs": data.hpo_dbxref?.value,
     "comment": data.hpo_comment?.value,
@@ -62,13 +62,13 @@ WHERE {
     //"related_synonym": data.hpo_related_synonym?.value
   };
 
-  const class_ids = main.results.bindings[0].hpo_parent_class.value.split(/,/);
-  const class_labels = main.results.bindings[0].hpo_parent_class_label.value.split(/,/);
   if (objs[0]["subclass_of"]) {
+    const class_urls = data.hpo_parent_class.value.split(/,/);
+    const class_labels = data.hpo_parent_class_label.value.split(/,/);
     objs[0]["subclass_of"] = "<ul>";
-    for (let i=0; i<class_ids.length; i++) {
-      objs[0]["subclass_of"] += "<li><a href=\"" + class_ids[i] + "\" target=\"_blank\">"
-                                + class_ids[i].replace("http://purl.obolibrary.org/obo/","").replace("_", ":")
+    for (let i=0; i<class_urls.length; i++) {
+      objs[0]["subclass_of"] += "<li><a href=\"" + class_urls[i] + "\" target=\"_blank\">"
+                                + class_urls[i].replace("http://purl.obolibrary.org/obo/","").replace("_", ":")
                                 + "</a>" + " " +  class_labels[i] + "</li>";
     }
     objs[0]["subclass_of"] += "</ul>";
