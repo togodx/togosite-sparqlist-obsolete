@@ -26,8 +26,6 @@ SELECT ?hpo ?hpo_id ?hpo_label ?hpo_definition
        (GROUP_CONCAT(DISTINCT ?hpo_parent_class_label_s, ",") AS ?hpo_parent_class_label)  
        (GROUP_CONCAT(DISTINCT ?hpo_exact_synonym_s, ",")AS ?hpo_exact_synonym)
        (GROUP_CONCAT(DISTINCT ?hpo_related_synonym_s, ",") AS ?hpo_related_synonym)
-       ?hpo_obo_ns
-       (GROUP_CONCAT(DISTINCT ?hpo_seealso, ",") AS ?hpo_seealso)
 WHERE {
   VALUES ?hpo { <http://purl.obolibrary.org/obo/HP_{{id}}> }
   GRAPH <http://rdf.integbio.jp/dataset/togosite/hpo> {
@@ -38,13 +36,10 @@ WHERE {
     OPTIONAL {?hpo rdfs:subClassOf ?hpo_parent_class_s .
               ?hpo_parent_class_s rdfs:label ?hpo_parent_class_label_s . }
     OPTIONAL {?hpo go:hasExactSynonym ?hpo_exact_synonym_s .}
-    OPTIONAL {?hpo go:hasOBONamespace ?hpo_obo_ns_temp .}
     OPTIONAL {?hpo go:hasRelatedSynonym ?hpo_related_synonym_s .}
-    OPTIONAL {?hpo rdfs:seeAlso ?hpo_seealso .}
     BIND (replace(str(?hpo), 'http://purl.obolibrary.org/obo/HP_', 'HP:') AS ?hpo_id)
     BIND (IF(bound(?hpo_definition_temp), ?hpo_definition_temp, "") AS ?hpo_definition)
     BIND (IF(bound(?hpo_comment_temp), ?hpo_comment_temp, "") AS ?hpo_comment)
-    BIND (IF(bound(?hpo_obo_ns_temp), ?hpo_obo_ns_temp, "") AS ?hpo_obo_ns)
   }
 }
 ```
@@ -64,9 +59,7 @@ WHERE {
     "comment": data.hpo_comment?.value,
     "subclass_of": data.hpo_parent_class?.value
     //"exact_synonym": data.hpo_exact_synonym?.value,
-    //"related_synonym": data.hpo_related_synonym?.value,
-    //"seeAlso": data.hpo_seealso?.value,
-    //"obo_ns": data.hpo_obo_ns?.value
+    //"related_synonym": data.hpo_related_synonym?.value
   };
 
   const class_ids = main.results.bindings[0].hpo_parent_class.value.split(/,/);
