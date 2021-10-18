@@ -20,7 +20,6 @@ PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 
 SELECT ?hpo ?hpo_id ?hpo_label ?hpo_definition 
-       (GROUP_CONCAT(DISTINCT ?hpo_alt_id_s, ",") AS ?hpo_alt_id) 
        (GROUP_CONCAT(DISTINCT ?hpo_dbxref_s, ",") AS ?hpo_dbxref)
        ?hpo_comment
        (GROUP_CONCAT(DISTINCT ?hpo_parent_class_s, ",") AS ?hpo_parent_class)  
@@ -34,7 +33,6 @@ WHERE {
   GRAPH <http://rdf.integbio.jp/dataset/togosite/hpo> {
     ?hpo rdfs:label ?hpo_label .
     OPTIONAL {?hpo obo:IAO_0000115 ?hpo_definition_temp .}
-    OPTIONAL {?hpo go:hasAlternativeId ?hpo_alt_id_s .}
     OPTIONAL {?hpo go:hasDbXref ?hpo_dbxref_s .}
     OPTIONAL {?hpo rdfs:comment ?hpo_comment_temp .}
     OPTIONAL {?hpo rdfs:subClassOf ?hpo_parent_class_s .
@@ -62,7 +60,6 @@ WHERE {
     "ID": data.hpo_id?.value,
     "label": data.hpo_label?.value,
     "definition": data.hpo_definition?.value,
-    //"altID": data.hpo_alt_id?.value,
     "xrefs": data.hpo_dbxref?.value,
     "comment": data.hpo_comment?.value,
     "subclass_of": data.hpo_parent_class?.value
