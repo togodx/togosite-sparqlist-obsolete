@@ -84,7 +84,7 @@
       },
       hp: {
         hp: [[]],
-        disease: [["mdgen", "mondo"]]
+        disease: [["medgen", "mondo"]]
       },
       disease: {
         disease: [["mondo"]]
