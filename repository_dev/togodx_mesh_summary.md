@@ -73,7 +73,7 @@ WHERE {
   if (data.concept_ids?.value) {
     const ids = data.concept_ids.value.split("__");
     const labels = data.concept_labels.value.split("__");
-    objs[0].concept = makePairList(ids, labels, prefix);
+    objs[0].concept = makePairList(ids, labels, ids.map((id)=>prefix+id));
   }
   if (data.note?.value)
     objs[0].scope_note = data.note.value;
@@ -86,8 +86,8 @@ WHERE {
   function makeList(strs) {
     return "<ul><li>" + strs.join("</li><li>") + "</li></ul>";
   }
-  function makePairList(ids, labels, prefix) {
-    return makeList(ids.map((id, i)=>makeLink(prefix + id, id) + " " + labels[i]));
+  function makePairList(ids, labels, urls) {
+    return makeList(ids.map((id, i)=>makeLink(urls[i], id) + " " + labels[i]));
   }
   return objs;
 };

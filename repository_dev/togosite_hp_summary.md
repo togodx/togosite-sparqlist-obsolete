@@ -20,12 +20,12 @@ PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 
 SELECT ?hpo ?id ?label ?definition
-       (GROUP_CONCAT(DISTINCT ?dbxref, ",") AS ?dbxrefs)
+       (GROUP_CONCAT(DISTINCT ?dbxref, "__") AS ?dbxrefs)
        ?comment
-       (GROUP_CONCAT(DISTINCT ?parent_class, ",") AS ?parent_classes)
-       (GROUP_CONCAT(DISTINCT ?parent_class_label, ",") AS ?parent_class_labels)
-       (GROUP_CONCAT(DISTINCT ?exact_synonym, ",")AS ?exact_synonyms)
-       (GROUP_CONCAT(DISTINCT ?related_synonym, ",") AS ?related_synonyms)
+       (GROUP_CONCAT(DISTINCT ?parent_id, "__") AS ?parent_ids)
+       (GROUP_CONCAT(DISTINCT ?parent_label, "__") AS ?parent_labels)
+       (GROUP_CONCAT(DISTINCT ?exact_synonym, "__")AS ?exact_synonyms)
+       (GROUP_CONCAT(DISTINCT ?related_synonym, "__") AS ?related_synonyms)
 WHERE {
   VALUES ?hpo { <http://purl.obolibrary.org/obo/HP_{{id}}> }
   GRAPH <http://rdf.integbio.jp/dataset/togosite/hpo> {
@@ -35,9 +35,12 @@ WHERE {
     OPTIONAL { ?hpo rdfs:comment ?comment . }
     OPTIONAL { ?hpo go:hasExactSynonym ?exact_synonym . }
     OPTIONAL { ?hpo go:hasRelatedSynonym ?related_synonym . }
-    OPTIONAL { ?hpo rdfs:subClassOf ?parent_class .
-               ?parent_class rdfs:label ?parent_class_label . }
-    BIND (replace(str(?hpo), 'http://purl.obolibrary.org/obo/HP_', 'HP:') AS ?id)
+    OPTIONAL { 
+      ?hpo rdfs:subClassOf ?parent .
+      ?parent rdfs:label ?parent_label .
+      BIND(REPLACE(STR(?parent), 'http://purl.obolibrary.org/obo/HP_', 'HP:') AS ?parent_id)
+    }
+    BIND(REPLACE(STR(?hpo), 'http://purl.obolibrary.org/obo/HP_', 'HP:') AS ?id)
   }
 }
 ```
@@ -53,29 +56,31 @@ WHERE {
     "ID": data.id.value,
     "label": data.label.value,
     "definition": data.definition?.value ?? "",
-    "xrefs": data.dbxrefs?.value ?? "",
+    "xrefs": "",
     "comment": data.comment?.value ?? "",
-    "subclass_of": data.parent_classes?.value ?? ""
-    //"exact_synonym": data.exact_synonym?.value,
-    //"related_synonym": data.related_synonym?.value
+    "subclass_of": "",
+    "exact_synonym": "",
+    "related_synonym": ""
   };
-
-  if (objs[0]["subclass_of"]) {
-    const class_urls = data.parent_classes.value.split(/,/);
-    const class_labels = data.parent_class_labels.value.split(/,/);
-    objs[0]["subclass_of"] = "<ul>";
-    for (let i=0; i<class_urls.length; i++) {
-      objs[0]["subclass_of"] += "<li><a href=\"" + class_urls[i] + "\" target=\"_blank\">"
-                                + class_urls[i].replace("http://purl.obolibrary.org/obo/","").replace("_", ":")
-                                + "</a>" + " " +  class_labels[i] + "</li>";
-    }
-    objs[0]["subclass_of"] += "</ul>";
+  const prefix = "http://purl.obolibrary.org/obo/";
+  if (data.parent_ids?.value) {
+    const ids = data.parent_ids.value.split("__");
+    const labels = data.parent_labels.value.split("__");
+    objs[0]["subclass_of"] = makePairList(ids, labels, ids.map((id)=>prefix+id.replace(":", "_")));
   }
-  if (objs[0].xrefs) objs[0].xrefs = makeList(objs[0].xrefs, ",");
+  if (data.exact_synonyms?.value) objs[0].exact_synonym = makeList(data.exact_synonyms.value.split("__"));
+  if (data.related_synonyms?.value) objs[0].related_synonym = makeList(data.related_synonyms.value.split("__"));
+  if (data.dbxrefs?.value) objs[0].xrefs = makeList(data.dbxrefs.value.split("__"));
   return objs;
 
-  function makeList(str, sep) {
-    return "<ul><li>" + str.replace(new RegExp(sep, 'g'), "</li><li>") + "</li></ul>";
-  };
+  function makeLink(url, text) {
+    return "<a href=\"" + url + "\" target=\"_blank\">" + text + "</a>";
+  }
+  function makeList(strs) {
+    return "<ul><li>" + strs.join("</li><li>") + "</li></ul>";
+  }
+  function makePairList(ids, labels, urls) {
+    return makeList(ids.map((id, i)=>makeLink(urls[i], id) + " " + labels[i]));
+  }
 };
 ```
