@@ -20,41 +20,25 @@ PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 
-SELECT DISTINCT ?mondo ?mondo_id ?mondo_label ?mondo_definition
-                (GROUP_CONCAT(DISTINCT ?related, ", ") AS ?mondo_related)
-                (GROUP_CONCAT(DISTINCT ?synonym, "__") AS ?mondo_synonym) 
-                (GROUP_CONCAT(DISTINCT ?upper_class_s,",")  AS ?mondo_upper_class)
-                (GROUP_CONCAT(DISTINCT ?upper_label , ",") AS ?mondo_upper_label)
-WHERE { 
+SELECT DISTINCT ?mondo ?id ?label ?definition
+                (GROUP_CONCAT(DISTINCT ?xref, "__") AS ?xrefs)
+                (GROUP_CONCAT(DISTINCT ?synonym, "__") AS ?synonyms)
+                (GROUP_CONCAT(DISTINCT ?parent_id, "__")  AS ?parent_ids)
+                (GROUP_CONCAT(DISTINCT ?parent_label , "__") AS ?parent_labels)
+WHERE {
   VALUES ?mondo { <http://purl.obolibrary.org/obo/MONDO_{{id}}> }
   GRAPH <http://rdf.integbio.jp/dataset/togosite/mondo> {
-    ?mondo oboinowl:id ?mondo_id ;
-           rdfs:label ?mondo_label .
-    OPTIONAL {?mondo obo:IAO_0000115 ?mondo_definition_temp .}
-    OPTIONAL {?mondo oboinowl:hasDbXref ?related .}
-    OPTIONAL {?mondo oboinowl:hasExactSynonym ?synonym .}
-    OPTIONAL {?mondo rdfs:subClassOf ?upper_class .
-              ?upper_class rdfs:label ?upper_label.}
-    BIND(REPLACE(STR(?upper_class), "http://purl.obolibrary.org/obo/MONDO_","MONDO:") AS ?upper_class_s)
-    BIND(IF(bound(?mondo_definition_temp), ?mondo_definition_temp, "") AS ?mondo_definition)
+    ?mondo oboinowl:id ?id ;
+           rdfs:label ?label .
+    OPTIONAL { ?mondo obo:IAO_0000115 ?definition . }
+    OPTIONAL { ?mondo oboinowl:hasDbXref ?xref . }
+    OPTIONAL { ?mondo oboinowl:hasExactSynonym ?synonym . }
+    OPTIONAL {
+      ?mondo rdfs:subClassOf ?parent_class .
+      ?parent_class rdfs:label ?parent_label ;
+                    oboinowl:id ?parent_id .
+    }
   }
-}
-```
-
-## `columns` columns and their order to show
-
-```javascript
-() => {
-  const array = [
-    { "ID": "mondo_id" },
-    { "URL": "mondo" },
-    { "label": "mondo_label" },
-    { "definition": "mondo_definition" },
-    { "xrefs": "mondo_related" },
-    { "synonym": "mondo_synonym" },
-    { "subclass_of": "mondo_upper_class" }
-  ];
-  return array;
 }
 ```
 
@@ -62,45 +46,35 @@ WHERE {
 
 ```javascript
 ({ main, columns }) => {
-  const objs = main.results.bindings.map((binding) => {
-    const results = columns.map((row) => {
-      const obj = {};
-      for (const [k, v] of Object.entries(row)) {
-        obj[k] = binding[v];
-      }
-      return obj;
-    });
-
-    return results.reduce((obj, elem) => {
-      for (const [key, node] of Object.entries(elem)) {
-        if (node) {
-          obj[key] = node.value;
-        }
-        return obj;
-      };
-    }, {});
-  });
-  const class_ids = main.results.bindings[0].mondo_upper_class.value.split(/,/);
-  const class_labels = main.results.bindings[0].mondo_upper_label.value.split(/,/);
-  if (objs[0]["subclass_of"]) {
-    objs[0]["subclass_of"] = "<ul>";
-    for (let i=0; i<class_ids.length; i++) {
-      objs[0]["subclass_of"] += "<li><a href=\"http://purl.obolibrary.org/obo/" + class_ids[i].replace(":", "_")
-                                + "\" target=\"_blank\">" + class_ids[i] + "</a>" + " " +  class_labels[i] + "</li>";
-    }
-    objs[0]["subclass_of"] += "</ul>";
+  const objs = [];
+  const data = main.results.bindings[0];
+  objs[0] = {
+    "URL": data.mondo.value,
+    "ID": data.id.value,
+    "label": data.label.value,
+    "definition": data.definition?.value ?? "",
+    "xref": "",
+    "subclass_of": "",
+    "synonym": ""
+  };
+  const prefix = "http://purl.obolibrary.org/obo/";
+  if (data.parent_ids?.value) {
+    const ids = data.parent_ids.value.split("__");
+    const labels = data.parent_labels.value.split("__");
+    objs[0]["subclass_of"] = makePairList(ids, labels, ids.map((id)=>prefix+id.replace(":", "_")));
   }
-  if (objs[0]["synonym"]) {
-    objs[0]["synonym"] = makeList(objs[0]["synonym"], "__");
-  }
-  if (objs[0]["xrefs"]) {
-    objs[0]["xrefs"] = makeList(objs[0]["xrefs"], ", ");
-  }
+  if (data.synonyms?.value) objs[0].synonym = makeList(data.synonyms.value.split("__"));
+  if (data.xrefs?.value) objs[0].xref = makeList(data.xrefs.value.split("__"));
   return objs;
 
-  function makeList(str, sep) {
-    const rx = new RegExp(sep, 'g');
-    return "<ul><li>" + str.replace(rx, "</li><li>") + "</li></ul>";
-  };
+  function makeLink(url, text) {
+    return "<a href=\"" + url + "\" target=\"_blank\">" + text + "</a>";
+  }
+  function makeList(strs) {
+    return "<ul><li>" + strs.join("</li><li>") + "</li></ul>";
+  }
+  function makePairList(ids, labels, urls) {
+    return makeList(ids.map((id, i)=>makeLink(urls[i], id) + " " + labels[i]));
+  }
 };
 ```

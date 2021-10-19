@@ -93,36 +93,42 @@ WHERE {
 
 ```javascript
 ({ main, id }) => {
-  let binding = main.results.bindings[0];
-  let ts_gtex = binding.gtex_tissue_labels.value;
+  let data = main.results.bindings[0];
+  let ts_gtex = data.gtex_tissue_labels.value;
   if (ts_gtex == "") {
-    if (binding.type_gtex?.value)
+    if (data.type_gtex?.value)
       ts_gtex = "(Low tissue specificity)";
     else 
       ts_gtex = "N/A";
+  } else {
+    ts_gtex = "<ul><li>" + ts_gtex.split(", ").join("</li><li>") + "</li></ul>";
   }
-  let ts_hpa = binding.hpa_tissue_labels.value;
+  let ts_hpa = data.hpa_tissue_labels.value;
   if (ts_hpa == "") {
-    if (binding.type_hpa_tissue?.value)
+    if (data.type_hpa_tissue?.value)
       ts_hpa = "(Low tissue specificity)";
     else 
       ts_hpa = "N/A";
+  } else {
+    ts_hpa = "<ul><li>" + ts_hpa.split(", ").join("</li><li>") + "</li></ul>";
   }
-  let cs_hpa = binding.hpa_cell_labels.value;
+  let cs_hpa = data.hpa_cell_labels.value;
   if (cs_hpa == "") {
-    if (binding.type_hpa_cell?.value)
+    if (data.type_hpa_cell?.value)
       cs_hpa = "(Low cell specificity)";
     else 
       cs_hpa = "N/A";
+  } else {
+    cs_hpa = "<ul><li>" + cs_hpa.split(", ").join("</li><li>") + "</li></ul>";
   }
 
   let objs = [{
-    "Ensembl ID": binding.ensg_id.value,
-    "Ensembl URL": binding.idt_ensg.value,
-    "Gene symbol": binding.gene_symbol.value,
-    "Description": binding.desc.value,
-    "Gene type": binding.type_label.value,
-    "Location": binding.location.value,
+    "Ensembl ID": data.ensg_id.value,
+    "Ensembl URL": data.idt_ensg.value,
+    "Gene symbol": data.gene_symbol.value,
+    "Description": data.desc.value,
+    "Gene type": data.type_label.value,
+    "Location": data.location.value,
     "Tissue specificity (GTEx)": ts_gtex,
     "Tissue specificity (HPA)": ts_hpa,
     "Cell specificity (HPA)": cs_hpa,
