@@ -17,21 +17,35 @@ PREFIX mesh: <http://id.nlm.nih.gov/mesh/>
 PREFIX meshv: <http://id.nlm.nih.gov/mesh/vocab#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 
-SELECT DISTINCT ?mesh ?mesh_id ?mesh_label ?mesh_parent_id ?mesh_parent_label ?mesh_preferred_concept ?mesh_preferred_concept_label ?mesh_note
+SELECT DISTINCT ?mesh ?id ?label ?preferred_concept_id ?preferred_concept_label
+                (GROUP_CONCAT(DISTINCT ?concept_id, "__") AS ?concept_ids)
+                (GROUP_CONCAT(DISTINCT ?concept_label, "__") AS ?concept_labels)
+                (GROUP_CONCAT(DISTINCT ?broader_id, "__") AS ?broader_ids)
+                (GROUP_CONCAT(DISTINCT ?broader_label, "__") AS ?broader_labels)
+                ?note
 FROM <http://rdf.integbio.jp/dataset/togosite/mesh>
-WHERE { 
+WHERE {
   VALUES ?mesh { mesh:{{id}} }
-  ?mesh rdfs:label ?mesh_label ;
-        meshv:identifier ?mesh_id .
+  ?mesh meshv:identifier ?id ;
+        rdfs:label ?label .
+  ?mesh meshv:preferredConcept ?preferred_concept .
+  ?preferred_concept meshv:identifier ?preferred_concept_id ;
+                          rdfs:label ?preferred_concept_label .
   OPTIONAL {
-    ?mesh meshv:treeNumber / meshv:parentTreeNumber / ^meshv:treeNumber ?parent .
-    ?parent rdfs:label ?mesh_parent_label ;
-            meshv:identifier ?mesh_parent_id .
+    ?preferred_concept meshv:scopeNote ?note .
   }
-  ?mesh meshv:preferredConcept ?mesh_preferred_concept .
-  ?mesh_preferred_concept rdfs:label ?mesh_preferred_concept_label .
   OPTIONAL {
-    ?mesh_preferred_concept meshv:scopeNote ?mesh_note . 
+    ?mesh meshv:broaderDescriptor ?broader .
+    ?broader meshv:identifier ?broader_id ;
+                 rdfs:label ?broader_label .
+  }
+  OPTIONAL {
+    ?mesh meshv:scopeNote ?note .
+  }
+  OPTIONAL {
+    ?mesh meshv:concept ?concept .
+    ?concept meshv:identifier ?concept_id ;
+                  rdfs:label ?concept_label .
   }
 }
 ```
@@ -43,20 +57,38 @@ WHERE {
   const objs = [];
   const data = main.results.bindings[0];
   objs[0] = {
-    "ID": data.mesh_id.value,
+    "ID": data.id.value,
     "URL": data.mesh.value,
-    "label": data.mesh_label.value,
+    "label": data.label.value,
+    "concept": "",
     "scope_note": "",
-    "parent": ""
+    "broader_descriptor": ""
   };
-  if (data.mesh_parent_id?.value)
-    objs[0].parent = "<a href=\"http://id.nlm.nih.gov/mesh/" + data.mesh_parent_id.value + "\" target=\"_blank\">"
-                     + data.mesh_parent_id.value + "</a> " + data.mesh_parent_label.value;
-  if (data.mesh_note?.value)
-    objs[0].scope_note = data.mesh_note.value;
-  objs[0].preferred_concept = "<a href=\"" + data.mesh_preferred_concept.value + "\" target=\"_blank\">"
-                              + data.mesh_preferred_concept.value.replace("http://id.nlm.nih.gov/mesh/", "")
-                              + "</a> " + data.mesh_preferred_concept_label.value;
+  const prefix = "http://id.nlm.nih.gov/mesh/";
+  if (data.broader_ids?.value) {
+    const ids = data.broader_ids.value.split("__");
+    const labels = data.broader_labels.value.split("__");
+    objs[0].broader_descriptor = makePairList(ids, labels, prefix);
+  }
+  if (data.concept_ids?.value) {
+    const ids = data.concept_ids.value.split("__");
+    const labels = data.concept_labels.value.split("__");
+    objs[0].concept = makePairList(ids, labels, prefix);
+  }
+  if (data.note?.value)
+    objs[0].scope_note = data.note.value;
+  objs[0].preferred_concept = makeLink(prefix + data.preferred_concept_id.value, data.preferred_concept_id.value)
+                              + " " + data.preferred_concept_label.value;
+
+  function makeLink(url, text) {
+    return "<a href=\"" + url + "\" target=\"_blank\">" + text + "</a>";
+  }
+  function makeList(strs) {
+    return "<ul><li>" + strs.join("</li><li>") + "</li></ul>";
+  }
+  function makePairList(ids, labels, prefix) {
+    return makeList(ids.map((id, i)=>makeLink(prefix + id, id) + " " + labels[i]));
+  }
   return objs;
 };
 ```
