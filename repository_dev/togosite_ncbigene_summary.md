@@ -20,7 +20,7 @@ PREFIX nuc: <http://ddbj.nig.ac.jp/ontologies/nucleotide/>
 PREFIX hop: <http://purl.org/net/orthordf/hOP/ontology#>
 
 SELECT ?ncbigene ?ncbigene_id ?desc ?location ?gene_symbol ?type_label
-       (GROUP_CONCAT(DISTINCT ?others; separator=", ") AS ?other_names)
+       (GROUP_CONCAT(DISTINCT ?others; separator="__") AS ?other_names)
        (GROUP_CONCAT(DISTINCT ?tissue_label; separator=", ") AS ?tissue_labels)
        (GROUP_CONCAT(DISTINCT ?synonym; separator=", ") AS ?synonyms)
 WHERE {
@@ -63,22 +63,36 @@ WHERE {
 
 ```javascript
 ({ main, id }) => {
-  let binding = main.results.bindings[0];
+  let data = main.results.bindings[0];
   let objs = [{
-    "NCBI Gene ID": binding.ncbigene_id.value,
-    "NCBI Gene URL": binding.ncbigene.value,
-    "Gene symbol": binding.gene_symbol.value,
-    "Synonym": binding.synonyms.value,
-    "Description": binding.desc.value,
-    "Gene type": binding.type_label.value,
-    "Location": binding.location.value,
-    "Tissue specificity (RefEx)": binding.tissue_labels.value,
+    "NCBI_Gene_ID": data.ncbigene_id.value,
+    "NCBI_Gene_URL": data.ncbigene.value,
+    "Gene_symbol": data.gene_symbol.value,
+    "Synonym": data.synonyms.value,
+    "Description": data.desc.value,
+    "Gene_type": data.type_label.value,
+    "Location": data.location.value,
+    "Other_names": "",
+    "Tissue_specificity_(RefEx)": data.tissue_labels.value,
   }];
 
   if (objs[0]["Tissue specificity (RefEx)"] == "") {
     objs[0]["Tissue specificity (RefEx)"] = "(Low tissue specificity)";
+  } else {
+    objs[0]["Tissue specificity (RefEx)"] = makeList(data.tissue_labels.value.split(", "));
   }
+  if (data.other_names?.value) objs[0].Other_names = makeList(data.other_names.value.split("__"));
   return objs;
+
+  function makeLink(url, text) {
+    return "<a href=\"" + url + "\" target=\"_blank\">" + text + "</a>";
+  }
+  function makeList(strs) {
+    return "<ul><li>" + strs.join("</li><li>") + "</li></ul>";
+  }
+  function makePairList(ids, labels, urls) {
+    return makeList(ids.map((id, i)=>makeLink(urls[i], id) + " " + labels[i]));
+  }
 };
 ```
 
