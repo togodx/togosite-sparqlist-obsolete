@@ -18,28 +18,34 @@ PREFIX mondo: <http://purl.obolibrary.org/obo/MONDO_>
 PREFIX nando: <http://nanbyodata.jp/ontology/NANDO_>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX oboinowl: <http://www.geneontology.org/formats/oboInOwl#>
 
-SELECT DISTINCT ?nando ?nando_id ?nando_label ?nando_label_jp ?nando_description ?nando_source 
-                (GROUP_CONCAT(DISTINCT ?nando_altLabel, "__")AS ?nando_altLabels) ?nando_parent_label ?nando_parent_id
-                (GROUP_CONCAT(DISTINCT ?nando_mondo, ",") AS ?nando_mondos)
-WHERE { 
+SELECT DISTINCT ?nando ?id ?label ?label_jp ?description ?source
+                (GROUP_CONCAT(DISTINCT ?altLabel, "__") AS ?altLabels) ?parent_label ?parent_id
+                (GROUP_CONCAT(DISTINCT ?mondo_id, "__") AS ?mondo_ids)
+                (GROUP_CONCAT(DISTINCT ?mondo_label, "__") AS ?mondo_labels)
+FROM <http://rdf.integbio.jp/dataset/togosite/nando>
+FROM <http://rdf.integbio.jp/dataset/togosite/mondo>
+WHERE {
   VALUES ?nando { <http://nanbyodata.jp/ontology/NANDO_{{id}}> }
-  GRAPH <http://rdf.integbio.jp/dataset/togosite/nando> {
-    ?nando dcterms:identifier ?nando_id ;
-           rdfs:label ?nando_label .
-    FILTER(lang(?nando_label) = "en")
-    ?nando rdfs:label ?nando_label_jp .
-    FILTER(lang(?nando_label_jp) = "ja")
-    OPTIONAL { ?nando dcterms:description ?nando_description . }
-    OPTIONAL { ?nando skos:closeMatch ?nando_mondo . }
-    OPTIONAL { ?nando dcterms:source ?nando_source . }
-    OPTIONAL { ?nando skos:altLabel ?nando_altLabel . }
-    OPTIONAL {
-      ?nando rdfs:subClassOf ?nando_parent .
-      ?nando_parent rdfs:label ?nando_parent_label ;
-                    dcterms:identifier ?nando_parent_id .
-      FILTER(lang(?nando_parent_label) = "en") 
-    }
+  ?nando dcterms:identifier ?id ;
+         rdfs:label ?label .
+  FILTER(lang(?label) = "en")
+  ?nando rdfs:label ?label_jp .
+  FILTER(lang(?label_jp) = "ja")
+  OPTIONAL { ?nando dcterms:description ?description . }
+  OPTIONAL { ?nando dcterms:source ?source . }
+  OPTIONAL { ?nando skos:altLabel ?altLabel . }
+  OPTIONAL {
+    ?nando skos:closeMatch ?mondo . 
+    ?mondo oboinowl:id ?mondo_id ;
+           rdfs:label ?mondo_label .
+  }
+  OPTIONAL {
+    ?nando rdfs:subClassOf ?parent .
+    ?parent rdfs:label ?parent_label ;
+            dcterms:identifier ?parent_id .
+    FILTER(lang(?parent_label) = "en")
   }
 }
 ```
@@ -50,44 +56,37 @@ WHERE {
 ({ main, columns }) => {
  const objs = [];
   const data = main.results.bindings[0];
-  objs[0] = {  
-    "URL": data.nando?.value,
-    "ID": data.nando_id?.value,
-    "label": data.nando_label?.value,
-    "label_ja": data.nando_label_jp?.value,
-    "description": data.nando_description?.value,
-    "source": data.nando_source?.value,
-    "altLabel": data.nando_altLabels?.value,
-    "MONDO_related": data.nando_mondos?.value,
-    "subclass_of": data.nando_parent_id?.value
+  objs[0] = {
+    "URL": data.nando.value,
+    "ID": data.id.value,
+    "label": data.label.value,
+    "label_ja": data.label_jp.value,
+    "description": data.description?.value ?? "",
+    "source": data.source?.value ?? "",
+    "altLabel": "",
+    "MONDO_related": "",
+    "subclass_of": ""
   };
-
-  if (objs[0]["subclass_of"]) {
-    const class_ids = data.nando_parent_id.value.split(/,/);
-    const class_labels = data.nando_parent_label.value.split(/,/);
-    objs[0]["subclass_of"] = "<ul>";
-    for (let i=0; i<class_ids.length; i++) {
-      objs[0]["subclass_of"] += "<li><a href=\"http://nanbyodata.jp/ontology/" + class_ids[i].replace(":", "_") + "\" target=\"_blank\">"
-                                + class_ids[i]
-                                + "</a>" + " " +  class_labels[i] + "</li>";
-    }
-    objs[0]["subclass_of"] += "</ul>";
+  const prefix = "http://nanbyodata.jp/ontology/";
+  if (data.parent_id?.value)
+    objs[0]["subclass_of"] = makeLink(prefix+data.parent_id.value.replace(":", "_"),
+                                      data.parent_id.value) + " " + data.parent_label.value;
+  if (data.altLabels?.value) objs[0]["altLabel"] = makeList(data.altLabels.value.split("__"));
+  if (data.mondo_ids?.value) {
+    const ids = data.mondo_ids.value.split("__");
+    const labels = data.mondo_labels.value.split("__");
+    objs[0]["MONDO_related"] = makePairList(ids, labels, ids.map((id)=>"http://purl.obolibrary.org/obo/"+id.replace(":", "_")));
   }
-  if (objs[0]["MONDO_related"]) {
-    const mondo_urls = data.nando_mondos.value.split(/,/);
-    objs[0]["MONDO_related"] = "<ul>";
-    for (let i=0; i<mondo_urls.length; i++) {
-      objs[0]["MONDO_related"] += "<li><a href=\"" + mondo_urls[i] + "\" target=\"_blank\">"
-                                + mondo_urls[i].replace("http://purl.obolibrary.org/obo/", "").replace("_", ":")
-                                + "</a>" + "</li>";
-    }
-    objs[0]["MONDO_related"] += "</ul>";
-  }
-  if (objs[0]["altLabel"]) objs[0]["altLabel"] = makeList(objs[0]["altLabel"], "__");
   return objs;
 
-  function makeList(str, sep) {
-    return "<ul><li>" + str.replace(new RegExp(sep, 'g'), "</li><li>") + "</li></ul>";
-  };
+  function makeLink(url, text) {
+    return "<a href=\"" + url + "\" target=\"_blank\">" + text + "</a>";
+  }
+  function makeList(strs) {
+    return "<ul><li>" + strs.join("</li><li>") + "</li></ul>";
+  }
+  function makePairList(ids, labels, urls) {
+    return makeList(ids.map((id, i)=>makeLink(urls[i], id) + " " + labels[i]));
+  }
 };
 ```
