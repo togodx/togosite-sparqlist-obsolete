@@ -32,8 +32,8 @@
         protein: [["uniprot"]],
         structure: [["uniprot", "pdb"]],
         compound: [["pubchem_compound"]],
-        nando: [["uniprot", "ncbigene", "medgen", "mondo"]],
-        disease: [["uniprot", "ncbigene", "medgen"]]
+        nando: [["doid", "mondo"]],
+        disease: [["doid", "mondo"]]
       },
       variant: {
         variant: [[]],
