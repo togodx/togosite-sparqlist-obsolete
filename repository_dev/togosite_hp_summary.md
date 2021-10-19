@@ -19,27 +19,25 @@ PREFIX obo: <http://purl.obolibrary.org/obo/>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 
-SELECT ?hpo ?hpo_id ?hpo_label ?hpo_definition 
-       (GROUP_CONCAT(DISTINCT ?hpo_dbxref_s, ",") AS ?hpo_dbxref)
-       ?hpo_comment
-       (GROUP_CONCAT(DISTINCT ?hpo_parent_class_s, ",") AS ?hpo_parent_class)  
-       (GROUP_CONCAT(DISTINCT ?hpo_parent_class_label_s, ",") AS ?hpo_parent_class_label)  
-       (GROUP_CONCAT(DISTINCT ?hpo_exact_synonym_s, ",")AS ?hpo_exact_synonym)
-       (GROUP_CONCAT(DISTINCT ?hpo_related_synonym_s, ",") AS ?hpo_related_synonym)
+SELECT ?hpo ?id ?label ?definition
+       (GROUP_CONCAT(DISTINCT ?dbxref, ",") AS ?dbxrefs)
+       ?comment
+       (GROUP_CONCAT(DISTINCT ?parent_class, ",") AS ?parent_classes)
+       (GROUP_CONCAT(DISTINCT ?parent_class_label, ",") AS ?parent_class_labels)
+       (GROUP_CONCAT(DISTINCT ?exact_synonym, ",")AS ?exact_synonyms)
+       (GROUP_CONCAT(DISTINCT ?related_synonym, ",") AS ?related_synonyms)
 WHERE {
   VALUES ?hpo { <http://purl.obolibrary.org/obo/HP_{{id}}> }
   GRAPH <http://rdf.integbio.jp/dataset/togosite/hpo> {
-    ?hpo rdfs:label ?hpo_label .
-    OPTIONAL { ?hpo obo:IAO_0000115 ?hpo_definition_temp . }
-    OPTIONAL { ?hpo go:hasDbXref ?hpo_dbxref_s . }
-    OPTIONAL { ?hpo rdfs:comment ?hpo_comment_temp . }
-    OPTIONAL { ?hpo go:hasExactSynonym ?hpo_exact_synonym_s . }
-    OPTIONAL { ?hpo go:hasRelatedSynonym ?hpo_related_synonym_s . }
-    OPTIONAL { ?hpo rdfs:subClassOf ?hpo_parent_class_s .
-               ?hpo_parent_class_s rdfs:label ?hpo_parent_class_label_s . }
-    BIND (replace(str(?hpo), 'http://purl.obolibrary.org/obo/HP_', 'HP:') AS ?hpo_id)
-    BIND (IF(bound(?hpo_definition_temp), ?hpo_definition_temp, "") AS ?hpo_definition)
-    BIND (IF(bound(?hpo_comment_temp), ?hpo_comment_temp, "") AS ?hpo_comment)
+    ?hpo rdfs:label ?label .
+    OPTIONAL { ?hpo obo:IAO_0000115 ?definition . }
+    OPTIONAL { ?hpo go:hasDbXref ?dbxref . }
+    OPTIONAL { ?hpo rdfs:comment ?comment . }
+    OPTIONAL { ?hpo go:hasExactSynonym ?exact_synonym . }
+    OPTIONAL { ?hpo go:hasRelatedSynonym ?related_synonym . }
+    OPTIONAL { ?hpo rdfs:subClassOf ?parent_class .
+               ?parent_class rdfs:label ?parent_class_label . }
+    BIND (replace(str(?hpo), 'http://purl.obolibrary.org/obo/HP_', 'HP:') AS ?id)
   }
 }
 ```
@@ -52,19 +50,19 @@ WHERE {
   const data = main.results.bindings[0];
   objs[0] = {
     "URL": data.hpo.value,
-    "ID": data.hpo_id.value,
-    "label": data.hpo_label.value,
-    "definition": data.hpo_definition?.value,
-    "xrefs": data.hpo_dbxref?.value,
-    "comment": data.hpo_comment?.value,
-    "subclass_of": data.hpo_parent_class?.value
-    //"exact_synonym": data.hpo_exact_synonym?.value,
-    //"related_synonym": data.hpo_related_synonym?.value
+    "ID": data.id.value,
+    "label": data.label.value,
+    "definition": data.definition?.value ?? "",
+    "xrefs": data.dbxrefs?.value ?? "",
+    "comment": data.comment?.value ?? "",
+    "subclass_of": data.parent_classes?.value ?? ""
+    //"exact_synonym": data.exact_synonym?.value,
+    //"related_synonym": data.related_synonym?.value
   };
 
   if (objs[0]["subclass_of"]) {
-    const class_urls = data.hpo_parent_class.value.split(/,/);
-    const class_labels = data.hpo_parent_class_label.value.split(/,/);
+    const class_urls = data.parent_classes.value.split(/,/);
+    const class_labels = data.parent_class_labels.value.split(/,/);
     objs[0]["subclass_of"] = "<ul>";
     for (let i=0; i<class_urls.length; i++) {
       objs[0]["subclass_of"] += "<li><a href=\"" + class_urls[i] + "\" target=\"_blank\">"
