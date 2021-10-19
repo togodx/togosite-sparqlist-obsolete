@@ -61,7 +61,7 @@ WHERE {
     "URL": data.mesh.value,
     "label": data.label.value,
     "concept": "",
-    "scope_note": "",
+    "scope_note": data.note?.value ?? "",
     "broader_descriptor": ""
   };
   const prefix = "http://id.nlm.nih.gov/mesh/";
@@ -75,10 +75,9 @@ WHERE {
     const labels = data.concept_labels.value.split("__");
     objs[0].concept = makePairList(ids, labels, ids.map((id)=>prefix+id));
   }
-  if (data.note?.value)
-    objs[0].scope_note = data.note.value;
   objs[0].preferred_concept = makeLink(prefix + data.preferred_concept_id.value, data.preferred_concept_id.value)
                               + " " + data.preferred_concept_label.value;
+  return objs;
 
   function makeLink(url, text) {
     return "<a href=\"" + url + "\" target=\"_blank\">" + text + "</a>";
@@ -89,6 +88,5 @@ WHERE {
   function makePairList(ids, labels, urls) {
     return makeList(ids.map((id, i)=>makeLink(urls[i], id) + " " + labels[i]));
   }
-  return objs;
 };
 ```

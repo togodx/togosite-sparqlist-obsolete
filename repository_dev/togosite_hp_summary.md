@@ -56,8 +56,8 @@ WHERE {
     "ID": data.id.value,
     "label": data.label.value,
     "definition": data.definition?.value ?? "",
-    "xrefs": "",
     "comment": data.comment?.value ?? "",
+    "xref": "",
     "subclass_of": "",
     "exact_synonym": "",
     "related_synonym": ""
@@ -70,7 +70,7 @@ WHERE {
   }
   if (data.exact_synonyms?.value) objs[0].exact_synonym = makeList(data.exact_synonyms.value.split("__"));
   if (data.related_synonyms?.value) objs[0].related_synonym = makeList(data.related_synonyms.value.split("__"));
-  if (data.dbxrefs?.value) objs[0].xrefs = makeList(data.dbxrefs.value.split("__"));
+  if (data.dbxrefs?.value) objs[0].xref = makeList(data.dbxrefs.value.split("__"));
   return objs;
 
   function makeLink(url, text) {
