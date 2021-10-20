@@ -76,10 +76,10 @@ WHERE {
     "Tissue_specificity_(RefEx)": data.tissue_labels.value,
   }];
 
-  if (objs[0]["Tissue specificity (RefEx)"] == "") {
-    objs[0]["Tissue specificity (RefEx)"] = "(Low tissue specificity)";
+  if (objs[0]["Tissue_specificity_(RefEx)"] == "") {
+    objs[0]["Tissue_specificity_(RefEx)"] = "(Low tissue specificity)";
   } else {
-    objs[0]["Tissue specificity (RefEx)"] = makeList(data.tissue_labels.value.split(", "));
+    objs[0]["Tissue_specificity_(RefEx)"] = makeList(data.tissue_labels.value.split(", "));
   }
   if (data.other_names?.value) objs[0].Other_names = makeList(data.other_names.value.split("__"));
   return objs;
