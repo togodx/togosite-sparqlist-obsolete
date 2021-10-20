@@ -8,7 +8,7 @@
 
 ## Endpoint
 
-https://integbio.jp/togosite/sparql
+https://integbio.jp/rdf/pubchem/sparql
 
 ## `main`
 ```sparql
