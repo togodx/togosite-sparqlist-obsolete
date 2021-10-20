@@ -20,7 +20,7 @@ PREFIX iao: <http://purl.obolibrary.org/obo/IAO_>
 PREFIX chebi: <http://purl.obolibrary.org/obo/chebi/>
 
 SELECT DISTINCT ?chebi ?molecular_formula ?id
-                (GROUP_concat(distinct ?altid; separator = "__") as ?altids)
+                (GROUP_concat(distinct ?altid; separator = ", ") as ?altids)
                 (GROUP_concat(distinct ?label; separator = "__") as ?labels)
                 (GROUP_concat(distinct ?synonym; separator = "__") as ?synonyms)
                 ?mass ?smiles ?inchi ?definition
@@ -55,26 +55,14 @@ WHERE {
     mass: data.mass?.value ?? "",
     SMILES: data.smiles?.value ?? "",
     InChI: data.inchi?.value ?? "",
-    alternative_ID: ""
+    secondary_ID: data.altids?.value ?? ""
   };
   if (data.synonyms?.value)
     objs[0].synonym = makeList(data.synonyms.value.split("__"));
-  if (data.altids?.value) {
-    const ids = data.altids.value.split("__");
-    const labels = Array(ids.length).fill("");
-    const urls = ids.map((id)=>"http://purl.obolibrary.org/obo/chebi/"+id.replace(":", "_"));
-    objs[0].alternative_ID = makePairList(ids, labels, urls);
-  }
   return objs;
 
-  function makeLink(url, text) {
-    return "<a href=\"" + url + "\" target=\"_blank\">" + text + "</a>";
-  }
   function makeList(strs) {
     return "<ul><li>" + strs.join("</li><li>") + "</li></ul>";
-  }
-  function makePairList(ids, labels, urls) {
-    return makeList(ids.map((id, i)=>makeLink(urls[i], id) + " " + labels[i]));
   }
 };
 ```
