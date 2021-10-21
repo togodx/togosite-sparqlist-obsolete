@@ -22,7 +22,8 @@
       structure: ["pdb"],
       compound: ["pubchem_compound", "chembl_compound", "chebi"],
       nando: ["nando"],
-      disease: ["mondo", "medgen", "omim_phenotype", "orphanet", "hp", "mesh"]
+      hp: ["hp"],
+      disease: ["mondo", "medgen", "omim_phenotype", "orphanet", "mesh"]
     },
     route: {
       glycan: {
@@ -32,8 +33,9 @@
         protein: [["uniprot"]],
         structure: [["uniprot", "pdb"]],
         compound: [["pubchem_compound"]],
-        nando: [["uniprot", "ncbigene", "medgen", "mondo"]],
-        disease: [["uniprot", "ncbigene", "medgen"]]
+        nando: [["doid", "mondo"]],
+        hp: [["doid", "mondo", "medgen"]],
+        disease: [["doid", "mondo"]]
       },
       variant: {
         variant: [[]],
@@ -42,6 +44,7 @@
         structure: [["hgnc", "uniprot", "pdb"]],
         compound: [["hgnc", "uniprot", "reactome_reaction", "chebi"], ["hgnc", "uniprot", "chembl_target", "chembl_compound"]],
         nando: [["medgen", "mondo"]],
+        hp: [["medgen"]],
         disease: [["medgen"]]
       },
       gene: {
@@ -50,6 +53,7 @@
         structure: [["uniprot", "pdb"]],
         compound: [["uniprot", "reactome_reaction", "chebi"], ["uniprot", "chembl_target", "chembl_compound"]],
         nando: [["ncbigene", "medgen", "mondo"]],
+        hp: [["ncbigene", "medgen"]],
         disease: [["ncbigene", "medgen"]]
       },
       protein: {
@@ -57,22 +61,30 @@
         structure: [[]],
         compound: [["reactome_reaction", "chebi"], ["chembl_target", "chembl_compound"]],
         nando: [["ncbigene", "medgen", "mondo"]],
+        hp: [["ncbigene", "medgen"]],
         disease: [["ncbigene", "medgen"]]
       },
       structure: {
         structure: [[]],
         compound: [["uniprot", "reactome_reaction", "chebi"], ["uniprot", "chembl_target", "chembl_compound"]],
         nando: [["uniprot", "ncbigene", "medgen", "mondo"]],
+        hp: [["uniprot", "ncbigene", "medgen"]],
         disease: [["uniprot", "ncbigene", "medgen"]]
       },
       compound: {
         compound: [[]],
         nando: [["chembl_compound", "mesh", "mondo", "medgen"]],
+        hp: [["chembl_compound", "mesh", "mondo", "medgen"]],
         disease: [["chembl_compound", "mesh", "mondo"]],
       },
       nando: {
         nando: [[]],
+        hp: [["mondo", "medgen"]],
         disease: [["mondo"]]
+      },
+      hp: {
+        hp: [[]],
+        disease: [["medgen", "mondo"]]
       },
       disease: {
         disease: [["mondo"]]
@@ -87,12 +99,6 @@
   }
   
   // 例外処理
-  // mondo - medgen - hp
-  if (source == "mondo" && target == "hp") {
-    config.route.disease.disease[0].push("medgen");
-  } else if (target == "mondo" && source == "hp") {
-     config.route.disease.disease[0].unshift("medgen");
-  }
   // chembl_compound - mesh
   if ((sourceSubject == "compound" && target == "mesh") 
       || (targetSubject == "compound" && source == "mesh")) {
