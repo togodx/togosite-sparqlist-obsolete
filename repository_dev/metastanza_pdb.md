@@ -18,7 +18,7 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX dc: <http://purl.org/dc/elements/1.1/>
 
 SELECT DISTINCT ?pdb ?id ?title ?method ?polypeptide_number ?pH ?keywords ?text ?species ?host
-                (GROUP_CONCAT(DISTINCT ?uniprot_id; separator="__") AS ?uniprot_ids)
+                (GROUP_CONCAT(DISTINCT ?uniprot; separator="__") AS ?uniprots)
                 (GROUP_CONCAT(DISTINCT ?uniprot_desc; separator="__") AS ?uniprot_descs)
 WHERE {
   VALUES ?pdb { pdbr:{{id}} }
@@ -40,7 +40,7 @@ WHERE {
   }
   OPTIONAL {
     ?pdb pdbo:has_entityCategory/pdbo:has_entity ?entity_each .
-    ?entity_each pdbo:referenced_by_struct_ref/pdbo:link_to_uniprot ?uniprot_id .
+    ?entity_each pdbo:referenced_by_struct_ref/pdbo:link_to_uniprot ?uniprot .
     ?entity_each pdbo:entity.pdbx_description ?uniprot_desc .
   }
   BIND(REPLACE(STR(?pdb), pdbr:, "") AS ?id)
@@ -59,16 +59,16 @@ WHERE {
     method: elem.method.value,
     polypeptide_number: elem.polypeptide_number.value,
     pH: elem.pH?.value ?? "N/A",
-    keywords: elem.keywords.value,
-    text: elem.text.value,
+    classification: elem.keywords.value,
+    functional_keywords: elem.text.value,
     species: elem.species.value,
-    host: elem.host.value
+    "host_(expression_system)": elem.host.value
   }));
 
-  if (data.uniprot_ids?.value)
-    objs[0].uniprot = makePairList(data.uniprot_ids.value.split("__"),
+  if (data.uniprots?.value)
+    objs[0].uniprot = makePairList(data.uniprots.value.split("__").map((url)=>url.replace("http://purl.uniprot.org/uniprot/", "")),
                                    data.uniprot_descs.value.split("__"),
-                                   data.uniprot_ids.value.split("__").map((id)=>"http://purl.uniprot.org/uniprot/"+id));
+                                   data.uniprots.value.split("__"));
   return objs;
 
   function makeLink(url, text) {
