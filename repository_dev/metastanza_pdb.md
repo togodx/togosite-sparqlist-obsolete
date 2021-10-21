@@ -7,7 +7,7 @@ https://integbio.jp/rdf/sparql
 ## Parameters
 * `id`
   * default: 6TIW
-  * example: 6TIW
+  * example: 6TIW, 6W9K
 
 ## `main`
 
@@ -35,7 +35,9 @@ WHERE {
   {
     SELECT DISTINCT ?pdb COUNT(?polypeptide) AS ?polypeptide_number {
      ?pdb pdbo:has_entity_polyCategory/pdbo:has_entity_poly ?polypeptide.
-     ?polypeptide rdfs:seeAlso ?uniprot_link . #DNAのentryを排除
+     VALUES ?polypeptide_type { "polypeptide(L)" "polypeptide(D)"}
+     ?polypeptide pdbo:entity_poly.type ?polypeptide_type .
+     #?polypeptide rdfs:seeAlso ?uniprot_link . #DNAのentryを排除
     }
   }
   OPTIONAL {
