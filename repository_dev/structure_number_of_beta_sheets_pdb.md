@@ -55,8 +55,8 @@ https://integbio.jp/togosite/sparql
 ## `withTarget`
 
 ```sparql
-PREFIX pdbr: <http://rdf.wwpdb.org/pdb/>
-PREFIX pdbo: <http://rdf.wwpdb.org/schema/pdbx-v50.owl#>
+PREFIX pdbr: <https://rdf.wwpdb.org/pdb/>
+PREFIX pdbo: <https://rdf.wwpdb.org/schema/pdbx-v50.owl#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX dc: <http://purl.org/dc/elements/1.1/>
@@ -80,7 +80,7 @@ WHERE {
         SELECT DISTINCT ?PDBentry {
           ?PDBentry pdbo:has_entityCategory
                   / pdbo:has_entity
-                  / rdfs:seeAlso <http://identifiers.org/taxonomy:9606> .
+                  / rdfs:seeAlso <http://identifiers.org/taxonomy/9606> .
         }
       }
     }
