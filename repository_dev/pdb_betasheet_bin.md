@@ -15,7 +15,7 @@
 
 ## Endpoint
 
-https://integbio.jp/togosite/sparql
+https://integbio.jp/rdf/sparql
 
 ## Parameters
 
