@@ -44,7 +44,7 @@ WHERE {
   const objs = [];
   const data = main.results.bindings[0];
   objs[0] = {
-    URL: data.pubchem.value.replace("http://rdf.ncbi.nlm.nih.gov/pubchem/compound/", "http://identifiers.org/pubchem.compound/"),
+    URL: data.pubchem.value.replace("http://rdf.ncbi.nlm.nih.gov/pubchem/compound/CID", "http://identifiers.org/pubchem.compound/"),
     ID: data.id.value,
     molecular_formula: data.molecular_formula?.value ?? "",
     label: data.label?.value ?? "",
