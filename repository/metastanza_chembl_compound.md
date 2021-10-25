@@ -45,7 +45,7 @@ WHERE {
   const objs = [];
   const data = main.results.bindings[0];
   objs[0] = {
-    URL: data.chembl.value,
+    URL: data.chembl.value.replace("http://rdf.ebi.ac.uk/resource/chembl/molecule/", "http://identifiers.org/chembl.compound/"),
     ID: data.id.value,
     molecular_formula: data.molecular_formula?.value ?? "",
     type: data.type.value,
