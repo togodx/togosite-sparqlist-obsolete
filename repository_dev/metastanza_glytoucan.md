@@ -7,7 +7,7 @@ https://ts.glycosmos.org/sparql
 ## Parameters
 * `id`
   * default: G14606UO
-  * example: G14606UO
+  * example: G14606UO, G00035MO
 
 ## `main`
 
@@ -43,15 +43,23 @@ WHERE {
 
 ```javascript
 ({ main, id }) => {
-  return main.results.bindings.map((elem) => ({
+  const data = main.results.bindings[0];
+  const objs = main.results.bindings.map((elem) => ({
     ID: id,
     url: "https://glycosmos.org/glycans/show?gtc_id=" + id,
     IUPAC: elem.iupac?.value ?? "",
     WURCS: elem.wurcs_label.value,
     mass: elem.mass.value,
     subsumption: elem.sbsmpt.value.replace("http://www.glycoinfo.org/glyco/owl/relation#", "").replace(/_/g, " "),
-    tissue: elem.tissue_labels?.value ?? "",
-    image: "<img src=\"https://image.beta.glycosmos.org/snfg/png/" + id + "\" width=\"50%\ height=\"50%\" />"
-  }))
+    tissue: "",
+  }));
+  if (data.tissue_labels?.value) {
+    objs[0].tissue = makeList(data.tissue_labels.value.split(", ").sort());
+  }
+  return objs;
+
+  function makeList(strs) {
+    return "<ul><li>" + strs.join("</li><li>") + "</li></ul>";
+  }
 }
 ```
