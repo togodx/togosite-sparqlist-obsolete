@@ -68,7 +68,7 @@ WHERE {
   if (data.broader_ids?.value) {
     const ids = data.broader_ids.value.split("__");
     const labels = data.broader_labels.value.split("__");
-    objs[0].broader_descriptor = makePairList(ids, labels, prefix);
+    objs[0].broader_descriptor = makePairList(ids, labels, ids.map((id)=>prefix+id));
   }
   if (data.concept_ids?.value) {
     const ids = data.concept_ids.value.split("__");
