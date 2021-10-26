@@ -72,7 +72,7 @@ WHERE {
     species: elem.species?.value ?? "",
     "host_(expression_system)": elem.host?.value ?? "",
     macromolecules: "",
-    
+    other_molecules: ""    
   }));
 
   objs[0].links = makeLink("https://www.ebi.ac.uk/pdbe/entry/pdb/"+id, "PDBe") + ", "
