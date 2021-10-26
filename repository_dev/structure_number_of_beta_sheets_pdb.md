@@ -56,7 +56,7 @@ https://integbio.jp/togosite/sparql
 
 ```sparql
 PREFIX pdbr: <https://rdf.wwpdb.org/pdb/>
-PREFIX pdbo: <https://rdf.wwpdb.org/schema/pdbx-v50.owl#>
+PREFIX pdbo: <http://rdf.wwpdb.org/schema/pdbx-v50.owl#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX dc: <http://purl.org/dc/elements/1.1/>
@@ -78,9 +78,11 @@ WHERE {
       ?sheet pdbo:has_struct_sheet ?sheet_each .
       {
         SELECT DISTINCT ?PDBentry {
-          ?PDBentry pdbo:has_entityCategory
-                  / pdbo:has_entity
-                  / rdfs:seeAlso <http://identifiers.org/taxonomy/9606> .
+          ?PDBentry ( (pdbo:has_entity_src_genCategory /
+                       pdbo:has_entity_src_gen ) | 
+                      (pdbo:has_entity_src_natCategory /
+                       pdbo:has_entity_src_nat ) )
+                  / rdfs:seeAlso <http://identifiers.org/taxonomy:9606> .
         }
       }
     }
@@ -102,7 +104,7 @@ order by ?target_num
 - シートを持たないタンパク質の数
 ```sparql
 PREFIX pdbr: <https://rdf.wwpdb.org/pdb/>
-PREFIX pdbo: <https://rdf.wwpdb.org/schema/pdbx-v50.owl#>
+PREFIX pdbo: <http://rdf.wwpdb.org/schema/pdbx-v50.owl#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX dc: <http://purl.org/dc/elements/1.1/>
@@ -125,10 +127,12 @@ WHERE{
       MINUS {?PDBentry pdbo:has_struct_sheetCategory ?sheet . }
       {
         SELECT DISTINCT ?PDBentry {
-          ?PDBentry pdbo:has_entityCategory
-                  / pdbo:has_entity
-                  / rdfs:seeAlso <http://identifiers.org/taxonomy/9606> .
-        }
+          ?PDBentry ( (pdbo:has_entity_src_genCategory /
+                       pdbo:has_entity_src_gen ) | 
+                      (pdbo:has_entity_src_natCategory /
+                       pdbo:has_entity_src_nat ) )
+                  / rdfs:seeAlso <http://identifiers.org/taxonomy:9606> .
+          }
       }
     }
   }
