@@ -22,10 +22,11 @@
   * example: idList, objectList
   
 ## testURL
-- [default](https://integbio.jp/togosite/sparqlist/api/disease_mesh_filter?categoryIds=C04&queryIds=&mode=)
-- [caregoryIds+queryIds](https://integbio.jp/togosite/sparqlist/api/disease_mesh_filter?categoryIds=C04&queryIds=D017091%2CD004067%2CD042882%2CD053706%2CD007516&mode=)
-- [caregoryIds+queryIds+idList](https://integbio.jp/togosite/sparqlist/api/disease_mesh_filter?categoryIds=C04&queryIds=D017091%2CD004067%2CD042882%2CD053706%2CD007516&mode=idList)
-- [caregoryIds+queryIds+objectList](https://integbio.jp/togosite/sparqlist/api/disease_mesh_filter?categoryIds=C04&queryIds=D017091%2CD004067%2CD042882%2CD053706%2CD007516&mode=objectList)
+- [default](https://integbio.jp/togosite/sparqlist/api/disease_diseases_mesh?categoryIds=&queryIds=&mode=)
+- [categoryIds](https://integbio.jp/togosite/sparqlist/api/disease_diseases_mesh?categoryIds=C04&queryIds=&mode=)
+- [caregoryIds+queryIds](https://integbio.jp/togosite/sparqlist/api/disease_diseases_mesh?categoryIds=C04&queryIds=D017091%2CD004067%2CD042882%2CD053706%2CD007516&mode=)
+- [caregoryIds+queryIds+idList](https://integbio.jp/togosite/sparqlist/api/disease_diseases_mesh?categoryIds=C04&queryIds=D017091%2CD004067%2CD042882%2CD053706%2CD007516&mode=idList)
+- [caregoryIds+queryIds+objectList](https://integbio.jp/togosite/sparqlist/api/disease_diseases_mesh?categoryIds=C04&queryIds=D017091%2CD004067%2CD042882%2CD053706%2CD007516&mode=objectList)
 
 ## `top`
 - Top レベルかどうかのチェック
@@ -80,7 +81,7 @@ WHERE {
   MINUS { 
     ?tree meshv:parentTreeNumber ?parent . 
   }
-  FILTER (CONTAINS(STR(?tree),"mesh/{{categoryIds}}"))
+  FILTER (contains(str(?tree),"mesh/{{categoryIds}}"))
 {{else}}
   {{#if mode}}
   VALUES ?tree { {{#each categoryArray}} tree:{{this}} {{/each}} }
@@ -92,12 +93,12 @@ WHERE {
 {{#if queryArray}}
   VALUES ?mesh { {{#each queryArray}} mesh:{{this}} {{/each}} }
 {{/if}}
-   ?tree ^meshv:treeNumber/rdfs:label ?label .
-   ?mesh meshv:treeNumber/meshv:parentTreeNumber* ?tree .
-   FILTER(lang(?label) = "en")
+  ?tree ^meshv:treeNumber/rdfs:label ?label .
+  ?mesh meshv:treeNumber/meshv:parentTreeNumber* ?tree .
+  FILTER(lang(?label) = "en")
 }
 {{#unless mode}}  
-  ORDER BY DESC(?count)
+ORDER BY DESC(?count)
 {{/unless}}                  
 ```
 
@@ -125,7 +126,6 @@ WHERE {
       categoryId: d.category.value.replace(categoryPrefix, ""), 
       label: d.label.value,
       count: Number(d.count.value),
- //     hasChild: Boolean(d.child)
       hasChild: (Number(d.count.value) > 1 ? true : false)
     };
   });	
