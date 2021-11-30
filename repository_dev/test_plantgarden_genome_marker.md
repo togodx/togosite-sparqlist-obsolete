@@ -16,6 +16,7 @@ dcterms:identifier ?leaf_marker_id ;
 rdfs:label ?leaf_marker_label ;
 pg_ns:chr ?parent_chr .
 } 
+limit 10000
 ```
 
 ## `chr_genome`
@@ -33,6 +34,7 @@ pg_ns:chr ?parent_chr .
 dcterms:identifier ?parent_genome_identifier ;
 rdfs:label ?parent_genome_label .
 }
+limit 10000
 ```
 
 ## `genome_subspecies`
@@ -53,5 +55,31 @@ pg_ns:subspecies ?top_genome_subspecies .
 dcterms:identifier ?top_subspecies_identifier ;
 rdfs:label ?top_subspecies_label .
 FILTER (lang(?top_subspecies_label) = "en" )
+}
+limit 10000
+```
+
+## `return`
+```javascript
+({ leaf, chr_genome, genome_subspecies}) => {
+  
+ let tree = [
+    {
+      id: "root",
+      label: "root node",
+      root: true
+    }
+  ];
+  
+  let edge = {};
+  leaf.results.bindings.map(d => {
+    tree.push({
+      id: d.leaf_marker_id.value,
+      label: d.leaf_marker_label.value,
+      leaf: true,
+      parent: d.parent_chr.value
+    })
+   });
+  return tree;
 }
 ```
