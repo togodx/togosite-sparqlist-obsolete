@@ -16,7 +16,7 @@ dcterms:identifier ?leaf_marker_id ;
 rdfs:label ?leaf_marker_label ;
 pg_ns:chr ?parent_chr .
 } 
-limit 10000
+limit 1000
 ```
 
 ## `chr_genome`
@@ -34,7 +34,7 @@ pg_ns:chr ?parent_chr .
 dcterms:identifier ?parent_genome_identifier ;
 rdfs:label ?parent_genome_label .
 }
-limit 10000
+limit 1000
 ```
 
 ## `genome_subspecies`
@@ -56,7 +56,7 @@ dcterms:identifier ?top_subspecies_identifier ;
 rdfs:label ?top_subspecies_label .
 FILTER (lang(?top_subspecies_label) = "en" )
 }
-limit 10000
+limit 1000
 ```
 
 ## `return`
@@ -79,7 +79,18 @@ limit 10000
       leaf: true,
       parent: d.parent_chr.value
     })
-   });
+      });
+    let graph1 = {};
+  // 親子関係
+  chr_genome.results.bindings.map(d => {
+    tree.push({
+      id: d.parent_chr.value,
+      label: d.parent_chr.value,
+      parent: d.parent_genome_identifier.value
+    })
+  }) ;
+
   return tree;
 }
+
 ```
