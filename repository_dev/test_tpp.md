@@ -1,4 +1,4 @@
-# knapsack  (信定)
+# knapsack organism-compund (信定)
 - 生物種ーknapsack compoundの分類 
 - kingdom-family-oraganism-compound
 
