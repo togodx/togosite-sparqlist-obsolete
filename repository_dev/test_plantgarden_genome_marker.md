@@ -46,7 +46,16 @@ rdfs:subClassOf  ?taxlevel1 .
 ##`removeDuplicate`
 ```javascript
 ({list}) => {
-const tree1 =  tree ;  
+  
+   let tree1 = [
+  ];
+  
+ list.results.bindings.map(d =>
+    tree1.push( 
+   d.tree.value, 
+   )
+      );
+
 const tree2 = Array.from(new Set(tree1))
   return tree2;
 }
