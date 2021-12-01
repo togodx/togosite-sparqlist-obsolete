@@ -86,19 +86,24 @@ graph_b.results.bindings.map(d => {
       parent: d.kingdom.value
     })
   }) ;
-  
- ({graph_b}) => {
-  const kingdom = Array.from(new Set(d.kingdom.value))
-   return tree2 ;
-tree2.map(d => {
-    tree.push({
-      id: d.kingdom.value,
+
+ const top = [
+  graph_b.results.bindings.map(d => {
+    { id: d.kingdom.value,
       label: d.kingdom.value,
       parent: "root"
-    })
-  }) };
-
-
+    }}
+  ) ] ;
+  
+ tree.push(d => {
+   const topData = top.filter((element, index, self) => 
+                            self.findIndex(e => 
+                                           e.id === element.id &&
+                                           e.label === element.label
+                                          ) === index
+                            )
+           } );
+  
   return tree;
 }
 
