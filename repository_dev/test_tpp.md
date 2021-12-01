@@ -54,7 +54,7 @@ limit 10
 ```
 ## `return`
 ```javascript
-({ main, graph_a, graph_b}) => {
+({ leaf, graph_a, graph_b}) => {
   
  let tree = [
     {
@@ -64,8 +64,7 @@ limit 10
     }
   ];
   
-  let edge = {};
- main.results.bindings.map(d => {
+ leaf.results.bindings.map(d => {
     tree.push({
       id: d.compound_id.value,
       label: d.compound_label.value,
@@ -73,8 +72,6 @@ limit 10
       parent: d.tax_id.value
     })
       });
-    let family = {};
-  // 親子関係
   graph_a.results.bindings.map(d => {
     tree.push({
       id: d.tax_id.value,
