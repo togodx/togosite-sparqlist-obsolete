@@ -6,3 +6,7 @@
 https://mb2.ddbj.nig.ac.jp/sparql
 
 ## `leaf`
+- organismとcompound のアノテーション関係
+```sparql
+
+```
