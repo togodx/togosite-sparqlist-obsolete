@@ -11,69 +11,45 @@ prefix ddbjtax: <http://ddbj.nig.ac.jp/ontologies/taxonomy/>
 prefix dct: <http://purl.org/dc/terms/>
 prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 prefix taxon: <http://identifiers.org/taxonomy/>
-select distinct  ?parent
+select distinct  ?tax1 ?tax2
 from <http://ddbj.nig.ac.jp/ontologies/taxonomy>
 where {
 ?taxlevel1 a ddbjtax:Taxon ;
 rdfs:subClassOf  taxon:33090 .
-  BIND(IRI(REPLACE(STR(?taxlevel1), "http://identifiers.org/taxonomy/","")) AS ?parent)
+?taxlevel2 a ddbjtax:Taxon ;
+rdfs:subClassOf  ?taxlevel1 .
+  BIND(IRI(REPLACE(STR(?taxlevel1), "http://identifiers.org/taxonomy/","")) AS ?tax1)
+  BIND(IRI(REPLACE(STR(?taxlevel2), "http://identifiers.org/taxonomy/","")) AS ?tax2)
 }
 
 ```
 
-## `list1`
+## `list`
 ```javascript
 ({Top}) => {
   
- let tree1 = [
+ let tree = [
   ];
   
  Top.results.bindings.map(d =>
-    tree1.push(
-      d.parent.value,
+    tree.push(
+      d.tax1.value,
+      d.tax2.value,
   )
       );
 
-  return tree1;
+  return tree;
 }
 
 ```
 
-## `TaxIDList`
-```sparql
-prefix ddbjtax: <http://ddbj.nig.ac.jp/ontologies/taxonomy/>
-prefix dct: <http://purl.org/dc/terms/>
-prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-prefix taxon: <http://identifiers.org/taxonomy/>
-select distinct  ?taxlevel2
-from <http://ddbj.nig.ac.jp/ontologies/taxonomy>
-where {
-  VALUES ?taxlevel1 { {{#each list1}} tree:{{this}} {{/each}} }
-?taxlevel2 a ddbjtax:Taxon ;
-rdfs:subClassOf  ?taxlevel1 .
-}
-```
-## `list2`
+##`removeDuplicate`
 ```javascript
-({Top, TaxIDList}) => {
-  
- let tree2 = [
-  ];
-  
- Top.results.bindings.map(d =>
-    tree2.push(
-      d.taxlevel1.value,
-  )
-      );
-  TaxIDList.results.bindings.map(d =>
-    tree2.push(
-      d.taxlevel2.value,
-  )
-      );
-
+({list}) => {
+const tree1 =  tree ;  
+const tree2 = Array.from(new Set(tree1))
   return tree2;
 }
-
+  
 ```
-
 
