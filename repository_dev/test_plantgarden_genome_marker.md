@@ -11,7 +11,7 @@ prefix ddbjtax: <http://ddbj.nig.ac.jp/ontologies/taxonomy/>
 prefix dct: <http://purl.org/dc/terms/>
 prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 prefix taxon: <http://identifiers.org/taxonomy/>
-select distinct ?tax1 ?tax2 ?tax3 ?tax4 ?tax5 ?tax6 ?tax7 ?tax8 ?tax9 ?tax10 ?tax11 ?tax12 ?tax13 ?tax14 ?tax15
+select distinct ?tax23
 from <http://ddbj.nig.ac.jp/ontologies/taxonomy>
 where {
 ?taxlevel1 a ddbjtax:Taxon ;
@@ -44,6 +44,22 @@ rdfs:subClassOf  ?taxlevel12 .
 rdfs:subClassOf  ?taxlevel13 .
       ?taxlevel15 a ddbjtax:Taxon ;
 rdfs:subClassOf  ?taxlevel14 .
+        ?taxlevel16 a ddbjtax:Taxon ;
+rdfs:subClassOf  ?taxlevel15 .
+        ?taxlevel17 a ddbjtax:Taxon ;
+rdfs:subClassOf  ?taxlevel16 .
+        ?taxlevel18 a ddbjtax:Taxon ;
+rdfs:subClassOf  ?taxlevel17 .
+        ?taxlevel19 a ddbjtax:Taxon ;
+rdfs:subClassOf  ?taxlevel18 .
+       ?taxlevel20 a ddbjtax:Taxon ;
+rdfs:subClassOf  ?taxlevel19 .
+         ?taxlevel21 a ddbjtax:Taxon ;
+rdfs:subClassOf  ?taxlevel20 .
+         ?taxlevel22 a ddbjtax:Taxon ;
+rdfs:subClassOf  ?taxlevel21 .
+         ?taxlevel23 a ddbjtax:Taxon ;
+rdfs:subClassOf  ?taxlevel22 .
   
   BIND(IRI(REPLACE(STR(?taxlevel1), "http://identifiers.org/taxonomy/","")) AS ?tax1)
   BIND(IRI(REPLACE(STR(?taxlevel2), "http://identifiers.org/taxonomy/","")) AS ?tax2)
@@ -60,7 +76,14 @@ rdfs:subClassOf  ?taxlevel14 .
         BIND(IRI(REPLACE(STR(?taxlevel13), "http://identifiers.org/taxonomy/","")) AS ?tax13)
         BIND(IRI(REPLACE(STR(?taxlevel14), "http://identifiers.org/taxonomy/","")) AS ?tax14)
         BIND(IRI(REPLACE(STR(?taxlevel15), "http://identifiers.org/taxonomy/","")) AS ?tax15)
-  
+          BIND(IRI(REPLACE(STR(?taxlevel16), "http://identifiers.org/taxonomy/","")) AS ?tax16)
+          BIND(IRI(REPLACE(STR(?taxlevel17), "http://identifiers.org/taxonomy/","")) AS ?tax17)
+          BIND(IRI(REPLACE(STR(?taxlevel18), "http://identifiers.org/taxonomy/","")) AS ?tax18)
+          BIND(IRI(REPLACE(STR(?taxlevel19), "http://identifiers.org/taxonomy/","")) AS ?tax19)
+          BIND(IRI(REPLACE(STR(?taxlevel20), "http://identifiers.org/taxonomy/","")) AS ?tax20)
+          BIND(IRI(REPLACE(STR(?taxlevel21), "http://identifiers.org/taxonomy/","")) AS ?tax21) 
+          BIND(IRI(REPLACE(STR(?taxlevel22), "http://identifiers.org/taxonomy/","")) AS ?tax22)
+          BIND(IRI(REPLACE(STR(?taxlevel23), "http://identifiers.org/taxonomy/","")) AS ?tax23)  
 }
 
 ```
@@ -74,21 +97,8 @@ rdfs:subClassOf  ?taxlevel14 .
   
  taxonids.results.bindings.map(d =>
     tree.push(
-   d.tax1.value,
-   d.tax2.value,
-   d.tax3.value,
-   d.tax4.value,
-   d.tax5.value,
-   d.tax6.value,
-   d.tax7.value,
-   d.tax8.value,
-   d.tax9.value,
-   d.tax10.value,
-   d.tax11.value,
-   d.tax12.value,
-   d.tax13.value,
-   d.tax14.value,
-   d.tax15.value,
+ 
+      d.tax23.value,
   )
       );
 
