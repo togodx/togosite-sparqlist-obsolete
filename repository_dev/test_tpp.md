@@ -21,7 +21,7 @@ BIND (strafter(str(?taxonomy), "http://identifiers.org/taxonomy/") AS ?tax_id)
 dc:identifier ?compound_id ;
 rdfs:label ?compound_label .
 }
-
+limit 1000
 ```
 ## `graph_a`
 ```sparql
@@ -36,7 +36,7 @@ metabo:family ?family ;
 metabo:organism ?organism .
 BIND (strafter(str(?taxonomy), "http://identifiers.org/taxonomy/") AS ?tax_id)
 }
-
+limit 1000
 ```
 ## `graph_b`
 ```sparql
@@ -50,7 +50,7 @@ rdfs:seeAlso ?taxonomy ;
 metabo:family ?family ;
 metabo:kingdom ?kingdom  .
 }
-
+limit 1000
 ```
 ## `return`
 ```javascript
@@ -87,22 +87,25 @@ graph_b.results.bindings.map(d => {
     })
   }) ;
 
+   let subtree = [];
   graph_b.results.bindings.map(d => {
-    tree.push({
+    subtree.push({
       id: d.kingdom.value,
       label: d.kingdom.value,
       parent: "root"
    })
   }) ;
   
-  const result = tree.filter((element, index, self) => 
+  const result = subtree.filter((element, index, self) => 
                             self.findIndex(e => 
                                            e.id === element.id &&
                                            e.label === element.label
                                           ) === index
                             );
   
-  return result;
+  tree.push(result) ;
+  
+  return tree;
 }
 
 ```
