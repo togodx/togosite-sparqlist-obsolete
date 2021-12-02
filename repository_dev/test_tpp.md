@@ -21,7 +21,6 @@ BIND (strafter(str(?taxonomy), "http://identifiers.org/taxonomy/") AS ?tax_id)
 dc:identifier ?compound_id ;
 rdfs:label ?compound_label .
 }
-limit 100
 ```
 ## `graph_a`
 ```sparql
@@ -36,7 +35,6 @@ metabo:family ?family ;
 metabo:organism ?organism .
 BIND (strafter(str(?taxonomy), "http://identifiers.org/taxonomy/") AS ?tax_id)
 }
-limit 100
 ```
 ## `graph_b`
 ```sparql
@@ -50,7 +48,6 @@ rdfs:seeAlso ?taxonomy ;
 metabo:family ?family ;
 metabo:kingdom ?kingdom  .
 }
-limit 100
 ```
 ## `return`
 ```javascript
