@@ -44,18 +44,19 @@ limit 10000
 prefix pg_ns: <https://plantgardden.jp/ns/>
 prefix dcterms: <http://purl.org/dc/terms/>
 prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-select distinct  ?parent_genome_identifier ?parent_genome_label  ?top_subspecies_identifier  ?top_subspecies_label 
+select distinct ?genome_identifier ?genome_label  ?species_taxid  ?species_label 
 where {
 ?s a  pg_ns:Marker ;
-pg_ns:genome ?parent_genome .
-?parent_genome a  pg_ns:Genome ;
-dcterms:identifier ?parent_genome_identifier ;
-rdfs:label ?parent_genome_label ;
- pg_ns:subspecies ?top_genome_subspecies .
- ?top_genome_subspecies  a   pg_ns:Subspecies  ;
-dcterms:identifier ?top_subspecies_identifier ;
-rdfs:label ?top_subspecies_label .
-FILTER (lang(?top_subspecies_label) = "en" )  
+pg_ns:genome ?genome ;
+ pg_ns:species   ?species  .
+?genome a  pg_ns:Genome ;
+dcterms:identifier ?genome_identifier ;
+rdfs:label ?genome_label .
+?species a pg_ns:Species ;
+a ?ncbi ;
+rdfs:label ?species_label .
+FILTER contains (str(?ncbi ), "http://purl.obolibrary.org/obo/NCBITaxon").
+BIND (IRI(REPLACE(STR(?ncbi), "http://purl.obolibrary.org/obo/NCBITaxon_","")) AS ?species_taxid)
 }
 limit 10000
 ```
@@ -91,9 +92,9 @@ limit 10000
   }) ;
 graph_b.results.bindings.map(d => {
     tree.push({
-      id: d.parent_genome_identifier.value,
-      label: d.parent_genome_label.value,
-      parent: d.top_subspecies_identifier.value
+      id: d.genome_identifier.value,
+      label: d.genome_label.value,
+      parent: d.species_taxid.value
     })
   }) ;
   
@@ -101,8 +102,8 @@ graph_b.results.bindings.map(d => {
   
 graph_b.results.bindings.map(d => {
     subtree.push({
-      id: d.top_subspecies_identifier.value,
-      label: d.top_subspecies_label.value,
+      id: d.species_taxid.value,
+      label: d.species_label.value,
       parent: "root"
     })
   }) ;
