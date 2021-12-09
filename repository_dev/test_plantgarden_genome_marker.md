@@ -11,14 +11,18 @@ https://mb2.ddbj.nig.ac.jp/sparql
 prefix pg_ns: <https://plantgardden.jp/ns/>
 prefix dcterms: <http://purl.org/dc/terms/>
 prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-select distinct ?leaf_marker_id ?leaf_marker_label  ?parent_chr 
+select distinct ?leaf_marker_id ?leaf_marker_label  ?parent_chr_id  ?parent_chr 
 where {
 ?s a  pg_ns:Marker ;
 dcterms:identifier ?leaf_marker_id ;
 rdfs:label ?leaf_marker_label ;
+pg_ns:genome ?parent_genome ;
 pg_ns:chr ?parent_chr .
+  ?parent_genome a  pg_ns:Genome ;
+dcterms:identifier ?parent_genome_identifier .
+BIND ( CONCAT(?parent_genome_identifier, ".", ?parent_chr) as ?parent_chr_id)
 } 
-limit 10000
+
 ```
 
 ## `graph_a`
@@ -27,7 +31,7 @@ limit 10000
 prefix pg_ns: <https://plantgardden.jp/ns/>
 prefix dcterms: <http://purl.org/dc/terms/>
 prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-select distinct  ?parent_chr   ?parent_genome_identifier ?parent_genome_label
+select distinct ?parent_chr_id  ?parent_chr   ?parent_genome_identifier ?parent_genome_label
 where {
 ?s a  pg_ns:Marker ;
 pg_ns:genome ?parent_genome ;
@@ -35,8 +39,9 @@ pg_ns:chr ?parent_chr .
 ?parent_genome a  pg_ns:Genome ;
 dcterms:identifier ?parent_genome_identifier ;
 rdfs:label ?parent_genome_label .
+  BIND ( CONCAT(?parent_genome_identifier, ".", ?parent_chr) as ?parent_chr_id)
 }
-limit 10000
+
 ```
 ## `graph_b`
 - 親子関係
@@ -58,7 +63,7 @@ rdfs:label ?species_label .
 FILTER contains (str(?ncbi ), "http://purl.obolibrary.org/obo/NCBITaxon").
 BIND (IRI(REPLACE(STR(?ncbi), "http://purl.obolibrary.org/obo/NCBITaxon_","")) AS ?species_taxid)
 }
-limit 10000
+
 ```
 
 ## `return`
@@ -79,13 +84,13 @@ limit 10000
       id: d.leaf_marker_id.value,
       label: d.leaf_marker_label.value,
       leaf: true,
-      parent: d.parent_chr.value
+      parent: d.parent_chr_id.value
     })
       });
   // 親子関係
   graph_a.results.bindings.map(d => {
     tree.push({
-      id: d.parent_chr.value,
+      id: d.parent_chr_id.value,
       label: d.parent_chr.value,
       parent: d.parent_genome_identifier.value
     })
