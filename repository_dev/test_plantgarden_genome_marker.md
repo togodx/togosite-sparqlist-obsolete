@@ -120,9 +120,7 @@ graph_b.results.bindings.map(d => {
                                           ) === index
                             );
   
-  tree.push(result) ;
-  
-  return tree;
+   return tree.concat(result);
 }
 
 ```
