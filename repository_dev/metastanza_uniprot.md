@@ -179,7 +179,7 @@ WHERE{
   if (obj[0]["mass"]) obj[0]["mass"] = obj[0]["mass"].replace(/(\d)(?=(\d{3})+$)/g , '$1,');
   if (obj[0]["citation_number"]) obj[0]["citation_number"] = obj[0]["citation_number"].replace(/(\d)(?=(\d{3})+$)/g , '$1,');
   if (obj[0]["pdbs"]) obj[0]["pdbs"] = obj[0]["pdbs"].split(/,/).map(d => {
-    return "<a href='" + d + "'>" + d.replace("http://rdf.wwpdb.org/pdb/", "") + "</a>";
+    return "<a href='" + d + "' target=\"_blank\">" + d.replace("http://rdf.wwpdb.org/pdb/", "") + "</a>";
   }).join(", ");
   obj[0]["biological_process"] = "";
   obj[0]["molecular_function"] = "";
