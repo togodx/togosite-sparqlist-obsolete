@@ -132,8 +132,8 @@ WHERE {
     "Tissue specificity (GTEx)": ts_gtex,
     "Tissue specificity (HPA)": ts_hpa,
     "Cell specificity (HPA)": cs_hpa,
-    "Expression": "<a href=\"https://gtexportal.org/home/gene/" + id + "\">" + "View Expression at GTEx Portal</a>, " +
-                  "<a href=\"https://www.proteinatlas.org/" + id + "\">" + "View Expression at ProteinAtlas</a>"
+    "Expression": "<a href=\"https://gtexportal.org/home/gene/" + id + "\" target=\"_blank\">" + "View Expression at GTEx Portal</a>, " +
+                  "<a href=\"https://www.proteinatlas.org/" + id + "\" target=\"_blank\">" + "View Expression at ProteinAtlas</a>"
   }];
 
   return objs;
