@@ -150,8 +150,14 @@ async ({togokey, filters, annotations, queries})=>{
       tableData[togoId].push({
         id: attribute,
         //propertyLabel: config.label,
-        dataset: config.dataset,
-        entries: leafList
+        items: leafList.map(d => {
+          return {
+            datadset: config.dataset,
+            entry: d.id,
+            node: d.attribute.categoryId,
+            value: d.attribute.label
+          }
+        })  
       })
     }
   }
@@ -159,8 +165,8 @@ async ({togokey, filters, annotations, queries})=>{
   // object to list
   let togoIdToLabel = await togoIdToLabelFetch;
   return togoIdArray.map(togoId=>{
-    let obj = { target: {id: togoId, dataset: togokey }};
-    if (togoIdToLabel[togoId]) obj.target.label = togoIdToLabel[togoId];
+    let obj = { index: {dataset: togokey, entry: togoId}};
+    if (togoIdToLabel[togoId]) obj.index.label = togoIdToLabel[togoId];
     obj.attributes = tableData[togoId];
     return obj;
   })
