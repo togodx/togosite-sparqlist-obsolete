@@ -148,10 +148,10 @@ async ({togokey, filters, annotations, queries})=>{
         if (primaryId2attribute[primaryId]) leafList = leafList.concat(primaryId2attribute[primaryId]);
       }
       tableData[togoId].push({
-        propertyId: attribute,
-        propertyLabel: config.label,
-        propertyKey: config.dataset,
-        attributes: leafList
+        id: attribute,
+        //propertyLabel: config.label,
+        dataset: config.dataset,
+        entries: leafList
       })
     }
   }
@@ -159,9 +159,9 @@ async ({togokey, filters, annotations, queries})=>{
   // object to list
   let togoIdToLabel = await togoIdToLabelFetch;
   return togoIdArray.map(togoId=>{
-    let obj = { id: togoId };
-    if (togoIdToLabel[togoId]) obj.label = togoIdToLabel[togoId];
-    obj.properties = tableData[togoId];
+    let obj = { target: {id: togoId, dataset: togokey }};
+    if (togoIdToLabel[togoId]) obj.target.label = togoIdToLabel[togoId];
+    obj.attributes = tableData[togoId];
     return obj;
   })
 }
