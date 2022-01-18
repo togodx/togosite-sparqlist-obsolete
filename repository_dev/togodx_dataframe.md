@@ -1,14 +1,13 @@
-# TogoDX dataframe SPARQList (Parameter, JSON 変更) 21.10.01
+# TogoDX dataframe SPARQList (JSON 変更) 22.01.18
 
-- 元 togokey_table_data
 - 入れ子 SPARQList の parameters もそのうち修正する
   - categoryIds -> nodes
-  - togokey -> togokey
+  - togokey -> dataset
   - queryIds -> queries
 
 ## Parameters
 
-* `togokey`
+* `dataset`
   * default: ensembl_gene
 * `filters`
   * default: [{"attribute": "gene_evolutionary_conservation_homologene","nodes": ["6"]}]
@@ -16,13 +15,13 @@
 * `annotations`
   * default: [{"attribute": "protein_biological_process_uniprot"},{"attribute": "protein_biological_process_uniprot", "node": "GO_0044237"}]
   * example: [{"attribute": "gene_low_level_expression_refex"}, {"attribute": "protein_number_of_phosphorylation_sites_uniprot"}, {"attribute": "protein_biological_process_uniprot", "node": "GO_0009987"}]
-* `queries` togokey 100個程度ずつ
+* `queries` 100個程度ずつ
   * default: ["ENSG00000173230"]
   * example: ["4942","5344","6148", "6265","6344","6677","6735","10593","10718","10876"]
 
 ## `primaryIds`
 ```javascript
-async ({togokey, filters, annotations, queries})=>{
+async ({dataset, filters, annotations, queries})=>{
   const fetchReq = async (url, options, body) => {
     console.log(url + " " + body);  // debug
     if (body) options.body = body;
@@ -58,9 +57,9 @@ async ({togokey, filters, annotations, queries})=>{
     config.api = config.api.split(/\//).slice(-1)[0]; // nested SPARQLet relative path
     //const t1 = Date.now() - start; // debug
     
-    // get 'togokey' ID - 'primalyKey' ID list via TogoID API
+    // get 'dataset' ID - 'primalyKey' ID list via TogoID API
     let idPair = [];
-    if (togokey != config.dataset) idPair = await fetchReq(togoidApi, options, "source=" + togokey + "&target=" + config.dataset + "&ids=" + encodeURIComponent(togoIdArray.join(" ")));
+    if (dataset != config.dataset) idPair = await fetchReq(togoidApi, options, "source=" + dataset + "&target=" + config.dataset + "&ids=" + encodeURIComponent(togoIdArray.join(" ")));
     else idPair = togoIdArray.map(d => {return {source_id: d, target_id: d} });
     let togo2primary = {};
     for (let d of idPair) {
@@ -123,7 +122,7 @@ async ({togokey, filters, annotations, queries})=>{
   }
   
   // label 取得（labelApi が対応しない、ラベルの無い togovar などを入れる場合は注意）
-  let togoIdToLabelFetch = fetchReq(labelApi, options, "togoKey=" + togokey + "&queryIds=" + queries);  // #### 入れ子 SPARQList. 要パラメータ名の整理
+  let togoIdToLabelFetch = fetchReq(labelApi, options, "togoKey=" + dataset + "&queryIds=" + queries);  // #### 入れ子 SPARQList. 要パラメータ名の整理
 
   let attributeDataAll = await getAllAttributeData(); // promise
   // console.log(attributeDataAll);
@@ -136,7 +135,7 @@ async ({togokey, filters, annotations, queries})=>{
     let togo2primary = attributeData.pair;
 	let objectList = attributeData.list;
           
-    // mapping to 'togokey' ID
+    // mapping to 'dataset' ID
     let primaryId2attribute = {};
     for (let d of objectList) {
       if (!primaryId2attribute[d.id]) primaryId2attribute[d.id] = [];
@@ -148,10 +147,16 @@ async ({togokey, filters, annotations, queries})=>{
         if (primaryId2attribute[primaryId]) leafList = leafList.concat(primaryId2attribute[primaryId]);
       }
       tableData[togoId].push({
-        propertyId: attribute,
-        propertyLabel: config.label,
-        propertyKey: config.dataset,
-        attributes: leafList
+        id: attribute,
+        //propertyLabel: config.label,
+        items: leafList.map(d => {
+          return {
+            datadset: config.dataset,
+            entry: d.id,
+            node: d.attribute.categoryId,
+            label: d.attribute.label
+          }
+        })  
       })
     }
   }
@@ -159,9 +164,9 @@ async ({togokey, filters, annotations, queries})=>{
   // object to list
   let togoIdToLabel = await togoIdToLabelFetch;
   return togoIdArray.map(togoId=>{
-    let obj = { id: togoId };
-    if (togoIdToLabel[togoId]) obj.label = togoIdToLabel[togoId];
-    obj.properties = tableData[togoId];
+    let obj = { index: {dataset: dataset, entry: togoId}};
+    if (togoIdToLabel[togoId]) obj.index.label = togoIdToLabel[togoId];
+    obj.attributes = tableData[togoId];
     return obj;
   })
 }

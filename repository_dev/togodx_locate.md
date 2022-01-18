@@ -17,8 +17,8 @@
 * `dataset`
   * default: uniprot
 * `queries` (IDs from "Map your IDs")
-  * default: Q9NYF8,Q4V339,A6NCE7,A7E2F4,P69849,A6NN73,Q92928,Q5T1J5,P0C7P4,Q6DN03,P09874,Q08211,Q5T4S7,P12270,Q9UPN3,P07814,P53621,P49321,P0C629,Q9BZK8,Q9BY65
-
+  * default: ["Q9NYF8","Q4V339","A6NCE7","A7E2F4","P69849","A6NN73","Q92928","Q5T1J5","P0C7P4","Q6DN03","P09874","Q08211","Q5T4S7","P12270","Q9UPN3","P07814","P53621","P49321","P0C629","Q9BZK8","Q9BY65"]
+  
 ## `pValueFlag`
 ```javascript
 async ({attribute})=>{
@@ -184,6 +184,7 @@ async ({node, queries, dataset, pValueFlag, population})=>{
   const sparqlet = api.split(/\//).slice(-1)[0];  // nested SPARQLet relative path
 
   // convert user IDs to primary IDs for SPARQLet
+  queries = JSON.parse(queries).join(","); // 歴史的経緯の変換
   let converted_queries = "";
   if (dataset != attributeDataset) {
     let body = "source=" + dataset + "&target=" + attributeDataset + "&ids=" +  encodeURIComponent(queries);
@@ -219,8 +220,10 @@ async ({node, queries, dataset, pValueFlag, population})=>{
   let originalDistribution = await fetchReq(sparqlet, body);
   for (let i = 0; i < originalDistribution.length; i++) {
     let hit_tmp = 0;
-    originalDistribution[i].node = originalDistribution[i].categoryId;
-    delete(originalDistribution[i].categoryId);
+    if (originalDistribution[i].categoryId) {
+      originalDistribution[i].node = originalDistribution[i].categoryId;
+      delete(originalDistribution[i].categoryId);
+    }
     if (hit[originalDistribution[i].node]) hit_tmp = hit[originalDistribution[i].node];
     originalDistribution[i].mapped = hit_tmp;
   }
