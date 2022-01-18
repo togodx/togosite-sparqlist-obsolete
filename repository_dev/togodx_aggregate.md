@@ -1,14 +1,13 @@
-# TogoDX aggregate SPARQList (Parameter, JSON 変更) 21.10.01
+# TogoDX aggregate SPARQList (JSON 変更) 22.01.18
 
-- 元 togokey_filter
 - 入れ子 SPARQList の parameters もそのうち修正する
   - categoryIds -> nodes
-  - togokey -> togokey
+  - togokey -> dataset
   - inputIds -> queries
  
 ## Parameters
 
-* `togokey`
+* `dataset`
   * default: hgnc
 * `filters`
   * default: [{"attribute": "gene_high_level_expression_refex", "nodes": ["v32_40", "v25_40"]}, {"attribute": "protein_cellular_component_uniprot","nodes": ["GO_0005886"]}, {"attribute": "structure_data_existence_uniprot", "nodes": ["1"]}, {"attribute": "interaction_chembl_assay_existence_uniprot", "nodes": ["1"]}]
@@ -17,7 +16,7 @@
   
 ## `primaryIds`
 ```javascript
-async ({togokey, filters, queries})=>{
+async ({dataset, filters, queries})=>{
   const fetchReq = async (url, options, body) => {
     if (body) options.body = body;
     /* //==== debug code
@@ -43,14 +42,14 @@ async ({togokey, filters, queries})=>{
   const attributesJson = await fetchReq(togoDxAttributes, {method: "get"});
   const queryProperties = JSON.parse(filters);
   let idLimit = 2000; // split 判定
-  if (togokey == "pubchem_compound") idLimit = 500; // restrict POST respons size
+  if (dataset == "pubchem_compound") idLimit = 500; // restrict POST respons size
   const start = Date.now(); // debug
 
-  // not filter (togoKey = hgnc, uniprot, pdb, mondo)
+  // not filter (dataset = hgnc, uniprot, pdb, mondo)
   const togoidNotFilter = "togokey_not_filter"; // nested SPARQLet relative path
-  if (queryProperties.length == 0 && (togokey == "hgnc" || togokey == "uniprot" || togokey == "pdb" || togokey == "mondo")) {
+  if (queryProperties.length == 0 && (dataset == "hgnc" || dataset == "uniprot" || dataset == "pdb" || dataset == "mondo")) {
     if (queries && JSON.parse(queries)[0]) return JSON.parse(queries);
-    return fetchReq(togoidNotFilter, options, "togoKey=" + togokey);  // #### 入れ子 SPARQList. 要パラメータ名の整理
+    return fetchReq(togoidNotFilter, options, "togoKey=" + dataset);  // #### 入れ子 SPARQList. 要パラメータ名の整理
   }
 
   const getIdPair = async (query) => {
@@ -58,17 +57,17 @@ async ({togokey, filters, queries})=>{
     const config = attributesJson.attributes[attribute];
      //const t1 = Date.now() - start; // debug
     
-    // get 'primatyKey' ID list by category filtering
+    // get 'attributes dataset' ID list by category filtering
     let queryCategoryIds = query.nodes.join(",");
 
     config.api = config.api.split(/\//).slice(-1)[0];  // nested SPARQLet relative path
     let primaryIds = await fetchReq(config.api, options, "mode=idList&categoryIds=" + queryCategoryIds);  // #### 入れ子 SPARQList. 要パラメータ名の整理
     //const t2 = Date.now() - start; // debug
     
-    // get 'primalyKey' ID - togoKey' ID list via togoID API
+    // get 'attributes dataset' ID - 'dataset' ID list via togoID API
     let idPair = [];
-    if (togokey != config.dataset) {
-      let body = "source=" + config.dataset + "&target=" + togokey + "&ids=" +  encodeURIComponent(primaryIds.join(","));
+    if (dataset != config.dataset) {
+      let body = "source=" + config.dataset + "&target=" + dataset + "&ids=" +  encodeURIComponent(primaryIds.join(","));
       if (primaryIds.length <= idLimit) {
         idPair = await fetchReq(togoidApi, options, body);
       } else {
@@ -106,7 +105,7 @@ async ({togokey, filters, queries})=>{
   for (let i = 0; i < queryProperties.length; i++) { 
     const idPair = await idPairAll[i];
      
-    // set 'togoKey' Ids
+    // set 'dataset' Ids
     let filterId = {};
     for (let id of idPair.map(d=>d.target_id)) {
       filterId[id] = true;
@@ -114,7 +113,7 @@ async ({togokey, filters, queries})=>{
     if (togoId === undefined) { // first filtered list
       togoId = filterId;
     } else {
-      for (let id of Object.keys(togoId)) { // remove 'togoKey' ID from list
+      for (let id of Object.keys(togoId)) { // remove 'dataset' ID from list
         if (!filterId[id]) delete(togoId[id]);
       }
     }

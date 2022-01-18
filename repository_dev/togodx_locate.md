@@ -1,9 +1,9 @@
-# TogoDX locate SPARQList (Parameter 変更) 21.10.01
+# TogoDX locate SPARQList (Parameter 変更) 22.01.18
 
 - 元 map_ids_to_attribute
 - 入れ子 SPARQList の parameters もそのうち修正する
   - categoryIds -> nodes
-  - togokey -> togokey
+  - togokey -> dataset
   - queryIds -> queries
 - DAVI p-value (EASE Score)
   - https://david.ncifcrf.gov/content.jsp?file=functional_annotation.html
@@ -14,7 +14,7 @@
   * default: gene_high_level_expression_refex
 * `node`
   * example:
-* `togokey`
+* `dataset`
   * default: uniprot
 * `queries` (IDs from "Map your IDs")
   * default: Q9NYF8,Q4V339,A6NCE7,A7E2F4,P69849,A6NN73,Q92928,Q5T1J5,P0C7P4,Q6DN03,P09874,Q08211,Q5T4S7,P12270,Q9UPN3,P07814,P53621,P49321,P0C629,Q9BZK8,Q9BY65
@@ -30,10 +30,10 @@ async ({attribute})=>{
 
   const togoDxAttributes = "https://raw.githubusercontent.com/togodx/togodx-config-human/develop/config/attributes.json";
   const attributesJson = await fetchReq(togoDxAttributes, {method: "get"});
-  const dataset = attributesJson.attributes[attribute].dataset;
+  const attributeDataset = attributesJson.attributes[attribute].dataset;
   let obj = {attribute: attributesJson.attributes[attribute]};
-  if (dataset == "uniprot") {  // || dataset == "pdb") {
-    obj[dataset] = true;
+  if (attributeDataset == "uniprot") {  // || attributeDataset == "pdb") {
+    obj[attributeDataset] = true;
   } else if (attribute.match(/gene_biotype_ensembl$/)) {
     obj.ensembl_gene_biotype = true;  
   } else if (attribute.match(/gene_chromosome_ensembl$/)) {
@@ -159,7 +159,7 @@ WHERE {
 
 ## `distribution`
 ```javascript
-async ({node, queries, togokey, pValueFlag, population})=>{
+async ({node, queries, dataset, pValueFlag, population})=>{
   const fetchReq = async (url, body) => {
     let options = {	
       method: 'POST',
@@ -174,19 +174,19 @@ async ({node, queries, togokey, pValueFlag, population})=>{
     return await fetch(url, options).then(res=>res.json());
   }
 
-  const dataset = pValueFlag.attribute.dataset;
+  const attributeDataset = pValueFlag.attribute.dataset;
   const api = pValueFlag.attribute.api;
   const togoidSparqlistSplitter = "togoid_sparqlist_splitter"; // nested SPARQLet relative path
   const sparqlistSplitter = "sparqlist_splitter"; // nested SPARQLet relative path
   const togoidApi = "togoid_route_sparql"; // nested SPARQLet relative path
   let idLimit = 2000; // split 判定
-  if (dataset == "chembl_compound") idLimit = 500; // restrict POST response size
+  if (attributeDataset == "chembl_compound") idLimit = 500; // restrict POST response size
   const sparqlet = api.split(/\//).slice(-1)[0];  // nested SPARQLet relative path
 
   // convert user IDs to primary IDs for SPARQLet
   let converted_queries = "";
-  if (togokey != dataset) {
-    let body = "source=" + togokey + "&target=" + dataset + "&ids=" +  encodeURIComponent(queries);
+  if (dataset != attributeDataset) {
+    let body = "source=" + dataset + "&target=" + attributeDataset + "&ids=" +  encodeURIComponent(queries);
     let togoidPair;
     if (queries.split(/,/).length <= idLimit) {
       togoidPair = await fetchReq(togoidApi, body);
@@ -219,8 +219,10 @@ async ({node, queries, togokey, pValueFlag, population})=>{
   let originalDistribution = await fetchReq(sparqlet, body);
   for (let i = 0; i < originalDistribution.length; i++) {
     let hit_tmp = 0;
-    if (hit[originalDistribution[i].categoryId]) hit_tmp = hit[originalDistribution[i].categoryId];
-    originalDistribution[i].hit_count = hit_tmp;
+    originalDistribution[i].node = originalDistribution[i].categoryId;
+    delete(originalDistribution[i].categoryId);
+    if (hit[originalDistribution[i].node]) hit_tmp = hit[originalDistribution[i].node];
+    originalDistribution[i].mapped = hit_tmp;
   }
 
   // without p-value
@@ -278,11 +280,11 @@ async ({node, queries, togokey, pValueFlag, population})=>{
   const LT = converted_queries.split(/,/).length;
   
   return originalDistribution.map(d => {
-    const LH = d.hit_count;
+    const LH = d.mapped;
     const PH = d.count;
     if (LH == 0) return d;
-    if (LH == 1) d.pValue = 1;
-    else d.pValue = calcPvalue(
+    if (LH == 1) d.pvalue = 1;
+    else d.pvalue = calcPvalue(
       LH - 1, 
       LT - LH, 
       PH - LH + 1, 
