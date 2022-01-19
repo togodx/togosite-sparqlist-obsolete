@@ -34,7 +34,12 @@ async ({attribute, node})=>{
     }
   }
   
-  const togoDxAttributes = "https://raw.githubusercontent.com/togodx/togodx-config-human/develop/config/attributes.json";
+  // attributes.json の order で sort
+  // const togoDxAttributes = "https://raw.githubusercontent.com/togodx/togodx-config-human/develop/config/attributes.json";
+  // const attributesJson = await fetchReq(togoDxAttributes, {method: "get"});
+  // const order = "numerical_desc"; // default
+  // if (attributesJson.attributes[attribute].order) order = attributesJson.attributes[attribute].order;
+
   let body = "";
   if (node) body = "categoryIds=" + node; // #### 入れ子 SPARQList. 要パラメータ名の整理
   let res = await fetchReq(attribute, options, body)
