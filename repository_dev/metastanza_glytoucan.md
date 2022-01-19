@@ -46,7 +46,7 @@ WHERE {
   const data = main.results.bindings[0];
   const objs = main.results.bindings.map((elem) => ({
     ID: id,
-    url: "https://glycosmos.org/glycans/show?gtc_id=" + id,
+    url: "https://glycosmos.org/glycans/show/" + id,
     IUPAC: elem.iupac?.value ?? "",
     WURCS: elem.wurcs_label.value,
     mass: elem.mass.value,
