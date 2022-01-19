@@ -7,10 +7,10 @@
  
 ## Parameters
 
-* `attribute`
-  * example: gene_high_level_expression_refex
+* `attribute` (Req.)
+  * example: protein_molecular_function_uniprot
 * `node`
-  * example: v32_40
+  * example: GO_0008150
 
 ## `primaryIds`
 ```javascript
@@ -37,7 +37,8 @@ async ({attribute, node})=>{
   const togoDxAttributes = "https://raw.githubusercontent.com/togodx/togodx-config-human/develop/config/attributes.json";
   let body = "";
   if (node) body = "categoryIds=" + node; // #### 入れ子 SPARQList. 要パラメータ名の整理
-  return fetchReq(attribute, options, body).map(d => {
+  let res = await fetchReq(attribute, options, body)
+  return res.map(d => {
     let leaf = true;
     if (d.hasChild) leaf = false;
     return {
