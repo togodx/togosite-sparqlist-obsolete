@@ -58,7 +58,7 @@ WHERE {
   if (data.tissue_labels?.value) {
     objs[0].tissue = makeList(data.tissue_labels.value.split(", ").sort());
   }
-  return objs[0];
+  return [objs[0]];
 
   function makeList(strs) {
     return "<ul><li>" + strs.join("</li><li>") + "</li></ul>";
