@@ -2,7 +2,7 @@
 
 ## Endpoint
 
-https://integbio.jp/rdf/sparql
+https://integbio.jp/togosite/sparql
 
 ## Parameters
 * `id`
