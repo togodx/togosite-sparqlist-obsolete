@@ -19,3 +19,28 @@ pg_ns:assembly_version ?version ;
 pg_ns:assembly_level  ?level .
 }
 ```
+## `return`
+```javascript
+({ main}) => {
+  
+ let tree = [
+    {
+      id: "root",
+      label: "root node",
+      root: true
+    }
+  ];
+  
+  let edge = {};
+  main.results.bindings.map(d => {
+    tree.push({
+      id: d.genome_id.value,
+      label: d.genome_id.value,
+      leaf: true,
+      parent: d.version.value
+    })
+      });
+  
+  
+  
+  ```
