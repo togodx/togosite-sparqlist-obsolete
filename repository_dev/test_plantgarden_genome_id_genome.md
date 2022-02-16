@@ -8,16 +8,27 @@ https://mb2.ddbj.nig.ac.jp/sparql
 ```sparql
 PREFIX pg_ns: <https://plantgardden.jp/ns/>
 PREFIX dcterms: <http://purl.org/dc/terms/>
-select distinct ?genome_id  ?version   ?subspecies_id  ?species_id  ?level 
+select distinct ?genome_id  ?version   ?subspecies_id  ?subspecies_label ?species_id  ?species_name  ?level 
 from <http://plantgarden.jp/resource/genome>
+from <http://plantgarden.jp/resource/subspecies>
+from <http://plantgarden.jp/resource/species>
 where {
 ?s a pg_ns:Genome ;
+pg_ns:subspecies ?subspecies ;
 pg_ns:pgid ?subspecies_id ;
+pg_ns:species ?species ;
 pg_ns:species_id ?species_id ;
 dcterms:identifier ?genome_id ;
 pg_ns:assembly_version ?version ;
 pg_ns:assembly_level  ?level .
+?subspecies a pg_ns:Subspecies ;
+rdfs:label ?subspecies_label .
+?species a pg_ns:Species ;
+pg_ns:scientific_name ?species_name .
+FILTER (lang(?subspecies_label) = "en" )
 }
+
+limit 100
 ```
 ## `return`
 ```javascript
@@ -49,4 +60,30 @@ pg_ns:assembly_level  ?level .
     })
         });
   
+  main.results.bindings.map(d => {
+  tree.push({
+      id: d.subspecies_id.value,
+      label: d.subspecies_label.value,
+      parent: d.species_id.value
+    })
+        });
+  
+    main.results.bindings.map(d => {
+  tree.push({
+      id: d.species_id.value,
+      label: d.species_name.value,
+      parent: d.level.value
+    })
+        });
+  
+ main.results.bindings.map(d => {
+  tree.push({
+      id: d.level.value,
+      label: d.level.value,
+      parent: "root"
+    })
+  }) ;
+  
+  return tree;
+}
   ```
