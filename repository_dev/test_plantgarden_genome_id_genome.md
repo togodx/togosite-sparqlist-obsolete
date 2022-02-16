@@ -40,7 +40,13 @@ pg_ns:assembly_level  ?level .
       parent: d.version.value
     })
       });
-  
-  
+ 
+  main.results.bindings.map(d => {
+  tree.push({
+      id: d.version.value,
+      label: d.version.value,
+      parent: d.subspecies_id.value
+    })
+        });
   
   ```
