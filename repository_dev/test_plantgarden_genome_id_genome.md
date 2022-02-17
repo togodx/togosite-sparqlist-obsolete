@@ -84,6 +84,10 @@ limit 100
     })
   }) ;
   
-  return tree;
+  const uniqueTree = tree.filter(
+  (element, index, self) => self.findIndex((e) => e.id === element.id) === index
+);
+  
+  return uniqueTree;
 }
   ```
