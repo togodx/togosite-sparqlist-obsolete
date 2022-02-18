@@ -1,4 +1,4 @@
-# PlantGarden taxonomy-genome-chr-marker (信定)
+# PlantGarden taxonomy-genome-chr-marker2 (信定)
 - 生物種ごとのmarkerの分類 
 - 生物種ーゲノムーchromosomeーmarker　で treeになっている
 
@@ -54,23 +54,24 @@ limit 20000
     })
       });
 
+  let tree2 = [];
+  
   main.results.bindings.map(d => {
-    tree.push({
+    tree2.push({
       id: d.chr_id.value,
       label: d.chr.value,
       parent: d.genome_id.value
     })
   }) ;
  main.results.bindings.map(d => {
-    tree.push({
+    tree2.push({
       id: d.genome_id.value,
       label: d.genome_label.value,
       parent: d.species_taxid.value
     })
   }) ;
-  
  main.results.bindings.map(d => {
-    tree.push({
+    tree2.push({
       id: d.species_taxid.value,
       label: d.species_label.value,
       parent: "root"
@@ -78,7 +79,7 @@ limit 20000
   }) ;
 
  const uniqueTree = Array.from(
-  new Map(tree.map((tree2) => [tree2.id, tree2])).values()
+  new Map(tree2.map((tree3) => [tree3.id, tree3])).values()
 )
   
   return uniqueTree;
