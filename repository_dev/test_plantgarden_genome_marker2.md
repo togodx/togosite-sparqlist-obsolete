@@ -12,6 +12,8 @@ prefix pg_ns: <https://plantgardden.jp/ns/>
 prefix dcterms: <http://purl.org/dc/terms/>
 prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 select distinct ?marker_id ?marker_label ?chr_id  
+from <http://plantgarden.jp/resource/pg_marker>
+from <http://plantgarden.jp/resource/genome>
 where {
 ?s a  pg_ns:Marker ;
 dcterms:identifier ?marker_id ;
@@ -22,7 +24,7 @@ pg_ns:chr ?chr  .
 dcterms:identifier ?genome_id .
 BIND ( CONCAT(?genome_id, ".", ?chr) as ?chr_id)
 } 
-limit 30000
+limit 50000
 ```
 ## `main2`
 
@@ -31,6 +33,9 @@ prefix pg_ns: <https://plantgardden.jp/ns/>
 prefix dcterms: <http://purl.org/dc/terms/>
 prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 select distinct ?chr_id   ?chr   ?genome_id   ?genome_label   ?species_taxid   ?species_label
+from <http://plantgarden.jp/resource/pg_marker>
+from <http://plantgarden.jp/resource/genome>
+from <http://plantgarden.jp/resource/species>
 where {
 ?s a  pg_ns:Marker ;
 pg_ns:genome ?genome ;
@@ -46,7 +51,7 @@ FILTER contains (str(?ncbi ), "http://purl.obolibrary.org/obo/NCBITaxon").
 BIND (IRI(REPLACE(STR(?ncbi), "http://purl.obolibrary.org/obo/NCBITaxon_","")) AS ?species_taxid)
 BIND ( CONCAT(?genome_id, ".", ?chr) as ?chr_id)
 } 
-limit 30000
+limit 50000
 ```
 
 ## `return`
@@ -102,7 +107,9 @@ limit 30000
  const uniqueTree2 = Array.from(
   new Map(tree2.map((tree4) => [tree4.id, tree4])).values()
 )
+ 
+ var uniqueTree = uniqueTree1.concat(uniqueTree2) ;
   
-  return uniqueTree1;
+  return uniqueTree;
 }
 ```
