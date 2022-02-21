@@ -6,16 +6,33 @@
 https://mb2.ddbj.nig.ac.jp/sparql
 
 ## `main`
-- chr と marker のアノテーション関係
+
 ```sparql
 prefix pg_ns: <https://plantgardden.jp/ns/>
 prefix dcterms: <http://purl.org/dc/terms/>
 prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-select distinct ?marker_id ?marker_label ?chr_id   ?chr   ?genome_id   ?genome_label   ?species_taxid   ?species_label
+select distinct ?marker_id ?marker_label ?chr_id  
 where {
 ?s a  pg_ns:Marker ;
 dcterms:identifier ?marker_id ;
 rdfs:label ?marker_label ;
+pg_ns:genome ?genome ;
+pg_ns:chr ?chr  .
+?genome a  pg_ns:Genome ;
+dcterms:identifier ?genome_id .
+BIND ( CONCAT(?genome_id, ".", ?chr) as ?chr_id)
+} 
+limit 30000
+```
+## `main2`
+
+```sparql
+prefix pg_ns: <https://plantgardden.jp/ns/>
+prefix dcterms: <http://purl.org/dc/terms/>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+select distinct ?chr_id   ?chr   ?genome_id   ?genome_label   ?species_taxid   ?species_label
+where {
+?s a  pg_ns:Marker ;
 pg_ns:genome ?genome ;
 pg_ns:chr ?chr ;
  pg_ns:species   ?species  .
@@ -29,12 +46,12 @@ FILTER contains (str(?ncbi ), "http://purl.obolibrary.org/obo/NCBITaxon").
 BIND (IRI(REPLACE(STR(?ncbi), "http://purl.obolibrary.org/obo/NCBITaxon_","")) AS ?species_taxid)
 BIND ( CONCAT(?genome_id, ".", ?chr) as ?chr_id)
 } 
-limit 20000
+limit 30000
 ```
 
 ## `return`
 ```javascript
-({main}) => {
+({main, main2}) => {
   
  let tree = [
     {
@@ -56,21 +73,21 @@ limit 20000
 
   let tree2 = [];
   
-  main.results.bindings.map(d => {
+  main2.results.bindings.map(d => {
     tree2.push({
       id: d.chr_id.value,
       label: d.chr.value,
       parent: d.genome_id.value
     })
   }) ;
- main.results.bindings.map(d => {
+ main2.results.bindings.map(d => {
     tree2.push({
       id: d.genome_id.value,
       label: d.genome_label.value,
       parent: d.species_taxid.value
     })
   }) ;
- main.results.bindings.map(d => {
+ main2.results.bindings.map(d => {
     tree2.push({
       id: d.species_taxid.value,
       label: d.species_label.value,
@@ -78,10 +95,14 @@ limit 20000
     })
   }) ;
 
- const uniqueTree = Array.from(
-  new Map(tree2.map((tree3) => [tree3.id, tree3])).values()
+ const uniqueTree1 = Array.from(
+  new Map(tree.map((tree3) => [tree3.id, tree3])).values()
+)
+ 
+ const uniqueTree2 = Array.from(
+  new Map(tree2.map((tree4) => [tree4.id, tree4])).values()
 )
   
-  return uniqueTree;
+  return uniqueTree1;
 }
 ```
