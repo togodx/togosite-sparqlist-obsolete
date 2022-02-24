@@ -24,7 +24,7 @@ BIND (strafter(str(?taxonomy), "http://identifiers.org/taxonomy/") AS ?tax_id)
 dc:identifier ?compound_id ;
 rdfs:label ?compound_label .
 }
-limit 20000
+limit 30000
 ```
 
 ## `return`
