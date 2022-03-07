@@ -3,7 +3,7 @@
 - 生物種ーゲノムーchromosomeーmarker　で treeになっている (chromosomeーmarkerの部分は別取り)
 
 ## Endpoint
-https://plantgarden.jp/sparql
+https://mb2.ddbj.nig.ac.jp/sparql
 
 ## `main`
 ```sparql
