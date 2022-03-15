@@ -26,11 +26,6 @@ ont_pubtator:term ?term .
 ```javascript
 ({main}) => {
   
-    // leafをまとめる
-    let pmid　= d.pmid.value ;
-   let term = d.term.value ;
-  let terms = term + '(pubmed_id: ' + pmid + ')' ;
-  
  let tree = [
     {
       id: "root",
@@ -41,6 +36,11 @@ ont_pubtator:term ?term .
   
   let edge = {};
  main.results.bindings.map(d => {
+   
+    let pmid　= d.pmid.value;
+    let term = d.term.value;
+    let terms =  term + '(pubmed_id:' + pmid + ')' ;
+   
     tree.push({
       id: d.label.value,
       label: d.label.value,
@@ -51,7 +51,7 @@ ont_pubtator:term ?term .
   
   tree.push({   
         id: d.pubtatorid.value,
-        label: d.terms.value,
+        label: terms,
         leaf: false,
         parent: d.taxid.value
       })
