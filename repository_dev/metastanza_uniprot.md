@@ -4,18 +4,6 @@
 * `uniprot`
   * default: P06493
   * example: P06493
-  
-## `uniprot_list`
-```javascript
-({ uniprot }) => {
-  uniprot = uniprot.replace(/\s/g, "");
-  if (uniprot) {
-    return uniprot.split(",");
-  } else {
-    return false;
-  }
-};
-```
 
 ## Endpoint
 https://integbio.jp/togosite/sparql
@@ -33,9 +21,7 @@ SELECT DISTINCT ?entry ?id ?mnemonic ?full_name ?short_name ?length ?mass
   (COUNT(DISTINCT ?citation) AS ?citation_number)
 FROM <http://rdf.integbio.jp/dataset/togosite/uniprot>
 WHERE{
-  {{#if uniprot_list}}
-  VALUES ?entry { {{#each uniprot_list}} uniprot:{{this}} {{/each}} }
-  {{/if}}
+  VALUES ?entry { uniprot:{{uniprot}} }
   ?entry a core:Protein ;
          core:mnemonic ?mnemonic ;
          core:recommendedName|core:submittedName ?rname .
@@ -61,87 +47,30 @@ WHERE{
 
 ```
 
-## `go_bp`
+## `go`
 ```sparql
 PREFIX uniprot: <http://purl.uniprot.org/uniprot/>
 PREFIX core: <http://purl.uniprot.org/core/>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX obo: <http://purl.obolibrary.org/obo/>
-SELECT DISTINCT ?entry
-  (GROUP_CONCAT(DISTINCT ?go_bp_l, ",") AS ?biological_process)
+PREFIX oboinowl: <http://www.geneontology.org/formats/oboInOwl#>
+
+SELECT DISTINCT ?entry ?category (GROUP_CONCAT(DISTINCT ?go_label, ",") AS ?go_labels)
 FROM <http://rdf.integbio.jp/dataset/togosite/uniprot>
 FROM <http://rdf.integbio.jp/dataset/togosite/go>
-WHERE{
-  {{#if uniprot_list}}
-  VALUES ?entry { {{#each uniprot_list}} uniprot:{{this}} {{/each}} }
-  {{/if}}
-  OPTIONAL{
+WHERE {
+  VALUES ?entry { uniprot:{{uniprot}} }
+  OPTIONAL {
     GRAPH <http://rdf.integbio.jp/dataset/togosite/uniprot> {
-      ?entry core:classifiedWith ?go_bp .
+      ?entry core:classifiedWith ?go .
     }
     GRAPH <http://rdf.integbio.jp/dataset/togosite/go> {
-      ?go_bp rdfs:subClassOf* obo:GO_0008150 ;
-             rdfs:label ?go_bp_l .
+      ?go oboinowl:hasOBONamespace ?category ;
+          rdfs:label ?go_label .
     }
   }
 }
-
-```
-
-## `go_mf`
-```sparql
-PREFIX uniprot: <http://purl.uniprot.org/uniprot/>
-PREFIX core: <http://purl.uniprot.org/core/>
-PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-PREFIX obo: <http://purl.obolibrary.org/obo/>
-SELECT DISTINCT ?entry
-  (GROUP_CONCAT(DISTINCT ?go_mf_l, ",") AS ?molecular_function)
-FROM <http://rdf.integbio.jp/dataset/togosite/uniprot>
-FROM <http://rdf.integbio.jp/dataset/togosite/go>
-WHERE{
-  {{#if uniprot_list}}
-  VALUES ?entry { {{#each uniprot_list}} uniprot:{{this}} {{/each}} }
-  {{/if}}
-  OPTIONAL{
-    GRAPH <http://rdf.integbio.jp/dataset/togosite/uniprot> {
-      ?entry core:classifiedWith ?go_mf .
-    }
-    GRAPH <http://rdf.integbio.jp/dataset/togosite/go> {
-      ?go_mf rdfs:subClassOf* obo:GO_0003674 ;
-             rdfs:label ?go_mf_l .
-    }
-  }
-}
-```
-
-## `go_cc`
-```sparql
-PREFIX uniprot: <http://purl.uniprot.org/uniprot/>
-PREFIX core: <http://purl.uniprot.org/core/>
-PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-PREFIX obo: <http://purl.obolibrary.org/obo/>
-SELECT DISTINCT ?entry
-  (GROUP_CONCAT(DISTINCT ?go_cc_l, ",") AS ?cellular_component)
-FROM <http://rdf.integbio.jp/dataset/togosite/uniprot>
-FROM <http://rdf.integbio.jp/dataset/togosite/go>
-WHERE{
-  {{#if uniprot_list}}
-  VALUES ?entry { {{#each uniprot_list}} uniprot:{{this}} {{/each}} }
-  {{/if}}
-  OPTIONAL{
-    GRAPH <http://rdf.integbio.jp/dataset/togosite/uniprot> {
-      ?entry core:classifiedWith ?go_cc .
-    }
-    GRAPH <http://rdf.integbio.jp/dataset/togosite/go> {
-      ?go_cc rdfs:subClassOf* obo:GO_0005575 ;
-             rdfs:label ?go_cc_l .
-    }
-  }
-}
-
 ```
 
 ## `tissue`
@@ -154,9 +83,7 @@ SELECT DISTINCT ?entry
 FROM <http://rdf.integbio.jp/dataset/togosite/uniprot/tissues>
 FROM <http://rdf.integbio.jp/dataset/togosite/uniprot>
 WHERE{
-  {{#if uniprot_list}}
-  VALUES ?entry { {{#each uniprot_list}} uniprot:{{this}} {{/each}} }
-  {{/if}}
+  VALUES ?entry { uniprot:{{uniprot}} }
   OPTIONAL {
     ?entry core:isolatedFrom/skos:prefLabel ?tissue .
   }
@@ -167,7 +94,7 @@ WHERE{
 ## `return`
 
 ```javascript
-({ main, go_bp, go_mf, go_cc, tissue }) => {
+({ main, go, tissue }) => {
   let obj = main.results.bindings.map(data => {
     return Object.keys(data).reduce((obj, key) => {
       obj[key] = data[key].value;
@@ -185,12 +112,9 @@ WHERE{
   obj[0]["molecular_function"] = "";
   obj[0]["cellular_component"] = "";
   obj[0]["isolated_tissue"] = "";
-  if (go_bp.results.bindings[0].biological_process.value)
-    obj[0]["biological_process"] = makeList(go_bp.results.bindings[0].biological_process.value.split(/,/));
-  if (go_mf.results.bindings[0].molecular_function.value)
-    obj[0]["molecular_function"] = makeList(go_mf.results.bindings[0].molecular_function.value.split(/,/));
-  if (go_cc.results.bindings[0].cellular_component.value)
-    obj[0]["cellular_component"] = makeList(go_cc.results.bindings[0].cellular_component.value.split(/,/));
+  go.results.bindings.forEach((data) => {
+    obj[0][data.category.value] = makeList(data.go_labels.value.split(/,/));
+  });
   if (tissue.results.bindings[0].isolated_tissue.value)
     obj[0]["isolated_tissue"] = makeList(tissue.results.bindings[0].isolated_tissue.value.split(/,/));
   return obj;
