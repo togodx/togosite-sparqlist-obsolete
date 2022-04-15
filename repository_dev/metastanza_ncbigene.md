@@ -70,10 +70,37 @@ WHERE {
 }
 ```
 
+## `go`
+
+```sparql
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX ncbigene: <http://identifiers.org/ncbigene/>
+PREFIX hop: <http://purl.org/net/orthordf/hOP/ontology#>
+PREFIX oboinowl: <http://www.geneontology.org/formats/oboInOwl#>
+
+SELECT DISTINCT ?go ?go_category ?go_label ?go_id
+WHERE {
+  VALUES ?ncbigene { ncbigene:{{id}} }
+  GRAPH <http://rdf.integbio.jp/dataset/togosite/homo_sapiens_gene_info> {
+    OPTIONAL {
+      ?ncbigene hop:hasGO ?go .
+    }
+  }
+  GRAPH <http://rdf.integbio.jp/dataset/togosite/go> {
+    OPTIONAL {
+      ?go oboinowl:hasOBONamespace ?go_category ;
+          oboinowl:id ?go_id ;
+          rdfs:label ?go_label .
+    }
+  }
+}
+ORDER BY ?go
+```
+
 ## `return`
 
 ```javascript
-({ main, id }) => {
+({ main, id, go }) => {
   let data = main.results.bindings[0];
   let objs = [{
     "NCBI_Gene_ID": data.ncbigene_id.value,
@@ -84,15 +111,28 @@ WHERE {
     "Gene_type": data.type_label.value,
     "Location": data.location.value,
     "Other_names": "",
+    "Biological_process": "",
+    "Cellular_component": "",
+    "Molecular_function": "",
+    "Tissue-specific_high_expression_(RefEx)": "",
+    "Tissue-specific_low_expression_(RefEx)": "",
   }];
 
-  objs[0]["Tissue-specific_high_expression_(RefEx)"] = ""
   if (data.p_tissue_labels?.value)
     objs[0]["Tissue-specific_high_expression_(RefEx)"] += makeList(data.p_tissue_labels.value.split(", "));
-  objs[0]["Tissue-specific_low_expression_(RefEx)"] = ""
   if (data.n_tissue_labels?.value)
     objs[0]["Tissue-specific_low_expression_(RefEx)"] += makeList(data.n_tissue_labels.value.split(", "));
 
+  const go_categories = ["Biological_process", "Cellular_component", "Molecular_function"];
+  go_categories.forEach((category => {
+    let gos = go.results.bindings.filter((x => x.go_category.value==category.toLowerCase()));
+    if (gos.length > 0) {
+      let ids = gos.map((x => x.go_id.value));
+      let urls = gos.map((x => x.go.value));
+      let labels = gos.map((x => x.go_label.value));
+      objs[0][category] = makePairList(ids, labels, urls);
+    }
+  }));
   if (data.other_names?.value) objs[0].Other_names = makeList(data.other_names.value.split("__"));
   return objs;
 
