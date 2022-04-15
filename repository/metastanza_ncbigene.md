@@ -31,10 +31,8 @@ WHERE {
               dct:identifier ?ncbigene_id ;
               hop:typeOfGene ?type_label ;
               nuc:chromosome ?chromosome ;
-              nuc:map ?location .
-    OPTIONAL {
-      ?ncbigene nuc:standard_name ?gene_symbol .
-    }
+              nuc:map ?location ;
+              rdfs:label ?gene_symbol .
     OPTIONAL {
       ?ncbigene nuc:gene_synonym ?synonym .
     }
