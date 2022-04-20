@@ -125,12 +125,14 @@ ORDER BY ?go
 
   const go_categories = ["Biological_process", "Cellular_component", "Molecular_function"];
   go_categories.forEach((category => {
-    let gos = go.results.bindings.filter((x => x.go_category.value==category.toLowerCase()));
-    if (gos.length > 0) {
-      let ids = gos.map((x => x.go_id.value));
-      let urls = gos.map((x => x.go.value));
-      let labels = gos.map((x => x.go_label.value));
-      objs[0][category] = makePairList(ids, labels, urls);
+    if(go.results.bindings.go_category?.value) {
+      let gos = go.results.bindings.filter((x => x.go_category.value==category.toLowerCase()));
+      if (gos.length > 0) {
+        let ids = gos.map((x => x.go_id.value));
+        let urls = gos.map((x => x.go.value));
+        let labels = gos.map((x => x.go_label.value));
+        objs[0][category] = makePairList(ids, labels, urls);
+      }
     }
   }));
   if (data.other_names?.value) objs[0].Other_names = makeList(data.other_names.value.split("__"));
