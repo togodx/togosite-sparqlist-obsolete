@@ -25,19 +25,36 @@ limit 100
 
 ## `return`
 ```javascript
-({main})=>{
-  const idPrefix = "http://purl.uniprot.org/uniprot/";
+({main}) => {
   
-  return main.results.bindings.map(d => {
-    const year = d.year.value ;
-    const year_id = (year) + "-" + ((year + 1) );
-    return {
+  let tree = [
+    {
+      id: "root",
+      label: "root node",
+      root: true
+    }
+  ];
+
+  let edge = {};
+  main.results.bindings.map(d => {
+    tree.push({
       id: d.GCFnumber.value,
       label: d.asm_name.value,
-      value: Number(d.year.value),
-      binId: year + 1,
-      binLabel: year_id
+      leaf: true,
+      parent: d.year.value
+    })
+  // root との親子関係を追加
+    if (!edge[d.year.value]) {
+      edge[d.year.value] = true;
+      tree.push({   
+        id: d.year.value,
+        label: d.year.value,
+        leaf: false,
+        parent: "root"
+      })
     }
-  })
+  });
+  
+  return tree;
 }
 ```
