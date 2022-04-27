@@ -170,7 +170,7 @@ http://ep6.dbcls.jp/togoid/sparql
 ## Query `result`
 
 ```sparql
-PREFIX chebi: <http://identifiers.org/chebi/CHEBI:>
+PREFIX chebi: <http://purl.obolibrary.org/obo/CHEBI_>
 PREFIX chembl_compound: <http://identifiers.org/chembl.compound/>
 PREFIX chembl_target: <http://identifiers.org/chembl.target/>
 PREFIX ensembl_gene: <http://identifiers.org/ensembl/>
