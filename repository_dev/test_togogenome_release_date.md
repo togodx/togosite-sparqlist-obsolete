@@ -8,7 +8,7 @@ http://togogenome.org/sparql
 ```sparql
 PREFIX asm: <http://ddbj.nig.ac.jp/ontologies/assembly/>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-SELECT DISTINCT  ?GCFnumber ?asm_name  ?date ?year
+SELECT DISTINCT  ?GCFnumber ?asm_name  ?year
 FROM <http://togogenome.org/graph/assembly_report>
 WHERE
 {
@@ -20,7 +20,7 @@ WHERE
   BIND (strbefore(str(?date), "/") AS ?year)
 }
 ORDER BY DESC (?year)
-limit 100
+
 ```
 
 ## `return`
