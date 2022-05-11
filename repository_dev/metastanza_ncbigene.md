@@ -125,7 +125,7 @@ ORDER BY ?go
 
   const go_categories = ["Biological_process", "Cellular_component", "Molecular_function"];
   go_categories.forEach((category => {
-    if(go.results.bindings.go_category?.value) {
+    if(go.results.bindings[0].go_category?.value) {
       let gos = go.results.bindings.filter((x => x.go_category.value==category.toLowerCase()));
       if (gos.length > 0) {
         let ids = gos.map((x => x.go_id.value));
