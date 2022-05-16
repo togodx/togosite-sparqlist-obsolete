@@ -165,7 +165,7 @@
 
 ## Endpoint
 
-http://ep6.dbcls.jp/togoid/sparql
+http://ep.dbcls.jp/togoid/sparql
 
 ## Query `result`
 
