@@ -44,6 +44,39 @@ WHERE {
   }
 limit 10
 ```
+## `return`
+```javascript
+({genome_size, organism}) => {
+  
+  let tree = [
+    {
+      id: "root",
+      label: "root node",
+      root: true
+    }
+  ];
 
+  let edge = {};
+  genome_size.results.bindings.map(d => {
+    tree.push({
+      id: d.tax_id.value,
+      label: d.genome_size.value,
+      leaf: true,
+      parent: d.tax_id.value
+    });
+    });
+  let edge2 = {};
+  organism.results.bindings.map(d => {
+    tree.push({
+      id: d.tax_id.value,
+      label: d.label.value,
+      leaf: false,
+      parent: "root"
+    });
+    });
+  
+  return tree;
+}
+```
 
 
