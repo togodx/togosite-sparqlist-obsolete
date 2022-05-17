@@ -10,7 +10,6 @@ PREFIX stats: <http://togogenome.org/stats/>
 SELECT distinct ?tax ?tax_id ?genome_size 
 FROM <http://togogenome.org/graph/stats>
 where{
- #values ?genome_size { 439609253}
   ?tax stats:sequence_length ?genome_size .
   FILTER contains (str(?tax), "taxonomy")
   BIND (strafter(str(?tax), "http://identifiers.org/taxonomy/") AS ?tax_id)
@@ -25,8 +24,12 @@ let tree = [] ;
 genome_size.results.bindings.map(d => {
   tree.push ( d.tax.value ) ;
 }) ;
-  return tree
-};
+  return tree ;
+  
+ tree.forEach(function(element){
+  console.log(element);
+});
+}
 ```
 
 ## `organism`
