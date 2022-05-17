@@ -17,4 +17,13 @@ where{
 }
 limit 10
 ```
+## `query`
+```javascript
+({genome_size}) => {
+genome_size.results.bindings.map(d => (
+      d.tax_id.value 
+    ) );
+}
+
+```
 
