@@ -20,18 +20,37 @@ limit 10
 ## `query`
 ```javascript
 ({genome_size}) => {
-  
 let tree = [] ;
 genome_size.results.bindings.map(d => {
   tree.push ( d.tax_id.value ) ;
 }) ;
-
- (tree) =>  { 
-   tree = tree.replace(/,/g," ")
-  if (tree.match(/[^\s]/)) return tree.split(/\s+/);
-  return false;
-  };
+  return tree
+};
+```
+## `queryArray`
+```javascript
+({query}) => {
+   query = query.replace(/,/g," ")
+  if (query.match(/[^\s]/)) return query.split(/\s+/);
+ return false;
 }
 
 ```
+
+## `organism`
+```sparql
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX dcterm: <http://purl.org/dc/terms/>
+SELECT distinct ?tax ?tax_id  ?label
+FROM <http://togogenome.org/graph/taxonomy>
+WHERE {
+  values ?tax { <http://identifiers.org/taxonomy/{{#each queryArray}}{{this}}{{/each}}> }
+?tax a <http://ddbj.nig.ac.jp/ontologies/taxonomy/Taxon> ; 
+  rdfs:label ?label ;
+  dcterm:identifier ?tax_id .
+  }
+limit 10
+```
+
+
 
