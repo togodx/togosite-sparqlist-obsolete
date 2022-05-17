@@ -24,11 +24,7 @@ let tree = [] ;
 genome_size.results.bindings.map(d => {
   tree.push ( d.tax.value ) ;
 }) ;
-  return tree ;
-  
- tree.forEach(function(element){
-  console.log(element);
-});
+return tree ;
 }
 ```
 
@@ -39,7 +35,9 @@ PREFIX dcterm: <http://purl.org/dc/terms/>
 SELECT distinct ?tax ?tax_id  ?label
 FROM <http://togogenome.org/graph/taxonomy>
 WHERE {
-  values ?tax {<{{#each query}}{{this}}{{/each}}>}
+
+  values ?tax { {{#each query}} <{{this}}> {{/each}} }
+
 ?tax a <http://ddbj.nig.ac.jp/ontologies/taxonomy/Taxon> ; 
   rdfs:label ?label ;
   dcterm:identifier ?tax_id .
