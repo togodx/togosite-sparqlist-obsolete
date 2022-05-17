@@ -20,9 +20,17 @@ limit 10
 ## `query`
 ```javascript
 ({genome_size}) => {
-genome_size.results.bindings.map(d => (
-      d.tax_id.value 
-    ) );
+  
+let tree = [] ;
+genome_size.results.bindings.map(d => {
+  tree.push ( d.tax_id.value ) ;
+}) ;
+
+ (tree) =>  { 
+   tree = tree.replace(/,/g," ")
+  if (tree.match(/[^\s]/)) return tree.split(/\s+/);
+  return false;
+  };
 }
 
 ```
