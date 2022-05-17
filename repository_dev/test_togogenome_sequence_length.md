@@ -20,7 +20,7 @@ limit 10
 ## `query`
 ```javascript
 ({genome_size}) => {
-let tree = [] ;
+let tree = {} ;
 genome_size.results.bindings.map(d => {
   tree.push ( d.tax_id.value ) ;
 }) ;
@@ -30,11 +30,10 @@ genome_size.results.bindings.map(d => {
 ## `queryArray`
 ```javascript
 ({query}) => {
-   query = query.replace(/,/g," ")
+  query = query.replace(/,/g," ")
   if (query.match(/[^\s]/)) return query.split(/\s+/);
  return false;
 }
-
 ```
 
 ## `organism`
@@ -44,7 +43,7 @@ PREFIX dcterm: <http://purl.org/dc/terms/>
 SELECT distinct ?tax ?tax_id  ?label
 FROM <http://togogenome.org/graph/taxonomy>
 WHERE {
-  values ?tax { <http://identifiers.org/taxonomy/{{#each queryArray}}{{this}}{{/each}}> }
+  values ?tax { <http://identifiers.org/taxonomy/{{#each query}}{{this}}{{/each}}> }
 ?tax a <http://ddbj.nig.ac.jp/ontologies/taxonomy/Taxon> ; 
   rdfs:label ?label ;
   dcterm:identifier ?tax_id .
