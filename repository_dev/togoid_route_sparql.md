@@ -43,9 +43,9 @@
         protein: [["hgnc", "uniprot"]],
         structure: [["hgnc", "uniprot", "pdb"]],
         compound: [["hgnc", "uniprot", "reactome_reaction", "chebi"], ["hgnc", "uniprot", "chembl_target", "chembl_compound"]],
-        nando: [["medgen", "mondo"]],
-        hp: [["medgen"]],
-        disease: [["medgen"]]
+        nando: [["clinvar", "medgen", "mondo"]],
+        hp: [["clinvar", "medgen"]],
+        disease: [["clinvar", "medgen"]]
       },
       gene: {
         gene: [[]],
@@ -190,6 +190,7 @@ PREFIX reactome_reaction: <http://identifiers.org/reactome/>
 PREFIX togovar: <http://togovar.biosciencedbc.jp/variation/>
 PREFIX uniprot: <http://purl.uniprot.org/uniprot/>
 PREFIX glytoucan: <http://identifiers.org/glytoucan/>
+PREFIX clinvar: <http://identifiers.org/clinvar/>
 
 SELECT DISTINCT ?source_id ?target_id #?source_uri ?target_uri
 WHERE {
