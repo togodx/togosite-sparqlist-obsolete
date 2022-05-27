@@ -178,14 +178,14 @@ PREFIX ensembl_transcript: <http://identifiers.org/ensembl/>
 PREFIX hgnc: <http://identifiers.org/hgnc/>
 PREFIX hp: <http://purl.obolibrary.org/obo/HP_>
 PREFIX medgen: <http://identifiers.org/medgen/>
-PREFIX mesh: <http://identifiers.org/mesh/>
+PREFIX mesh: <http://id.nlm.nih.gov/mesh/>
 PREFIX mondo: <http://purl.obolibrary.org/obo/MONDO_>
 PREFIX nando: <http://nanbyodata.jp/ontology/NANDO_>
 PREFIX ncbigene: <http://identifiers.org/ncbigene/>
 PREFIX omim_phenotype: <http://identifiers.org/mim/>
 PREFIX orphanet: <http://identifiers.org/orphanet.ordo/>
 PREFIX pdb: <http://rdf.wwpdb.org/pdb/>
-PREFIX pubchem_compound: <http://identifiers.org/pubchem.compound/>
+PREFIX pubchem_compound: <http://rdf.ncbi.nlm.nih.gov/pubchem/compound/CID>
 PREFIX reactome_reaction: <http://identifiers.org/reactome/>
 PREFIX togovar: <http://togovar.biosciencedbc.jp/variation/>
 PREFIX uniprot: <http://purl.uniprot.org/uniprot/>
