@@ -13,6 +13,7 @@ https://integbio.jp/togosite/sparql
 ```sparql
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX obo: <http://purl.obolibrary.org/obo/>
+PREFIX so: <http://purl.obolibrary.org/obo/so#>
 PREFIX idt_ensg: <http://identifiers.org/ensembl/>
 PREFIX dc: <http://purl.org/dc/elements/1.1/>
 PREFIX dct: <http://purl.org/dc/terms/>
@@ -31,14 +32,16 @@ WHERE {
   VALUES ?idt_ensg { idt_ensg:{{id}} }
   GRAPH <http://rdf.integbio.jp/dataset/togosite/ensembl> {
     ?ensg obo:RO_0002162 taxon:9606 ;
-             dc:identifier ?ensg_id ;
-             rdfs:label ?gene_symbol ;
-             dc:description ?desc ;
-             faldo:location ?loc ;
-             a ?type .
+          dct:identifier ?ensg_id ;
+          rdfs:label ?gene_symbol ;
+          #dct:description ?desc ;
+          #faldo:location ?loc ;
+          so:part_of ?chr ;
+          a ?type .
+    #?loc rdfs:label ?location .
     FILTER(STRSTARTS(STR(?type), "http://rdf.ebi.ac.uk/terms/ensembl/"))
     BIND(REPLACE(STRAFTER(STR(?type), "http://rdf.ebi.ac.uk/terms/ensembl/"), "_", " ") as ?type_label)
-    ?loc rdfs:label ?location .
+    BIND(STRBEFORE(STRAFTER(STR(?chr), "http://identifiers.org/hco/"), "#") as ?location)
   }
 
   OPTIONAL {
@@ -126,7 +129,7 @@ WHERE {
     "Ensembl ID": data.ensg_id.value,
     "Ensembl URL": data.idt_ensg.value,
     "Gene symbol": data.gene_symbol.value,
-    "Description": data.desc.value,
+    "Description": (data.desc?.value) ? data.desc.value : "",
     "Gene type": data.type_label.value,
     "Location": data.location.value,
     "Tissue specificity (GTEx)": ts_gtex,
