@@ -136,9 +136,9 @@ WHERE {
   }
 
   let location = "chr" + data.location.value + ":" + data.begin.value + "-" + data.end.value;
-  if (data.strand.value = "http://biohackathon.org/resource/faldo#ForwardStrandPosition") {
+  if (data.strand.value == "http://biohackathon.org/resource/faldo#ForwardStrandPosition") {
     location = location + " forward strand";
-  } else if (data.strand.value = "http://biohackathon.org/resource/faldo#ReverseStrandPosition") {
+  } else if (data.strand.value == "http://biohackathon.org/resource/faldo#ReverseStrandPosition") {
     location = location + " reverse strand";
   }
   let objs = [{
