@@ -24,18 +24,28 @@ PREFIX schema: <http://schema.org/>
 PREFIX ensg: <http://rdf.ebi.ac.uk/resource/ensembl/>
 
 SELECT DISTINCT ?ensg_id ?idt_ensg ?gene_symbol ?desc ?type_label ?location ?type_gtex ?type_hpa_cell ?type_hpa_tissue
+  ?begin ?end ?strand
   (GROUP_CONCAT(DISTINCT ?gtex_tissue_label; separator=", ") AS ?gtex_tissue_labels)
   (GROUP_CONCAT(DISTINCT ?hpa_tissue_label; separator=", ") AS ?hpa_tissue_labels)
   (GROUP_CONCAT(DISTINCT ?hpa_cell_label; separator=", ") AS ?hpa_cell_labels)
 WHERE {
   VALUES ?ensg { ensg:{{id}} }
   VALUES ?idt_ensg { idt_ensg:{{id}} }
+  VALUES ?strand { faldo:ReverseStrandPosition faldo:ForwardStrandPosition }
   GRAPH <http://rdf.integbio.jp/dataset/togosite/ensembl> {
     ?ensg obo:RO_0002162 taxon:9606 ;
           dct:identifier ?ensg_id ;
           rdfs:label ?gene_symbol ;
           #dct:description ?desc ;
-          #faldo:location ?loc ;
+          faldo:location [
+            faldo:begin [
+              a ?strand ;
+              faldo:position ?begin
+            ] ;
+            faldo:end [
+              faldo:position ?end
+            ]
+          ] ;
           so:part_of ?chr ;
           a ?type .
     #?loc rdfs:label ?location .
@@ -125,13 +135,19 @@ WHERE {
     cs_hpa = "<ul><li>" + cs_hpa.split(", ").join("</li><li>") + "</li></ul>";
   }
 
+  let location = "chr" + data.location.value + ":" + data.begin.value + "-" + data.end.value;
+  if (data.strand.value == "http://biohackathon.org/resource/faldo#ForwardStrandPosition") {
+    location = location + " forward strand";
+  } else if (data.strand.value == "http://biohackathon.org/resource/faldo#ReverseStrandPosition") {
+    location = location + " reverse strand";
+  }
   let objs = [{
     "Ensembl ID": data.ensg_id.value,
     "Ensembl URL": data.idt_ensg.value,
     "Gene symbol": data.gene_symbol.value,
     "Description": (data.desc?.value) ? data.desc.value : "",
     "Gene type": data.type_label.value,
-    "Location": data.location.value,
+    "Location": location,
     "Tissue specificity (GTEx)": ts_gtex,
     "Tissue specificity (HPA)": ts_hpa,
     "Cell specificity (HPA)": cs_hpa,
