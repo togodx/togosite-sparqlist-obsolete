@@ -71,7 +71,7 @@
       },
       compound: {
         compound: [[]],
-        nando: [["chembl_compound", "mesh", "mondo", "medgen"]],
+        nando: [["chembl_compound", "mesh", "mondo"]],
         hp: [["chembl_compound", "mesh", "mondo", "medgen"]],
         disease: [["chembl_compound", "mesh", "mondo"]],
       },
