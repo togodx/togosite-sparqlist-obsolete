@@ -113,7 +113,9 @@ WHERE{
   obj[0]["cellular_component"] = "";
   obj[0]["isolated_tissue"] = "";
   go.results.bindings.forEach((data) => {
-    obj[0][data.category.value] = makeList(data.go_labels.value.split(/,/));
+    if (data.category) {
+      obj[0][data.category.value] = makeList(data.go_labels.value.split(/,/));
+    }
   });
   if (tissue.results.bindings[0].isolated_tissue.value)
     obj[0]["isolated_tissue"] = makeList(tissue.results.bindings[0].isolated_tissue.value.split(/,/));
