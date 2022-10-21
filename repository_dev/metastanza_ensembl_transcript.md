@@ -30,7 +30,7 @@ PREFIX dct: <http://purl.org/dc/terms/>
 
 SELECT DISTINCT ?enst_id ?label ?chr_num ?type_name
   (GROUP_CONCAT(DISTINCT ?uniprot_id; separator=",") AS ?uniprot_ids) (COUNT(DISTINCT ?exon) AS ?exon_count)
-  ?begin ?end ?strand
+  ?begin ?end
 FROM <http://rdf.integbio.jp/dataset/togosite/ensembl>
 WHERE
 {
@@ -46,17 +46,16 @@ WHERE
         a ?type ;
         rdfs:label ?label ;
         dct:identifier ?enst_id ;
-        faldo:location [
-          faldo:begin [
-            a ?strand ;
-            faldo:position ?begin
-          ] ;
-          faldo:end [
-            faldo:position ?end
-          ]
-        ] ;
-        #faldo:location/rdfs:label ?location ;
         so:has_part ?exon .
+  ?exon faldo:location [
+    faldo:begin [
+      faldo:position ?begin
+    ] ;
+    faldo:end [
+      faldo:position ?end
+    ]
+  ] .
+
   OPTIONAL {
     ?enst rdfs:seeAlso ?uniprot .
     FILTER(CONTAINS(STR(?uniprot), "http://purl.uniprot.org/uniprot/"))
@@ -73,20 +72,27 @@ ORDER BY ?enst_id
 
 ```javascript
 ({ main }) => {
-  let objs = [];
+  let obj = {};
+  let ids = new Set();
   main.results.bindings.forEach((elem) => {
-    let length = elem.begin.value - elem.end.value + 1;
-    objs.push({
-      enst_id: elem.enst_id.value,
-      enst_url: "http://identifiers.org/ensembl/" + elem.enst_id.value,
-      uniprot_id: elem.uniprot_ids.value.split(",").map((elem)=>("<a href=\"http://identifiers.org/uniprot/"+elem+"\">"+elem+"</a>")).join(", "),
-      //uniprot_url: "http://identifiers.org/uniprot/" + elem.uniprot_id?.value,
-      type: elem.type_name.value.replace(/_/g, " "),
-      label:  elem.label.value,
-      length: length,
-      exon_count: elem.exon_count.value
-    });
+    let length = Math.abs(elem.begin.value - elem.end.value) - 1;
+    let enst_id = elem.enst_id.value;
+    if (!ids.has(enst_id)) {
+      obj.enst_id = {
+        enst_id: enst_id,
+        enst_url: "http://identifiers.org/ensembl/" + elem.enst_id.value,
+        uniprot_id: elem.uniprot_ids.value.split(",").map((elem)=>("<a href=\"http://identifiers.org/uniprot/"+elem+"\">"+elem+"</a>")).join(", "),
+        //uniprot_url: "http://identifiers.org/uniprot/" + elem.uniprot_id?.value,
+        type: elem.type_name.value.replace(/_/g, " "),
+        label:  elem.label.value,
+        length: length,
+        exon_count: elem.exon_count.value
+      };
+      ids.add(enst_id);
+    } else {
+      obj.enst_id.length += length;
+    }
   });
-  return objs;
+  return Object.values(obj);
 }
 ```
