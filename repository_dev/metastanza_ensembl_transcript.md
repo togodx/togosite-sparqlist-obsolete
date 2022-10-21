@@ -10,9 +10,8 @@ https://integbio.jp/togosite/sparql
 
 ## Parameters
 * `id`
-  * default: ENST00000302586
   * example: ENST00000302586
-* `as_ensg` (optional)
+* `is_ensg` (optional)
   * example: 1
 
 ## `main`
@@ -35,7 +34,7 @@ SELECT DISTINCT ?enst_id ?label ?chr_num ?type_name
 FROM <http://rdf.integbio.jp/dataset/togosite/ensembl>
 WHERE
 {
-  {{#if as_ensg}}
+  {{#if is_ensg}}
     VALUES ?ensg { ensg:{{id}} }
   {{else}}
     VALUES ?input_enst { enst:{{id}} }
@@ -66,7 +65,8 @@ WHERE
   FILTER REGEX(?type, "^http://rdf")
   BIND(REPLACE(STR(?type), "http://rdf.ebi.ac.uk/terms/ensembl/", "") AS ?type_name)
   BIND(STRBEFORE(STRAFTER(STR(?chr), "http://identifiers.org/hco/"), "#") as ?chr_num)
-} ORDER BY ?enst_id
+}
+ORDER BY ?enst_id
 ```
 
 ## `return`
@@ -75,12 +75,7 @@ WHERE
 ({ main }) => {
   let objs = [];
   main.results.bindings.forEach((elem) => {
-    let location = "chr" + elem.chr_num.value + ":" + elem.begin.value + "-" + elem.end.value;
-    if (elem.strand.value == "http://biohackathon.org/resource/faldo#ForwardStrandPosition") {
-      location = location + " forward strand";
-    } else if (elem.strand.value == "http://biohackathon.org/resource/faldo#ReverseStrandPosition") {
-      location = location + " reverse strand";
-    }
+    let length = elem.begin.value - elem.end.value + 1;
     objs.push({
       enst_id: elem.enst_id.value,
       enst_url: "http://identifiers.org/ensembl/" + elem.enst_id.value,
@@ -88,7 +83,7 @@ WHERE
       //uniprot_url: "http://identifiers.org/uniprot/" + elem.uniprot_id?.value,
       type: elem.type_name.value.replace(/_/g, " "),
       label:  elem.label.value,
-      location: location,
+      length: length,
       exon_count: elem.exon_count.value
     });
   });

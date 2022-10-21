@@ -5,9 +5,8 @@ https://integbio.jp/togosite/sparql
 ## Parameters
 
 * `id`
-  * default: ENSG00000150773
   * example: ENSG00000150773, ENST00000280350
-* `as_enst` (optional)
+* `is_enst` (optional)
   * example: 1
   
 ## `main`
@@ -32,7 +31,7 @@ SELECT DISTINCT ?ensg_id ?idt_ensg ?gene_symbol ?desc ?type_label ?location ?typ
   (GROUP_CONCAT(DISTINCT ?hpa_tissue_label; separator=", ") AS ?hpa_tissue_labels)
   (GROUP_CONCAT(DISTINCT ?hpa_cell_label; separator=", ") AS ?hpa_cell_labels)
 WHERE {
-  {{#if as_enst}}
+  {{#if is_enst}}
     VALUES ?input_enst { enst:{{id}} }
     ?input_enst so:transcribed_from ?ensg .
   {{else}}
