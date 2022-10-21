@@ -2,7 +2,7 @@
 
 ENST ID を受け取って、自分と兄弟の transcript の情報を返す
 
-is_ensg が 1 のときは、入力 ID を ENSG として扱い、紐づいている transcript の情報を返す
+入力が ENSG ID のときは、紐づいている transcript の情報を返す
 
 ## Endpoint
 
@@ -10,9 +10,18 @@ https://integbio.jp/togosite/sparql
 
 ## Parameters
 * `id`
-  * example: ENST00000302586
-* `is_ensg` (optional)
-  * example: 1
+  * example: ENST00000302586, ENSG00000171097
+
+## `is_ensg`
+```javascript
+({ id }) => {
+  if (id.match(/^ENSG[0-9]{11}$/)) {
+    return true;
+  } else if (id.match(/^ENST[0-9]{11}$/)) {
+    return false;
+  } 
+}
+```
 
 ## `main`
 

@@ -6,9 +6,18 @@ https://integbio.jp/togosite/sparql
 
 * `id`
   * example: ENSG00000150773, ENST00000280350
-* `is_enst` (optional)
-  * example: 1
   
+## `is_ensg`
+```javascript
+({ id }) => {
+  if (id.match(/^ENSG[0-9]{11}$/)) {
+    return true;
+  } else if (id.match(/^ENST[0-9]{11}$/)) {
+    return false;
+  } 
+}
+```
+
 ## `main`
 
 ```sparql
@@ -31,11 +40,11 @@ SELECT DISTINCT ?ensg_id ?idt_ensg ?gene_symbol ?desc ?type_label ?location ?typ
   (GROUP_CONCAT(DISTINCT ?hpa_tissue_label; separator=", ") AS ?hpa_tissue_labels)
   (GROUP_CONCAT(DISTINCT ?hpa_cell_label; separator=", ") AS ?hpa_cell_labels)
 WHERE {
-  {{#if is_enst}}
+  {{#if is_ensg}}
+    VALUES ?ensg { ensg:{{id}} }
+  {{else}}
     VALUES ?input_enst { enst:{{id}} }
     ?input_enst so:transcribed_from ?ensg .
-  {{else}}
-    VALUES ?ensg { ensg:{{id}} }
   {{/if}}
   BIND(URI(REPLACE(STR(?ensg), "http://rdf.ebi.ac.uk/resource/ensembl/", "http://identifiers.org/ensembl/")) AS ?idt_ensg)
   VALUES ?strand { faldo:ReverseStrandPosition faldo:ForwardStrandPosition }
