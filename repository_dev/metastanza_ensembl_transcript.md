@@ -25,13 +25,16 @@ PREFIX ensembl: <http://identifiers.org/ensembl/>
 PREFIX so: <http://purl.obolibrary.org/obo/so#>
 PREFIX dct: <http://purl.org/dc/terms/>
 
-SELECT ?enst_id ?gene_name ?label ?location ?type_name (GROUP_CONCAT(DISTINCT ?uniprot_id; separator=",") AS ?uniprot_ids) (COUNT(DISTINCT ?exon) AS ?exon_count)
-#FROM <http://rdf.ebi.ac.uk/dataset/ensembl/102/homo_sapiens>
+SELECT DISTINCT ?enst_id ?label ?chr_num ?type_name
+  (GROUP_CONCAT(DISTINCT ?uniprot_id; separator=",") AS ?uniprot_ids) (COUNT(DISTINCT ?exon) AS ?exon_count)
+  ?begin ?end ?strand
+FROM <http://rdf.integbio.jp/dataset/togosite/ensembl>
 WHERE
 {
   VALUES ?input_enst { enst:{{enst}} }
+  VALUES ?strand { faldo:ReverseStrandPosition faldo:ForwardStrandPosition }
   ?input_enst so:transcribed_from ?ensg .
-  ?ensg dct:description ?gene_name .
+  ?ensg so:part_of ?chr .
   ?enst so:transcribed_from ?ensg ;
         a ?type ;
         rdfs:label ?label ;
@@ -45,33 +48,42 @@ WHERE
             faldo:position ?end
           ]
         ] ;
-        so:part_of ?chr ;
-        faldo:location/rdfs:label ?location ;
+        #faldo:location/rdfs:label ?location ;
         so:has_part ?exon .
   OPTIONAL {
-    ?enst so:translates_to ?ensp .
-    ?ensp rdfs:seeAlso ?uniprot .
-    FILTER(CONTAINS(STR(?uniprot), "http://identifiers.org/uniprot/"))
-    BIND(STRAFTER(STR(?uniprot), "http://identifiers.org/uniprot/") AS ?uniprot_id)
+    ?enst rdfs:seeAlso ?uniprot .
+    FILTER(CONTAINS(STR(?uniprot), "http://purl.uniprot.org/uniprot/"))
+    BIND(STRAFTER(STR(?uniprot), "http://purl.uniprot.org/uniprot/") AS ?uniprot_id)
   }
   FILTER REGEX(?type, "^http://rdf")
   BIND(REPLACE(STR(?type), "http://rdf.ebi.ac.uk/terms/ensembl/", "") AS ?type_name)
-}ORDER BY ?enst_id
+  BIND(STRBEFORE(STRAFTER(STR(?chr), "http://identifiers.org/hco/"), "#") as ?chr_num)
+} ORDER BY ?enst_id
 ```
 
 ## `return`
 
 ```javascript
 ({ main }) => {
-  return main.results.bindings.map((elem) => ({
-    enst_id: elem.enst_id.value,
-    enst_url: "http://identifiers.org/ensembl/" + elem.enst_id.value,
-    uniprot_id: elem.uniprot_ids.value.split(",").map((elem)=>("<a href=\"http://identifiers.org/uniprot/"+elem+"\">"+elem+"</a>")).join(", "),
-    //uniprot_url: "http://identifiers.org/uniprot/" + elem.uniprot_id?.value,
-    type: elem.type_name.value.replace(/_/g, " "),
-    label:  elem.label.value,
-    location: elem.location.value,
-    exon_count: elem.exon_count.value
-  }))
+  let objs = [];
+  main.results.bindings.forEach((elem) => {
+    let location = "chr" + elem.chr_num.value + ":" + elem.begin.value + "-" + elem.end.value;
+    if (elem.strand.value == "http://biohackathon.org/resource/faldo#ForwardStrandPosition") {
+      location = location + " forward strand";
+    } else if (elem.strand.value == "http://biohackathon.org/resource/faldo#ReverseStrandPosition") {
+      location = location + " reverse strand";
+    }
+    objs.push({
+      enst_id: elem.enst_id.value,
+      enst_url: "http://identifiers.org/ensembl/" + elem.enst_id.value,
+      uniprot_id: elem.uniprot_ids.value.split(",").map((elem)=>("<a href=\"http://identifiers.org/uniprot/"+elem+"\">"+elem+"</a>")).join(", "),
+      //uniprot_url: "http://identifiers.org/uniprot/" + elem.uniprot_id?.value,
+      type: elem.type_name.value.replace(/_/g, " "),
+      label:  elem.label.value,
+      location: location,
+      exon_count: elem.exon_count.value
+    });
+  });
+  return objs;
 }
 ```
