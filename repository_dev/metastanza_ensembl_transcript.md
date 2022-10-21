@@ -2,7 +2,7 @@
 
 ENST ID を受け取って、自分と兄弟の transcript の情報を返す
 
-as_ensg が 1 のときは、入力 ID を ENSG として扱い、紐づいている transcript の情報を返す
+is_ensg が 1 のときは、入力 ID を ENSG として扱い、紐づいている transcript の情報を返す
 
 ## Endpoint
 
@@ -29,7 +29,7 @@ PREFIX so: <http://purl.obolibrary.org/obo/so#>
 PREFIX dct: <http://purl.org/dc/terms/>
 
 SELECT DISTINCT ?enst_id ?label ?chr_num ?type_name
-  (GROUP_CONCAT(DISTINCT ?uniprot_id; separator=",") AS ?uniprot_ids) (COUNT(DISTINCT ?exon) AS ?exon_count)
+  (GROUP_CONCAT(DISTINCT ?uniprot_id; separator=",") AS ?uniprot_ids) #(COUNT(DISTINCT ?exon) AS ?exon_count)
   ?begin ?end
 FROM <http://rdf.integbio.jp/dataset/togosite/ensembl>
 WHERE
@@ -75,22 +75,23 @@ ORDER BY ?enst_id
   let obj = {};
   let ids = new Set();
   main.results.bindings.forEach((elem) => {
-    let length = Math.abs(elem.begin.value - elem.end.value) - 1;
+    let exon_length = Math.abs(elem.begin.value - elem.end.value) + 1;
     let enst_id = elem.enst_id.value;
     if (!ids.has(enst_id)) {
-      obj.enst_id = {
+      obj[enst_id] = {
         enst_id: enst_id,
         enst_url: "http://identifiers.org/ensembl/" + elem.enst_id.value,
         uniprot_id: elem.uniprot_ids.value.split(",").map((elem)=>("<a href=\"http://identifiers.org/uniprot/"+elem+"\">"+elem+"</a>")).join(", "),
         //uniprot_url: "http://identifiers.org/uniprot/" + elem.uniprot_id?.value,
         type: elem.type_name.value.replace(/_/g, " "),
-        label:  elem.label.value,
-        length: length,
-        exon_count: elem.exon_count.value
+        label: elem.label.value,
+        bp: exon_length,
+        exon_count: 1
       };
       ids.add(enst_id);
     } else {
-      obj.enst_id.length += length;
+      obj[enst_id].bp += exon_length;
+      obj[enst_id].exon_count++;
     }
   });
   return Object.values(obj);
