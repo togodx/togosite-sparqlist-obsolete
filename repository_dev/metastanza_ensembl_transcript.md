@@ -2,14 +2,18 @@
 
 ENST ID を受け取って、自分と兄弟の transcript の情報を返す
 
+as_ensg が 1 のときは、入力 ID を ENSG として扱い、紐づいている transcript の情報を返す
+
 ## Endpoint
 
 https://integbio.jp/togosite/sparql
 
 ## Parameters
-* `enst`
+* `id`
   * default: ENST00000302586
   * example: ENST00000302586
+* `as_ensg` (optional)
+  * example: 1
 
 ## `main`
 
@@ -31,9 +35,13 @@ SELECT DISTINCT ?enst_id ?label ?chr_num ?type_name
 FROM <http://rdf.integbio.jp/dataset/togosite/ensembl>
 WHERE
 {
-  VALUES ?input_enst { enst:{{enst}} }
+  {{#if as_ensg}}
+    VALUES ?ensg { ensg:{{id}} }
+  {{else}}
+    VALUES ?input_enst { enst:{{id}} }
+    ?input_enst so:transcribed_from ?ensg .
+  {{/if}}
   VALUES ?strand { faldo:ReverseStrandPosition faldo:ForwardStrandPosition }
-  ?input_enst so:transcribed_from ?ensg .
   ?ensg so:part_of ?chr .
   ?enst so:transcribed_from ?ensg ;
         a ?type ;
