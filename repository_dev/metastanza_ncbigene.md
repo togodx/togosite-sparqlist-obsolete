@@ -119,9 +119,9 @@ ORDER BY ?go
   if (data.n_tissue_labels?.value)
     objs[0]["Tissue-specific_low_expression_(RefEx)"] += makeList(data.n_tissue_labels.value.split(", "));
 
-  const go_categories = ["Biological_process", "Cellular_component", "Molecular_function"];
-  go_categories.forEach((category => {
-    if(go.results.bindings.length > 0) {
+  if (go.results.bindings.length > 0) {
+    const go_categories = ["Biological_process", "Cellular_component", "Molecular_function"];
+    go_categories.forEach((category => {
       let gos = go.results.bindings.filter((x => x.go_category.value==category.toLowerCase()));
       if (gos.length > 0) {
         let ids = gos.map((x => x.go_id.value));
@@ -129,8 +129,8 @@ ORDER BY ?go
         let labels = gos.map((x => x.go_label.value));
         objs[0][category] = makePairList(ids, labels, urls);
       }
-    }
-  }));
+    }));
+  }
   if (data.other_names?.value) objs[0].Other_names = makeList(data.other_names.value.split("__"));
   return objs;
 
