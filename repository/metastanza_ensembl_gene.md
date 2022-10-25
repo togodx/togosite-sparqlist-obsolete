@@ -5,8 +5,18 @@ https://integbio.jp/togosite/sparql
 ## Parameters
 
 * `id`
-  * default: ENSG00000150773
-  * example: ENSG00000150773
+  * example: ENSG00000150773, ENST00000280350
+  
+## `is_ensg`
+```javascript
+({ id }) => {
+  if (id.match(/^ENSG[0-9]{11}$/)) {
+    return true;
+  } else if (id.match(/^ENST[0-9]{11}$/)) {
+    return false;
+  } 
+}
+```
 
 ## `main`
 
@@ -22,6 +32,7 @@ PREFIX faldo: <http://biohackathon.org/resource/faldo#>
 PREFIX refexo: <http://purl.jp/bio/01/refexo#>
 PREFIX schema: <http://schema.org/>
 PREFIX ensg: <http://rdf.ebi.ac.uk/resource/ensembl/>
+PREFIX enst: <http://rdf.ebi.ac.uk/resource/ensembl.transcript/>
 
 SELECT DISTINCT ?ensg_id ?idt_ensg ?gene_symbol ?desc ?type_label ?location ?type_gtex ?type_hpa_cell ?type_hpa_tissue
   ?begin ?end ?strand
@@ -29,14 +40,19 @@ SELECT DISTINCT ?ensg_id ?idt_ensg ?gene_symbol ?desc ?type_label ?location ?typ
   (GROUP_CONCAT(DISTINCT ?hpa_tissue_label; separator=", ") AS ?hpa_tissue_labels)
   (GROUP_CONCAT(DISTINCT ?hpa_cell_label; separator=", ") AS ?hpa_cell_labels)
 WHERE {
-  VALUES ?ensg { ensg:{{id}} }
-  VALUES ?idt_ensg { idt_ensg:{{id}} }
+  {{#if is_ensg}}
+    VALUES ?ensg { ensg:{{id}} }
+  {{else}}
+    VALUES ?input_enst { enst:{{id}} }
+    ?input_enst so:transcribed_from ?ensg .
+  {{/if}}
+  BIND(URI(REPLACE(STR(?ensg), "http://rdf.ebi.ac.uk/resource/ensembl/", "http://identifiers.org/ensembl/")) AS ?idt_ensg)
   VALUES ?strand { faldo:ReverseStrandPosition faldo:ForwardStrandPosition }
   GRAPH <http://rdf.integbio.jp/dataset/togosite/ensembl> {
     ?ensg obo:RO_0002162 taxon:9606 ;
           dct:identifier ?ensg_id ;
           rdfs:label ?gene_symbol ;
-          #dct:description ?desc ;
+          dct:description ?desc ;
           faldo:location [
             faldo:begin [
               a ?strand ;
