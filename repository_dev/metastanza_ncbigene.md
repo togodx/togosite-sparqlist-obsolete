@@ -82,16 +82,12 @@ SELECT DISTINCT ?go ?go_category ?go_label ?go_id
 WHERE {
   VALUES ?ncbigene { ncbigene:{{id}} }
   GRAPH <http://rdf.integbio.jp/dataset/togosite/homo_sapiens_gene_info> {
-    OPTIONAL {
-      ?ncbigene hop:hasGO ?go .
-    }
+    ?ncbigene hop:hasGO ?go .
   }
   GRAPH <http://rdf.integbio.jp/dataset/togosite/go> {
-    OPTIONAL {
-      ?go oboinowl:hasOBONamespace ?go_category ;
-          oboinowl:id ?go_id ;
-          rdfs:label ?go_label .
-    }
+    ?go oboinowl:hasOBONamespace ?go_category ;
+        oboinowl:id ?go_id ;
+        rdfs:label ?go_label .
   }
 }
 ORDER BY ?go
@@ -125,7 +121,7 @@ ORDER BY ?go
 
   const go_categories = ["Biological_process", "Cellular_component", "Molecular_function"];
   go_categories.forEach((category => {
-    if(go.results.bindings[0].go_category?.value) {
+    if(go.results.bindings.length > 0) {
       let gos = go.results.bindings.filter((x => x.go_category.value==category.toLowerCase()));
       if (gos.length > 0) {
         let ids = gos.map((x => x.go_id.value));
