@@ -3,7 +3,7 @@
 ## Description
 
 - Data sources
-    -  [TogoVar](https://togovar.biosciencedbc.jp/?) (limited to variants with frequency data in Japanese populations)
+    -  [TogoVar](https://togovar.org/?) (limited to variants with frequency data in Japanese populations)
 - Query
     - Input
         - TogoVar id
@@ -33,38 +33,20 @@ PREFIX faldo: <http://biohackathon.org/resource/faldo#>
 PREFIX m2r: <http://med2rdf.org/ontology/med2rdf#>
 PREFIX tgvo: <http://togovar.biosciencedbc.jp/vocabulary/>
 
-#SELECT DISTINCT ?tgv_id ?variation ?type_label ?reference ?ref ?alt ?hgvs ?link_to_togovar
-SELECT DISTINCT ?tgv_id ?type_label ?hgvs ?link_to_togovar
+SELECT DISTINCT ?tgv_id ?type ?hgvs ?link_to_togovar
 FROM <http://rdf.integbio.jp/dataset/togosite/variation>
 FROM <http://rdf.integbio.jp/dataset/togosite/so>
 WHERE {
     VALUES ?tgv_id { "{{tgv_id}}" }
 
     ?variation dct:identifier ?tgv_id ;
-        rdfs:label ?label ;
-        faldo:location ?_loc ;
-        a ?_type .
-
-    ?_loc (faldo:end|faldo:after)?/faldo:reference ?reference .
-
-    OPTIONAL { ?variation m2r:reference_allele ?ref . }
-    OPTIONAL { ?variation m2r:alternative_allele ?alt . }
-
-    FILTER ( ?_type IN (obo:SO_0001483, obo:SO_0000667, obo:SO_0000159, obo:SO_1000032, obo:SO_1000002) ) .
+        a ?type .
 
     OPTIONAL {
-      ?_type rdfs:label ?type_label ;
-        obo_in_owl:id ?_so_id .
-
-      BIND(REPLACE(STR(?_so_id), ":", "_") AS ?so)
-    }
-
-    OPTIONAL {
-       ?variation tgvo:hasConsequence/rdfs:label ?hgvs .
-       FILTER(!STRSTARTS(?hgvs, 'ENS'))
+       ?variation tgvo:hasConsequence/tgvo:hgvsg ?hgvs .
     }
   
-    BIND(IRI(CONCAT("https://togovar.biosciencedbc.jp/variant/", ?tgv_id)) AS ?link_to_togovar)
+    BIND(IRI(CONCAT("https://grch38.togovar.org/variant/", ?tgv_id)) AS ?link_to_togovar)
 }
 ```
 
@@ -72,37 +54,37 @@ WHERE {
 ```javascript
 
 ({ data }) =>  {
-// See https://www.ncbi.nlm.nih.gov/assembly/GCF_000001405.13/
+// See https://www.ncbi.nlm.nih.gov/assembly/GCF_000001405.40
 var chr2nc = {};
-chr2nc[1]="NC_000001.10";
-chr2nc[2]="NC_000002.11";
-chr2nc[3]="NC_000003.11";
-chr2nc[4]="NC_000004.11";
-chr2nc[5]="NC_000005.9";
-chr2nc[6]="NC_000006.11";
-chr2nc[7]="NC_000007.13";
-chr2nc[8]="NC_000008.10";
-chr2nc[9]="NC_000009.11";
-chr2nc[10]="NC_000010.10";
-chr2nc[11]="NC_000011.9";
-chr2nc[12]="NC_000012.11";
-chr2nc[13]="NC_000013.10";
-chr2nc[14]= "NC_000014.8";
-chr2nc[15]="NC_000015.9";
-chr2nc[16]="NC_000016.9";
-chr2nc[17]="NC_000017.10";
-chr2nc[18]="NC_000018.9";
-chr2nc[19]="NC_000019.9";
-chr2nc[20]="NC_000020.10";
-chr2nc[21]="NC_000021.8";
-chr2nc[22]="NC_000022.10";
-chr2nc['X']="NC_000023.10";
-chr2nc['Y']="NC_000024.9";
+chr2nc[1]="NC_000001.11";
+chr2nc[2]="NC_000002.12";
+chr2nc[3]="NC_000003.12";
+chr2nc[4]="NC_000004.12";
+chr2nc[5]="NC_000005.10";
+chr2nc[6]="NC_000006.12";
+chr2nc[7]="NC_000007.14";
+chr2nc[8]="NC_000008.11";
+chr2nc[9]="NC_000009.12";
+chr2nc[10]="NC_000010.11";
+chr2nc[11]="NC_000011.10";
+chr2nc[12]="NC_000012.12";
+chr2nc[13]="NC_000013.11";
+chr2nc[14]= "NC_000014.9";
+chr2nc[15]="NC_000015.10";
+chr2nc[16]="NC_000016.10";
+chr2nc[17]="NC_000017.11";
+chr2nc[18]="NC_000018.10";
+chr2nc[19]="NC_000019.10";
+chr2nc[20]="NC_000020.11";
+chr2nc[21]="NC_000021.9";
+chr2nc[22]="NC_000022.11";
+chr2nc['X']="NC_000023.11";
+chr2nc['Y']="NC_000024.10";
 chr2nc['MT']=" NC_012920.1";   // https://www.ncbi.nlm.nih.gov/nucleotide/NC_012920.1
   
     return data.results.bindings.map((d) => ({
       tgv_id: d.tgv_id .value,
-      type_label: d.type_label.value,
+      type_label: d.type.value.replace("http://genome-variation.org/resource#",""),
       hgvs:  d.hgvs.value.replace(/^(\S+):([gm].+)/, function(m, chr, pos_allele){ return chr2nc[chr] + ":" + pos_allele; }),
       link_to_togovar: d.link_to_togovar.value
     }));
