@@ -84,7 +84,7 @@ chr2nc['MT']=" NC_012920.1";   // https://www.ncbi.nlm.nih.gov/nucleotide/NC_012
   
     return data.results.bindings.map((d) => ({
       tgv_id: d.tgv_id .value,
-      type: d.type.value.replace("http://genome-variation.org/resource#",""),
+      type_label: d.type.value.replace("http://genome-variation.org/resource#",""),
       hgvs:  d.hgvs.value.replace(/^(\S+):([gm].+)/, function(m, chr, pos_allele){ return chr2nc[chr] + ":" + pos_allele; }),
       link_to_togovar: d.link_to_togovar.value
     }));
