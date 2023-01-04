@@ -33,38 +33,20 @@ PREFIX faldo: <http://biohackathon.org/resource/faldo#>
 PREFIX m2r: <http://med2rdf.org/ontology/med2rdf#>
 PREFIX tgvo: <http://togovar.biosciencedbc.jp/vocabulary/>
 
-#SELECT DISTINCT ?tgv_id ?variation ?type_label ?reference ?ref ?alt ?hgvs ?link_to_togovar
-SELECT DISTINCT ?tgv_id ?type_label ?hgvs ?link_to_togovar
+SELECT DISTINCT ?tgv_id ?type ?hgvs ?link_to_togovar
 FROM <http://rdf.integbio.jp/dataset/togosite/variation>
 FROM <http://rdf.integbio.jp/dataset/togosite/so>
 WHERE {
     VALUES ?tgv_id { "{{tgv_id}}" }
 
     ?variation dct:identifier ?tgv_id ;
-        rdfs:label ?label ;
-        faldo:location ?_loc ;
-        a ?_type .
-
-    ?_loc (faldo:end|faldo:after)?/faldo:reference ?reference .
-
-    OPTIONAL { ?variation m2r:reference_allele ?ref . }
-    OPTIONAL { ?variation m2r:alternative_allele ?alt . }
-
-    FILTER ( ?_type IN (obo:SO_0001483, obo:SO_0000667, obo:SO_0000159, obo:SO_1000032, obo:SO_1000002) ) .
+        a ?type .
 
     OPTIONAL {
-      ?_type rdfs:label ?type_label ;
-        obo_in_owl:id ?_so_id .
-
-      BIND(REPLACE(STR(?_so_id), ":", "_") AS ?so)
-    }
-
-    OPTIONAL {
-       ?variation tgvo:hasConsequence/rdfs:label ?hgvs .
-       FILTER(!STRSTARTS(?hgvs, 'ENS'))
+       ?variation tgvo:hasConsequence/tgvo:hgvsg ?hgvs .
     }
   
-    BIND(IRI(CONCAT("https://togovar.biosciencedbc.jp/variant/", ?tgv_id)) AS ?link_to_togovar)
+    BIND(IRI(CONCAT("https://grch38.togovar.org/variant/", ?tgv_id)) AS ?link_to_togovar)
 }
 ```
 
@@ -102,7 +84,7 @@ chr2nc['MT']=" NC_012920.1";   // https://www.ncbi.nlm.nih.gov/nucleotide/NC_012
   
     return data.results.bindings.map((d) => ({
       tgv_id: d.tgv_id .value,
-      type_label: d.type_label.value,
+      type: d.type.value.replace("http://genome-variation.org/resource#",""),
       hgvs:  d.hgvs.value.replace(/^(\S+):([gm].+)/, function(m, chr, pos_allele){ return chr2nc[chr] + ":" + pos_allele; }),
       link_to_togovar: d.link_to_togovar.value
     }));
