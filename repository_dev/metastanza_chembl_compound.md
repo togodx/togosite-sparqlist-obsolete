@@ -26,8 +26,7 @@ SELECT DISTINCT ?chembl ?id ?molecular_formula ?type
 FROM <http://rdf.integbio.jp/dataset/togosite/chembl>
 WHERE {
   VALUES ?chembl  { chembl:{{id}} }
-  ?chembl a cco:SmallMolecule ;
-          skos:altLabel ?label ;
+  ?chembl skos:altLabel ?label ;
           cco:substanceType ?type ;
           foaf:depiction  ?formula_img .
   OPTIONAL { ?chembl cheminf:SIO_000008 ?att_1. ?att_1 a cheminf:CHEMINF_000042 ; cheminf:SIO_000300 ?molecular_formula }.
