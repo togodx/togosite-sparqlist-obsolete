@@ -3,7 +3,6 @@
 ## Parameters
 
 * `id`
-  * default: CHEMBL6939
   * example: CHEMBL6939, CHEMBL1201330
 
 ## Endpoint
@@ -20,13 +19,14 @@ PREFIX chembl: <http://rdf.ebi.ac.uk/resource/chembl/molecule/>
 PREFIX cheminf: <http://semanticscience.org/resource/>
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 
-SELECT DISTINCT ?chembl ?id ?molecular_formula ?type
-                (GROUP_CONCAT(DISTINCT ucase(?label); separator = "__") as ?labels)
+SELECT DISTINCT ?chembl ?id ?label ?molecular_formula ?type
+                (GROUP_CONCAT(DISTINCT ucase(?synonym); separator = "__") as ?synonyms)
                 ?molecular_weight ?smiles ?inchi ?formula_img
 FROM <http://rdf.integbio.jp/dataset/togosite/chembl>
 WHERE {
   VALUES ?chembl  { chembl:{{id}} }
-  ?chembl skos:altLabel ?label ;
+  ?chembl rdfs:label ?label ;
+          skos:altLabel ?synonym ;
           cco:substanceType ?type ;
           foaf:depiction  ?formula_img .
   OPTIONAL { ?chembl cheminf:SIO_000008 ?att_1. ?att_1 a cheminf:CHEMINF_000042 ; cheminf:SIO_000300 ?molecular_formula }.
@@ -46,9 +46,10 @@ WHERE {
   objs[0] = {
     URL: data.chembl.value.replace("http://rdf.ebi.ac.uk/resource/chembl/molecule/", "http://identifiers.org/chembl.compound/"),
     ID: data.id.value,
+    label: data.label.value,
     molecular_formula: data.molecular_formula?.value ?? "",
     type: data.type.value,
-    label: makeList(data.labels.value.split("__")),
+    synonyms: makeList(data.synonyms.value.split("__")),
     molecular_weight: data.molecular_weight?.value ?? "",
     SMILES: data.smiles?.value ?? "",
     InChI: data.inchi?.value ?? "",
