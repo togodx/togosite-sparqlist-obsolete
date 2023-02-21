@@ -12,10 +12,10 @@ https://integbio.jp/rdf/ncbi/sparql
 
 ## Parameters
 
-* `gene_id`
+* `gene_id` ( NCBI Gene ID )
   * default: 59272
   * examples: 57406, 59272, ...
-* `disease_id`
+* `disease_id` ( MeSH ID )
   * default: C000657245
   * examples: D000086382, D000086402
 
