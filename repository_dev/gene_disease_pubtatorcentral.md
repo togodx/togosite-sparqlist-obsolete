@@ -1,4 +1,4 @@
-# PubTator Central RDFを対象として、NCBI GeneIDとDisease ID(MeSH)の関係を、関連するPubMedIDの件数降順で取得する。
+# PubTator Central RDFを対象として、NCBI GeneIDとDisease ID(MeSH)の関係を、関連するPubMedIDの件数降順で取得する （山本）
 
 ## Description
 PubTator Centralから取得してRDF化したデータに対し、NCBI GeneID または Disease ID(MeSH) のいずれか、もしくは両者を引数として与える。
@@ -37,11 +37,9 @@ SELECT DISTINCT ?g_id (count(?pmid) as ?c)
 FROM <http://rdf.integbio.jp/dataset/pubtator_central>
 WHERE {
 {{#if gene_id}}
-#  VALUES ?g_id { URI(CONCAT("http://identifiers.org/ncbigene/","{{gene_id}}")) }
   BIND( URI(CONCAT("http://identifiers.org/ncbigene/","{{gene_id}}")) AS ?g_id )
 {{/if}}
  {{#if disease_id}}
-#  VALUES ?d_id { URI(CONCAT("http://identifiers.org/mesh/","{{disease_id}}")) }
   BIND( URI(CONCAT("http://identifiers.org/mesh/","{{disease_id}}")) AS ?d_id )
 {{/if}}
   [ oa:hasTarget ?pmid ;
