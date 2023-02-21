@@ -7,10 +7,11 @@ https://integbio.jp/rdf/ncbi/sparql
 ## Parameters
 
 * `gene_id`
-  * default: 3358
+  * default: 59272
   * examples: 57406, 59272, ...
 * `disease_id`
-  * default: D016066
+  * default: C000657245
+  * examples: D000086382, D000086402
 
 ## `Query`
 
@@ -18,11 +19,18 @@ https://integbio.jp/rdf/ncbi/sparql
 PREFIX oa: <http://www.w3.org/ns/oa#>
 PREFIX dcterms: <http://purl.org/dc/terms/>
 
-SELECT DISTINCT ?pmid ?g_id ?d_id
+{{#if gene_id}}
+SELECT DISTINCT ?d_id (count(?pmid) as ?c)
+ {{else if disease_id}}
+SELECT DISTINCT ?g_id (count(?pmid) as ?c)
+{{/if}}
 FROM <http://rdf.integbio.jp/dataset/pubtator_central>
 WHERE {
-  BIND ((URI(CONCAT("http://identifiers.org/ncbigene/", "{{gene_id}}"))) AS ?g_id)
-  BIND ((URI(CONCAT("http://identifiers.org/mesh/", "{{disease_id}}"))) AS ?d_id)
+{{#if gene_id}}
+  VALUES ?g_id { URI(CONCAT("http://identifiers.org/ncbigene/",{{gene_id}})) }
+ {{else if disease_id}}
+  VALUES ?d_id { URI(CONCAT("http://identifiers.org/mesh/",{{disease_id}})) }
+{{/if}}
   [ oa:hasTarget ?pmid ;
     oa:hasBody ?g_id ;
     dcterms:subject "Gene" ] .
@@ -30,6 +38,9 @@ WHERE {
     oa:hasBody ?d_id ;
     dcterms:subject "Disease" ] .
 }
+GROUP BY ?d_id
+ORDER BY DESC(?c)
+LIMIT 10
 ```
 
 ## `Return`
