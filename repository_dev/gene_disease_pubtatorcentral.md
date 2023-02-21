@@ -66,5 +66,13 @@ LIMIT 10
 
 ```javascript
 ({Query})=>{
-  return Query.results.bindings
+  if (typeof gene_id == "undefined"){ gene_id = "" }
+  if (typeof disease_id == "undefined"){ disease_id = "" }
+if (gene_id && disease_id){
+   return Query.results.bindings.c.value
+}else if (gene_id){
+   return Query.results.bindings.map(d=>d.d_id.value)
+}else if (disease_id) {
+   return Query.results.bindings.map(d=>d.g_id.value)
+}
 }
