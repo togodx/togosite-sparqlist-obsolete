@@ -66,13 +66,13 @@ LIMIT 10
 
 ```javascript
 ({Query})=>{
-  if (typeof gene_id == "undefined"){ gene_id = "" }
-  if (typeof disease_id == "undefined"){ disease_id = "" }
-if (gene_id && disease_id){
-   return Query.results.bindings.c.value
-}else if (gene_id){
-   return Query.results.bindings.map(d=>d.d_id.value)
-}else if (disease_id) {
-   return Query.results.bindings.map(d=>d.g_id.value)
-}
+  if (Query.head.vars[0] == "c"){
+     return Query.results.bindings.map(d=>d.c.value)[0]
+  }else if (Query.head.vars[0] == "g_id"){
+     return Query.results.bindings.map(d=>d.g_id.value).join(",")
+  }else if (Query.head.vars[0] == "d_id") {
+     return Query.results.bindings.map(d=>d.d_id.value).join(",")
+  }else{
+    return Query.head.vars[0]
+  }
 }
