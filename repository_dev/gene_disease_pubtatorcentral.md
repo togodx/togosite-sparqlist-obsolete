@@ -1,4 +1,10 @@
-# PubTator Central RDFを対象として、NCBI GeneID, Disease ID(MeSH), PubMedIDの関係を取得する
+# PubTator Central RDFを対象として、NCBI GeneIDとDisease ID(MeSH)の関係を、関連するPubMedIDの件数降順で取得する。
+
+## Description
+PubTator Centralから取得してRDF化したデータに対し、NCBI GeneID または Disease ID(MeSH) のいずれか、もしくは両者を引数として与える。
+* NCBI GeneIDが与えられた場合は、関連PubMedIDの多い順にDisease ID(MeSH)を、PubMedIDの件数と共に表示する。
+* Disease ID(MeSH)が与えられた場合は、NCBI GeneIDについて表示する。
+* 両者が与えられた場合は、それらを含むPubMedIDの件数を表示する。
 
 ## Endpoint
 
@@ -20,16 +26,23 @@ PREFIX oa: <http://www.w3.org/ns/oa#>
 PREFIX dcterms: <http://purl.org/dc/terms/>
 
 {{#if gene_id}}
+  {{#if disease_id}}
+SELECT DISTINCT (count(?pmid) as ?c)
+  {{else}}
 SELECT DISTINCT ?d_id (count(?pmid) as ?c)
- {{else if disease_id}}
+  {{/if}}
+{{else if disease_id}}
 SELECT DISTINCT ?g_id (count(?pmid) as ?c)
 {{/if}}
 FROM <http://rdf.integbio.jp/dataset/pubtator_central>
 WHERE {
 {{#if gene_id}}
-  VALUES ?g_id { URI(CONCAT("http://identifiers.org/ncbigene/",{{gene_id}})) }
- {{else if disease_id}}
-  VALUES ?d_id { URI(CONCAT("http://identifiers.org/mesh/",{{disease_id}})) }
+#  VALUES ?g_id { URI(CONCAT("http://identifiers.org/ncbigene/","{{gene_id}}")) }
+  BIND( URI(CONCAT("http://identifiers.org/ncbigene/","{{gene_id}}")) AS ?g_id )
+{{/if}}
+ {{#if disease_id}}
+#  VALUES ?d_id { URI(CONCAT("http://identifiers.org/mesh/","{{disease_id}}")) }
+  BIND( URI(CONCAT("http://identifiers.org/mesh/","{{disease_id}}")) AS ?d_id )
 {{/if}}
   [ oa:hasTarget ?pmid ;
     oa:hasBody ?g_id ;
@@ -38,7 +51,15 @@ WHERE {
     oa:hasBody ?d_id ;
     dcterms:subject "Disease" ] .
 }
+{{#if gene_id}}
+  {{#if disease_id}}
+  {{else}}
 GROUP BY ?d_id
+  {{/if}}
+{{else if disease_id}}
+GROUP BY ?g_id
+{{/if}}
+
 ORDER BY DESC(?c)
 LIMIT 10
 ```
@@ -47,5 +68,5 @@ LIMIT 10
 
 ```javascript
 ({Query})=>{
-  return Query.results.bindings[0]
+  return Query.results.bindings
 }
