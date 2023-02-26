@@ -18,6 +18,17 @@ https://integbio.jp/rdf/ncbi/sparql
 * `disease_id` ( MeSH ID )
   * default: C000657245
   * examples: D000086382, D000086402
+## `Top`
+```javascript
+({gene_id})=>{
+  gene_id="http://identifiers.org/ncbigene/"+gene_id
+  return true;
+}
+({disease_id})=>{
+  disease_id="http://identifiers.org/mesh/"+disease_id
+  return true;
+}
+```
 
 ## `Query`
 
