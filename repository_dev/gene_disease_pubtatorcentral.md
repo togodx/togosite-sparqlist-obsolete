@@ -18,15 +18,26 @@ https://integbio.jp/rdf/ncbi/sparql
 * `disease_id` ( MeSH ID )
   * default: C000657245
   * examples: D000086382, D000086402
-## `Top`
+
+## `gene_id`
 ```javascript
 ({gene_id})=>{
-  gene_id="http://identifiers.org/ncbigene/"+gene_id
-  return true;
+  if( gene_id == "" ){
+    return gene_id
+  } else {
+    return "<http://identifiers.org/ncbigene/" + gene_id + ">"
+  }
 }
+```
+
+## `disease_id`
+```javascript
 ({disease_id})=>{
-  disease_id="http://identifiers.org/mesh/"+disease_id
-  return true;
+  if( disease_id == "" ){
+    return disease_id
+  } else {
+    return "<http://identifiers.org/mesh/" + disease_id + ">"
+  }
 }
 ```
 
@@ -47,17 +58,19 @@ SELECT DISTINCT ?g_id (count(?pmid) as ?c)
 {{/if}}
 FROM <http://rdf.integbio.jp/dataset/pubtator_central>
 WHERE {
-{{#if gene_id}}
-  BIND( URI(CONCAT("http://identifiers.org/ncbigene/","{{gene_id}}")) AS ?g_id )
-{{/if}}
- {{#if disease_id}}
-  BIND( URI(CONCAT("http://identifiers.org/mesh/","{{disease_id}}")) AS ?d_id )
-{{/if}}
   [ oa:hasTarget ?pmid ;
+{{#if gene_id}}
+    oa:hasBody {{gene_id}} ;
+{{else}}
     oa:hasBody ?g_id ;
+{{/if}}
     dcterms:subject "Gene" ] .
   [ oa:hasTarget ?pmid ;
+{{#if disease_id}}
+    oa:hasBody {{disease_id}} ;
+{{else}}
     oa:hasBody ?d_id ;
+{{/if}}
     dcterms:subject "Disease" ] .
 }
 {{#if gene_id}}
@@ -79,11 +92,11 @@ LIMIT 10
 ({Query})=>{
   if (Query.head.vars[0] == "c"){
      return Query.results.bindings.map(d=>d.c.value)[0]
-  }else if (Query.head.vars[0] == "g_id"){
+  } else if (Query.head.vars[0] == "g_id"){
      return Query.results.bindings.map(d=>d.g_id.value).join(",")
-  }else if (Query.head.vars[0] == "d_id") {
+  } else if (Query.head.vars[0] == "d_id") {
      return Query.results.bindings.map(d=>d.d_id.value).join(",")
-  }else{
+  } else{
     return Query.head.vars[0]
   }
 }
