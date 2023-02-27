@@ -19,21 +19,32 @@ https://integbio.jp/rdf/ncbi/sparql
   * default: C000657245
   * examples: D000086382, D000086402
 
-## `gene_id`
+## `no_geneid`
 ```javascript
 ({gene_id})=>{
-  if( gene_id == "" ){
+  return( gene_id == "" )
+}
+```
+## `no_diseaseid`
+```javascript
+({disease_id})=>{
+  return( disease_id == "" )
+}
+```
+## `gene_id`
+```javascript
+({gene_id, no_geneid})=>{
+  if( no_geneid ){
     return "?g_id"
   } else {
     return "<http://identifiers.org/ncbigene/" + gene_id + ">"
   }
 }
 ```
-
 ## `disease_id`
 ```javascript
-({disease_id})=>{
-  if( disease_id == "" ){
+({disease_id, no_diseaseid})=>{
+  if( no_diseaseid ){
     return "?d_id"
   } else {
     return "<http://identifiers.org/mesh/" + disease_id + ">"
@@ -47,9 +58,9 @@ https://integbio.jp/rdf/ncbi/sparql
 PREFIX oa: <http://www.w3.org/ns/oa#>
 PREFIX dcterms: <http://purl.org/dc/terms/>
 
-{{#if gene_id == "?g_id"}}
+{{#if no_geneid}}
 SELECT DISTINCT ?g_id (count(?pmid) as ?c)
-{{else if disease_id == "?d_id"}}
+{{else if no_diseaseid}}
 SELECT DISTINCT ?d_id (count(?pmid) as ?c)
 {{else}}
 SELECT DISTINCT (count(?pmid) as ?c)
@@ -63,9 +74,9 @@ WHERE {
     oa:hasBody {{disease_id}} ;
     dcterms:subject "Disease" ] .
 }
-{{#if gene_id == "?g_id"}}
+{{#if no_geneid}}
 GROUP BY ?g_id
-{{else if disease_id}}
+{{else if no_diseaseid}}
 GROUP BY ?d_id
 {{/if}}
 ORDER BY DESC(?c)
