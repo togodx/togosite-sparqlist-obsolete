@@ -23,7 +23,7 @@ https://integbio.jp/rdf/ncbi/sparql
 ```javascript
 ({gene_id})=>{
   if( gene_id == "" ){
-    return gene_id
+    return "?g_id"
   } else {
     return "<http://identifiers.org/ncbigene/" + gene_id + ">"
   }
@@ -34,7 +34,7 @@ https://integbio.jp/rdf/ncbi/sparql
 ```javascript
 ({disease_id})=>{
   if( disease_id == "" ){
-    return disease_id
+    return "?d_id"
   } else {
     return "<http://identifiers.org/mesh/" + disease_id + ">"
   }
@@ -47,41 +47,27 @@ https://integbio.jp/rdf/ncbi/sparql
 PREFIX oa: <http://www.w3.org/ns/oa#>
 PREFIX dcterms: <http://purl.org/dc/terms/>
 
-{{#if gene_id}}
-  {{#if disease_id}}
-SELECT DISTINCT (count(?pmid) as ?c)
-  {{else}}
-SELECT DISTINCT ?d_id (count(?pmid) as ?c)
-  {{/if}}
-{{else if disease_id}}
+{{#if gene_id == "?g_id"}}
 SELECT DISTINCT ?g_id (count(?pmid) as ?c)
+{{else if disease_id == "?d_id"}}
+SELECT DISTINCT ?d_id (count(?pmid) as ?c)
+{{else}}
+SELECT DISTINCT (count(?pmid) as ?c)
 {{/if}}
 FROM <http://rdf.integbio.jp/dataset/pubtator_central>
 WHERE {
   [ oa:hasTarget ?pmid ;
-{{#if gene_id}}
     oa:hasBody {{gene_id}} ;
-{{else}}
-    oa:hasBody ?g_id ;
-{{/if}}
     dcterms:subject "Gene" ] .
   [ oa:hasTarget ?pmid ;
-{{#if disease_id}}
     oa:hasBody {{disease_id}} ;
-{{else}}
-    oa:hasBody ?d_id ;
-{{/if}}
     dcterms:subject "Disease" ] .
 }
-{{#if gene_id}}
-  {{#if disease_id}}
-  {{else}}
-GROUP BY ?d_id
-  {{/if}}
-{{else if disease_id}}
+{{#if gene_id == "?g_id"}}
 GROUP BY ?g_id
+{{else if disease_id}}
+GROUP BY ?d_id
 {{/if}}
-
 ORDER BY DESC(?c)
 LIMIT 10
 ```
